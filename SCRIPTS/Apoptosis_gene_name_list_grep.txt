@@ -1,0 +1,153 @@
+########### List of gene names to Grep ################
+bcl-2-related protein A1
+apoptosis-inducing factor 1
+RAC-alpha
+RAC-gamma serine/threonine-protein kinase-
+APAF-1 interacting protein
+tumor necrosis factor ligand superfamily member 10
+tumor necrosis factor superfamily member 12
+Aven
+BCL2 associated agonist of cell death
+BAG family molecular chaperone regulator 1
+BAG family molecular chaperone regulator 2
+BAG family molecular chaperone regulator 3
+bcl-2 homologous antagonist/killer
+apoptosis regulator BAX
+bcl-2-like protein 2
+bcl-2-like protein 1
+bcl-2
+bcl2 modifying factor
+Bax inhibitor 1
+BH3 interacting domain death agonist
+Bcl-2 interacting killer
+bcl-2 interacting protein BIM
+Bik-like killer protein
+Bcl-2 related ovarian killer
+CASP8 and FADD like apoptosis regulator
+transcription factor AP-1
+caspase activity and apoptosis inhibitor 1
+DNA fragmentation factor subunit beta
+adenylate cyclase
+caspase-1
+caspase-2
+caspase-3, caspase-7
+caspase-8
+caspase-9
+caspase-10
+caspase-11
+caspase-6
+caspase-4
+caspase-5
+cell division cycle and apoptosis regulator protein 1
+CD151 antigen
+protein BTG1
+interferon alpha
+adenylate cyclase 10
+caspase activity and apoptosis inhibitor 1
+baculoviral IAP repeat-containing protein 2
+baculoviral IAP repeat-containing protein 3
+cAMP-responsive element modulator
+cytochrome c
+death-associated inhibitor of apoptosis 2
+tumor necrosis factor receptor superfamily member 25
+tumor necrosis factor receptor superfamily member 10A
+tumor necrosis factor receptor superfamily member 10B
+endonuclease G
+FAS-associated death domain protein
+fas apoptotic inhibitory molecule 1
+tumor necrosis factor receptor superfamily member 6
+fas cell surface death receptor
+gasdermin E
+GTPase IMAP family member 4
+GTPase IMAP family member 7
+GTPase IMAP family 8
+harakiri
+baculoviral IAP repeat-containing protein 5
+baculoviral IAP repeat-containing protein 6
+baculoviral IAP repeat-containing protein 1
+baculoviral IAP repeat-containing protein 8
+baculoviral IAP repeat-containing protein 7
+DNA fragmentation factor subunit alpha
+interferon-induced protein 44
+NF-kappa-B inhibitor alpha
+NF-kappa-B inhibitor epsilon
+inositol 1,4,5-trisphosphate receptor
+stress-activated protein kinase JNK
+lipopolysaccharide-induced tumor necrosis factor-alpha
+induced myeloid leukemia cell differentiation protein Mcl-1-like
+mitogen-activated protein kinase kinase kinase 1
+mitogen-activated protein kinase 1
+mitogen-activated protein kinase kinase kinase 7
+MYC proto-oncogene
+myeloid differentiation primary response protein MyD88
+phorbol-12-myristate-13-acetate-induced protein 1
+nuclear factor NF-kappa-B p105 subunit
+nuclear factor NF-kappa-B p100 subunit
+transcription factor p65
+RELB proto-oncogene, NF-kB subunit
+reticuloendotheliosis oncogene
+anti-apoptotic protein NR13
+nuclear mitotic apparatus protein 1
+dynamin-like 120 kDa protein
+Early 35 kDa protein
+mitogen-activated protein kinase 11`
+mitogen-activated protein kinase 12
+mitogen-activated protein kinase 13
+mitogen-activated protein kinase 14A
+cellular tumor antigen p53
+programmed cell death protein
+programmed cell death protein 1
+p53 and DNA damage-regulated protein 1
+phosphatidylinositol 3-kinase
+cAMP-dependent protein kinase
+protein kinase C
+BCL2 binding component 3
+cdc42
+ras-like GTP-binding protein rhoA
+ras-like GTP-binding protein RHO
+rho-related GTP-binding protein RhoE-like
+ras-related C3 botulinum toxin substrate 1
+rho-related protein racA
+ras-like GTP-binding protein Rho1
+mitochondrial Rho GTPase 1
+receptor-interacting serine/threonine-protein kinase 1
+receptor-interacting serine/threonine-protein kinase 4
+diablo homolog, mitochondrial
+toll-like receptor
+tumor necrosis factor
+lymphotoxin-alpha
+tumor necrosis factor receptor superfamily member 1A
+CD40 ligand
+tumor necrosis factor receptor superfamily member
+TNFRSF1A associated via death domain
+TNF receptor-associated factor 2
+TNF receptor-associated factor
+E3 ubiquitin-protein ligase XIAP
+netrin receptor DCC
+netrin receptor UNC5A
+netrin receptor UNC5B
+netrin receptor UNC5C
+netrin receptor UNC5D
+neurotrophic receptor tyrosine kinase 1
+sonic hedgehog receptor
+peptidyl-prolyl cis-trans isomerase
+receptor-interacting serine/threonine-protein kinase
+mixed lineage kinase domain
+HSP90
+E3 ubiquitin-protein ligase CHIP
+tumor necrosis factor alpha-induced protein 3
+protein phosphatase 1B
+aurora kinase A
+glutathione peroxidase 4
+gasdermin
+poly [ADP-ribose] polymerase 1
+macrophage migration inhibitory factor
+hexokinase-1
+Raf-1 protooncogene serine/threonine kinase
+elastase, neutrophil expressed
+cathepsin
+PRKC apoptosis WT1 regulator protein
+apoptosis-stimulating of p53 protein 1
+apoptosis-stimulating of p53 protein 2
+apoptosis inhibitory protein 5
+apoptotic chromatin condensation inducer in the nucleus

@@ -1,0 +1,11 @@
+tax_id	Org_name	GeneID	CurrentID	Status	Symbol	Aliases	description	other_designations	map_location	chromosome	genomic_nucleotide_accession.version	start_position_on_the_genomic_accession	end_position_on_the_genomic_accession	orientation	exon_count	OMIM	
+6565	Crassostrea virginica	111102552	0	live	LOC111102552		GTPase IMAP family member 4-like	GTPase IMAP family member 4-like		7	NC_035786.1	14027963	14046663	plus	4		
+6565	Crassostrea virginica	111103040	0	live	LOC111103040		GTPase IMAP family member 4-like	GTPase IMAP family member 4-like		7	NC_035786.1	14209656	14219301	minus	8		
+6565	Crassostrea virginica	111103161	0	live	LOC111103161		GTPase IMAP family member 4-like	GTPase IMAP family member 4-like		7	NC_035786.1	54557682	54588883	minus	3		
+6565	Crassostrea virginica	111103458	0	live	LOC111103458		GTPase IMAP family member 4-like	GTPase IMAP family member 4-like		7	NC_035786.1	54335425	54350571	minus	4		
+6565	Crassostrea virginica	111103460	0	live	LOC111103460		GTPase IMAP family member 4-like	GTPase IMAP family member 4-like		7	NC_035786.1	54355954	54362891	minus	3		
+6565	Crassostrea virginica	111104840	0	live	LOC111104840		GTPase IMAP family member 4-like	GTPase IMAP family member 4-like		7	NC_035786.1	54460846	54493108	minus	5		
+6565	Crassostrea virginica	111105333	0	live	LOC111105333		GTPase IMAP family member 4-like	GTPase IMAP family member 4-like		7	NC_035786.1	38526548	38573326	minus	14		
+6565	Crassostrea virginica	111105335	0	live	LOC111105335		GTPase IMAP family member 4-like	GTPase IMAP family member 4-like		7	NC_035786.1	38086481	38093250	minus	4		
+6565	Crassostrea virginica	111105336	0	live	LOC111105336		GTPase IMAP family member 4-like	GTPase IMAP family member 4-like		7	NC_035786.1	38056270	38063543	minus	4		
+6565	Crassostrea virginica	111105339	0	live	LOC111105339		GTPase IMAP family member 4-like	GTPase IMAP family member 4-like		7	NC_035786.1	38095081	38576347	minus	5		

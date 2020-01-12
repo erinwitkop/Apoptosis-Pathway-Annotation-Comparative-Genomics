@@ -1,0 +1,21 @@
+5_23_18_Notes_GIMAP
+
+1. Task: use same gene annotation approach and use sequence identity to verify
+all of the apoptosis genes present in the genome
+
+-Edited Google Doc called CV_manual_annotation
+-Using same procedure as before: begin with tblastn search, proceed with HMMER search with known conserved
+domains
+and do a final confirmation with tcoffee
+
+
+2. Continued on May 27th, 2018: I have finished BLAST searches for everything. Now time to confirm top domains
+with HMMER search of all molecules
+
+-Step one download all of these known molecules into a new folder on Bluewaves called "recognized_molecules"
+
+$/data3/marine_diseases_lab/erin/HMMER_analysis/recognized_molecules
+
+-Step two create a HMMER script that will run all the files at one time
+#created script called
+  -HMMER_recognized_all.sh

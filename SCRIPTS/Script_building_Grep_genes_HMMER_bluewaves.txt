@@ -1,0 +1,29 @@
+# Building Script to Mine Apoptosis Genes in C. virginica and run HMMER
+
+
+
+
+
+########### Bluewaves Script FOR SEARCHING GENOME(BASH):
+
+
+
+# Search for C. virginica
+G=C_vir_genome
+
+# Grep all the apoptosis key words and put into a file all together
+while read line;
+do grep -wF "$line" C_vir_genome >> $G_apoptosis_genes.txt
+done < apoptosis_genes_list_7_19.txt
+
+
+LOCAL R SCRIPT (for processing)
+
+# Isolate only the name field, count how many of each gene there are (each different LOC ID), and make into table
+
+# repeat for C. gigas later if it seems reasonable for the story
+
+
+################# Bluewaves Script for Running HMMER on all conserved protein families ####
+
+-Doing them one at a time was extremely slow

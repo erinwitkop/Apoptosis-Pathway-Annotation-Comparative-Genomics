@@ -1,0 +1,210 @@
+---
+title: "MSA with GIMAP Gene Family"
+author: "Erin Roberts"
+date: "4/6/2018"
+output: html_document
+---
+
+# Goal
+The goal of the present exercise are as follows:
+1. Analyze the sequence similarity of all GIMAP protein sequences in the Genome
+2. Use this information to determine:
+  -similarity of the genes to one another 
+  -How may these genes have propogated in the genome
+
+
+# Perform multiple sequence alignment and generate phylogenetic trees
+
+A helpful R package for creating multiple sequence alignments is MSA. 
+```{r pacakges, include=TRUE}
+#source("http://www.bioconductor.org/biocLite.R")
+#biocLite("msa")
+library(msa)
+library(Biostrings)
+system.file("tex", "texshade.sty", package="msa") #see where required LATEX file is located
+#install.packages("ape")
+library(ape)
+#install.packages("seqinr")
+library(seqinr)
+library(ggplot2)
+
+```
+
+## Upload sequences
+
+```{r sequences, echo=TRUE, include=TRUE}
+# all found GIMAP sequences were used for this 
+GIMAP_amino_acid_sequence <- readAAStringSet('/Users/erinroberts/Documents/PhD_Research/GOMEZCHIARRI2_FILES_DAILYNOTES/DAILYNOTES_DATA/apoptosis_data_pipeline/Cvir_apoptosis_manual_annotation/GIMAP/GIMAP_XP_all_amino_acid_sequence_shortest_header_edited.fasta')
+#GIMAP_rna_sequence <- readAAStringSet('/Users/erinroberts/Documents/PhD_Research/GOMEZCHIARRI2_FILES_DAILYNOTES/DAILYNOTES_DATA/apoptosis_data_pipeline/Cvir_apoptosis_manual_annotation/GIMAP/GIMAP_XP_all_rna_sequence_fixed_shortest_headers.fasta')
+
+```
+
+## Run MSA using clustalw default format 
+
+
+```{r clustalw, echo=TRUE, include=TRUE}
+# Create alignments with clustalw in MSA
+GIMAP_amino_acid_alignment <- msa(GIMAP_amino_acid_sequence)
+print(GIMAP_amino_acid_alignment)
+#GIMAP_rna_alignment <- msa(GIMAP_rna_sequence)
+
+```
+
+## Print the multiple alignment in a more attractive format
+
+Multiple alignments can be printed using Latex TEXshade to create a PDF. 
+
+``` {r pretty, include = TRUE, echo=TRUE}
+## Print the alignments in a pretty way and trim regions at ends with low consensus 
+msaPrettyPrint(GIMAP_amino_acid_alignment, y=c(200,600), output="pdf", showLogo="none", consensusColor="ColdHot")
+
+#this aligment is too big for LaTex to print
+#msaPrettyPrint(GIMAP_rna_alignment, output="tex", showConsensus= "none", askForOverwrite=TRUE, verbose=FALSE)
+#library(tools)
+#texi2pdf('GIMAP_rna_alignment.tex', clean=TRUE)
+```
+
+
+## Create phylogenetic trees of sequence similarity and calculate distance matrix
+
+Though these commands output a nice tree, no bootstrap values are generated. Bootstrapping going to be completed using RAxML. 
+
+```{r ape, echo =TRUE, include=TRUE}
+#Convert the output of the GIMAP output to aln format
+GIMAP_amino_acid_aln <- msaConvert(GIMAP_amino_acid_alignment, type="seqinr::alignment")
+
+# Compute a distance matrix with the dist.alignment() function from seqinr.
+GIMAP_amino_acid_dist <- dist.alignment(GIMAP_amino_acid_aln, "identity")
+GIMAP_amino_acid_dist_matrix <- as.matrix(GIMAP_amino_acid_dist)
+
+#Construct tree
+GIMAP_amino_acid_tree <- nj(GIMAP_amino_acid_dist)
+plot(GIMAP_amino_acid_tree, main="GIMAP Phlyogenetic Tree of Amino Acid Sequences", cex=0.65)
+
+```
+
+## Create graphs of the frequency of exon and chromosome data
+
+```{r exons, include=TRUE,echo=TRUE}
+Genes_per_chromosome <- read.csv(file="/Users/erinroberts/Documents/PhD_Research/GOMEZCHIARRI2_FILES_DAILYNOTES/DAILYNOTES_DATA/apoptosis_data_pipeline/Cvir_apoptosis_manual_annotation/GIMAP/GIMAP_genes_per_chromosome.csv", header=TRUE)
+ggplot(Genes_per_chromosome, aes(x=Chromosome,y=Number, color=Gene, by =Gene)) + geom_bar(stat="identity") + ggtitle("Number of GIMAP Genes per Chromosome") + labs(x="Number of Genes", y= "Chromosome Number") + theme(axis.text.x = element_text(angle = 75, hjust = 1)) + scale_x_discrete(name="Chromosome Number", limits=c("CHR2-1", "CHR2-2", "CHR2-3", "CHR4-1","CHR4-2", "CHR4-3", "CHR5-1", "CHR5-2","CHR5-3","CHR6-1","CHR6-2","CHR6-3","CHR7-1","CHR7-2","CHR7-3","CHR8-1","CHR8-2","CHR8-3","CHR9-1","CHR9-2","CHR9-3"),                                                                                                                                                               labels=c("CHR2-1"="CHR2", "CHR2-2"="CHR2", "CHR2-3"="CHR2", "CHR4-1"="CHR4","CHR4-2"="CHR4", "CHR4-3"="CHR4", "CHR5-1"="CHR5", "CHR5-2"="CHR5","CHR5-3"="CHR5","CHR6-1"="CHR6","CHR6-2"="CHR6","CHR6-3"="CHR6","CHR7-1"="CHR7","CHR7-2"="CHR7","CHR7-3"="CHR7","CHR8-1"="CHR8","CHR8-2"="CHR8","CHR8-3"="CHR8","CHR9-1"="CHR9","CHR9-2"="CHR9","CHR9-3"="CHR9"))
+```
+
+## Exon frequency across chromosomes
+
+```{r exon_freq, include=TRUE, echo=TRUE}
+Exons_per_gene <- read.csv(file="/Users/erinroberts/Documents/PhD_Research/GOMEZCHIARRI2_FILES_DAILYNOTES/DAILYNOTES_DATA/apoptosis_data_pipeline/Cvir_apoptosis_manual_annotation/GIMAP/GIMAP_exons_per_gene_per_chromosome.csv", header=TRUE)
+ggplot(Exons_per_gene, aes(x=Gene,y=number, color=Chromosome)) + geom_bar(stat="identity") + ggtitle("Number of Exons per Gene Across Chromosomes") + labs(x="Number of Exons", y= "Gene ID") + theme(axis.text.x = element_text(angle = 75, hjust = 1))
+
+```
+
+## Generate graph of exons on chromosome 7 using Gviz
+
+```{r gviz, include=TRUE, }
+source("https://bioconductor.org/biocLite.R")
+biocLite("Gviz")
+library(Gviz)
+library(GenomicRanges)
+
+#Read in all exon coordinates for GIMAP XP's as a single table
+exon_SP_df <- read.csv("/Users/erinroberts/Documents/PhD_Research/GOMEZCHIARRI2_FILES_DAILYNOTES/DAILYNOTES_DATA/apoptosis_data_pipeline/Cvir_apoptosis_manual_annotation/GIMAP/GIMAP_exons_gene_XM_info2_with_STATS.csv",header=TRUE, stringsAsFactors = FALSE)
+head(exon_SP_df)
+exon_granges <- GRanges(seqnames=exon_SP_df$CHR, exon=exon_SP_df$XM_value, ranges=IRanges(start=exon_SP_df$start, end=exon_SP_df$end), symbol=exon_SP_df$name)
+exon_granges
+
+#plot a basic track
+atrack <- AnnotationTrack(exon_granges, name ="exon")
+plotTracks(atrack)
+gtrack <- GenomeAxisTrack(exon_granges)
+plotTracks(list(gtrack, atrack))
+```
+
+Now we can plot each chromosome individually 
+```{r chr_exon, include=TRUE, echo=TRUE}
+
+#subset each individual chromosome
+seqnames(exon_granges)
+Chr2_exons<- exon_granges[seqnames(exon_granges) == 'chr2']
+Chr4_exons<-exon_granges[seqnames(exon_granges) == 'chr4']
+Chr5_exons<-exon_granges[seqnames(exon_granges) == 'chr5']
+Chr6_exons<-exon_granges[seqnames(exon_granges) == 'chr6']
+Chr7_exons<-exon_granges[seqnames(exon_granges) == 'chr7']
+Chr8_exons<-exon_granges[seqnames(exon_granges) == 'chr8']
+Chr9_exons<-exon_granges[seqnames(exon_granges) == 'chr9']
+
+#create an individual Annotation track and Range track for each 
+#add in the names of the track 
+Chr2_track<- AnnotationTrack(Chr2_exons, name = "GIMAP Chromosome 2")
+Chr4_track<-AnnotationTrack(Chr4_exons, name = "GIMAP Chromosome 4")
+Chr5_track<-AnnotationTrack(Chr5_exons, name = "GIMAP Chromosome 5")
+Chr6_track<-AnnotationTrack(Chr6_exons, name = "GIMAP Chromosome 6")
+Chr7_track<-AnnotationTrack(Chr7_exons, name = "GIMAP Chromosome 7")
+Chr8_track<-AnnotationTrack(Chr8_exons, name = "GIMAP Chromosome 8")
+Chr9_track<-AnnotationTrack(Chr9_exons, name = "GIMAP Chromosome 8")
+Chr2_range<-GenomeAxisTrack(Chr2_exons)
+Chr4_range<-GenomeAxisTrack(Chr4_exons)
+Chr5_range<-GenomeAxisTrack(Chr5_exons)
+Chr6_range<-GenomeAxisTrack(Chr6_exons)
+Chr7_range<- GenomeAxisTrack(Chr7_exons)
+Chr8_range<-GenomeAxisTrack(Chr8_exons)
+Chr9_range<-GenomeAxisTrack(Chr9_exons)
+plotTracks(list(Chr2_track, Chr2_range))
+plotTracks(list(Chr4_track, Chr4_range))
+plotTracks(list(Chr5_track, Chr5_range))
+plotTracks(list(Chr7_track, Chr7_range))
+plotTracks(list(Chr8_track, Chr8_range))
+plotTracks(list(Chr9_track, Chr9_range))
+
+```
+
+## Add more detailed annotations to the chromosomes, like the gene info 
+
+David Tang's blog has a helpful tutorial for reading gtf files into R 
+https://davetang.org/muse/2017/08/04/read-gtf-file-r/
+
+```{r refgenome, include=TRUE, echo=TRUE}
+install.packages("refGenome")
+library(refGenome)
+library(GenomicFeatures)
+library(GenomicRanges)
+library(rtracklayer)
+library(AnnotationDbi)
+
+#Load in gtf file so that I can make a TxDb object, and then create a GeneRegionTrack from that 
+granges_GFF3 <- import.gff('/Users/erinroberts/Documents/PhD_Research/GOMEZCHIARRI2_FILES_DAILYNOTES/DAILYNOTES_DATA/apoptosis_data_pipeline/Cvir_apoptosis_manual_annotation/GIMAP/GIMAP_in_gff3_top_level_edited.gff')
+granges_GFF3$symbol <- mapIds(txdb, granges_GFF3$product, "SYMBOL")
+txdb <- makeTxDbFromGRanges(granges_GFF3)
+columns(txdb)
+GRT <- GeneRegionTrack(txdb, showID=TRUE) 
+IDS <- mapIds(txdb, gene(GRT), "SYMBOL","ENTREZID", multiVals = "first")
+
+#subset tracks for different chromosomes
+options(ucscChromosomeNames=FALSE) #set arbitrary identifiers 
+
+GRT_chr2 <- GRT[chromosome(GRT)=="chr2"]
+GRT_chr4 <- GRT[chromosome(GRT)=="chr4"]
+GRT_chr5 <- GRT[chromosome(GRT)=="chr5"]
+GRT_chr6 <- GRT[chromosome(GRT)=="chr6"]
+GRT_chr7 <- GRT[chromosome(GRT)=="chr7"]
+GRT_chr8 <- GRT[chromosome(GRT)=="chr8"]
+GRT_chr9 <- GRT[chromosome(GRT)=="chr9"]
+
+#Create separate annotation tracks for each chromosome
+
+
+#plot annotation track with the gene symbols on top of other tracks above 
+plotTracks(list(Chr2_track, Chr2_range))
+plotTracks(list(Chr4_track, Chr4_range))
+plotTracks(list(Chr5_track, Chr5_range))
+plotTracks(list(Chr7_track, Chr7_range))
+plotTracks(list(Chr8_track, Chr8_range))
+plotTracks(list(Chr9_track, Chr9_range))
+
+```
+
+
+## Helpful websites for reference
+http://a-little-book-of-r-for-bioinformatics.readthedocs.io/en/latest/src/chapter5.html
+MSA documentation 
+http://adegenet.r-forge.r-project.org/files/PRstats/practical-introphylo.1.0.pdf
+http://www.imsbio.co.jp/RGM/R_rdfile?f=Gviz/man/GeneRegionTrack-class.Rd&d=R_BC

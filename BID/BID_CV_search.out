@@ -1,0 +1,126 @@
+# hmmsearch :: search profile(s) against a sequence database
+# HMMER 3.1b2 (February 2015); http://hmmer.org/
+# Copyright (C) 2015 Howard Hughes Medical Institute.
+# Freely distributed under the GNU General Public License (GPLv3).
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# query HMM file:                  /data3/marine_diseases_lab/erin/HMMER_analysis/BID.hmm
+# target sequence database:        /data3/marine_diseases_lab/shared/GCF_002022765.2_C_virginica-3.0_protein.faa
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Query:       BID_conserved_domains  [M=196]
+Scores for complete sequences (score includes all domains):
+   --- full sequence ---   --- best 1 domain ---    -#dom-
+    E-value  score  bias    E-value  score  bias    exp  N  Sequence       Description
+    ------- ------ -----    ------- ------ -----   ---- --  --------       -----------
+  ------ inclusion threshold ------
+      0.057   14.7   1.4        0.9   10.8   0.3    3.0  3  XP_022344060.1  cilia- and flagella-associated protein 206-li
+      0.057   14.7   1.4        0.9   10.8   0.3    3.0  3  XP_022344061.1  cilia- and flagella-associated protein 206-li
+       0.17   13.2   0.0       0.27   12.5   0.0    1.3  1  XP_022290501.1  uncharacterized protein LOC111102143 [Crassos
+       0.96   10.7   1.4        2.8    9.2   1.7    1.5  2  XP_022328339.1  uncharacterized protein LOC111127452 [Crassos
+
+
+Domain annotation for each sequence (and alignments):
+>> XP_022344060.1  cilia- and flagella-associated protein 206-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   10.8   0.3   5.9e-05       0.9      72     152 ..       3      87 ..       1      94 [. 0.81
+   2 ?   -1.1   0.0      0.26   3.9e+03      64     100 ..      94     129 ..      88     141 .. 0.77
+   3 ?    0.7   0.0     0.074   1.1e+03      66     108 ..     522     564 ..     509     587 .. 0.85
+
+  Alignments for each domain:
+  == domain 1  score: 10.8 bits;  conditional E-value: 5.9e-05
+  BID_conserved_domains  72 rleadsesqeevirsiarhLaeiGDeldrsiqpelvnqLaa....qf.rneslseedrrraLaaaveevmqtypaDleqekakLil 152
+                            r++a+s  ++ +ir+ia++ a  G  + + + + +v+ ++     +f +++ l+++d ++ +   v+++m + +  le  k ++  
+         XP_022344060.1   3 RAQAESVIKN-IIREIAQECASKGQAVSETLVAFMVKAVVLdpsnEFnVDRTLTKDDVQKLIKLCVDRLMDSRSPALETVKMQVYF 87 
+                            5666666666.********************99999988761111553467899******************99999999887765 PP
+
+  == domain 2  score: -1.1 bits;  conditional E-value: 0.26
+  BID_conserved_domains  64 rasrllegrleadsesqeevirsiarhLaeiGDeldr 100
+                            r+ +l e r++ +s  q  vir+i    a+  +el++
+         XP_022344060.1  94 RSDFLEEHRRVLESRLQP-VIREITDSRARTREELES 129
+                            566688888888998888.999999998888888875 PP
+
+  == domain 3  score: 0.7 bits;  conditional E-value: 0.074
+  BID_conserved_domains  66 srllegrleadsesqeevirsiarhLaeiGDeldrsiqpelvn 108
+                            ++++e+++++  e +e  +r  a +La++  ++ +s+q++l n
+         XP_022344060.1 522 THFMESNIVKSYEWNEWELRRKAIKLANLRTRITHSVQTNLSN 564
+                            4688889999999999999999***************999866 PP
+
+>> XP_022344061.1  cilia- and flagella-associated protein 206-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   10.8   0.3   5.9e-05       0.9      72     152 ..       3      87 ..       1      94 [. 0.81
+   2 ?   -1.1   0.0      0.26   3.9e+03      64     100 ..      94     129 ..      88     141 .. 0.77
+   3 ?    0.7   0.0     0.074   1.1e+03      66     108 ..     522     564 ..     509     587 .. 0.85
+
+  Alignments for each domain:
+  == domain 1  score: 10.8 bits;  conditional E-value: 5.9e-05
+  BID_conserved_domains  72 rleadsesqeevirsiarhLaeiGDeldrsiqpelvnqLaa....qf.rneslseedrrraLaaaveevmqtypaDleqekakLil 152
+                            r++a+s  ++ +ir+ia++ a  G  + + + + +v+ ++     +f +++ l+++d ++ +   v+++m + +  le  k ++  
+         XP_022344061.1   3 RAQAESVIKN-IIREIAQECASKGQAVSETLVAFMVKAVVLdpsnEFnVDRTLTKDDVQKLIKLCVDRLMDSRSPALETVKMQVYF 87 
+                            5666666666.********************99999988761111553467899******************99999999887765 PP
+
+  == domain 2  score: -1.1 bits;  conditional E-value: 0.26
+  BID_conserved_domains  64 rasrllegrleadsesqeevirsiarhLaeiGDeldr 100
+                            r+ +l e r++ +s  q  vir+i    a+  +el++
+         XP_022344061.1  94 RSDFLEEHRRVLESRLQP-VIREITDSRARTREELES 129
+                            566688888888998888.999999998888888875 PP
+
+  == domain 3  score: 0.7 bits;  conditional E-value: 0.074
+  BID_conserved_domains  66 srllegrleadsesqeevirsiarhLaeiGDeldrsiqpelvn 108
+                            ++++e+++++  e +e  +r  a +La++  ++ +s+q++l n
+         XP_022344061.1 522 THFMESNIVKSYEWNEWELRRKAIKLANLRTRITHSVQTNLSN 564
+                            4688889999999999999999***************999866 PP
+
+>> XP_022290501.1  uncharacterized protein LOC111102143 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   12.5   0.0   1.8e-05      0.27       2      37 ..     196     231 ..     195     235 .. 0.94
+
+  Alignments for each domain:
+  == domain 1  score: 12.5 bits;  conditional E-value: 1.8e-05
+  BID_conserved_domains   2 dakvsnGsglrdesitnlLvfsfLqsrsnsefheeL 37 
+                            + kvs+ +g +d+ i +++vfs Lq++ + ef+++L
+         XP_022290501.1 196 EVKVSSAAGDEDQAIAQIIVFSLLQKQRHPEFQHHL 231
+                            579*****************************9987 PP
+
+>> XP_022328339.1  uncharacterized protein LOC111127452 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?    9.2   1.7   0.00019       2.8      52     147 ..     156     251 ..     145     255 .. 0.85
+   2 ?   -3.7   0.0       1.6   2.4e+04     100     117 ..     445     462 ..     444     464 .. 0.83
+
+  Alignments for each domain:
+  == domain 1  score: 9.2 bits;  conditional E-value: 0.00019
+  BID_conserved_domains  52 adhddeLqtDGnrasr.llegrleadsesqeevirsiarhLaeiGDeldrsiqpelvnqLaaqfrneslseedrrraLaaaveevmqt 138
+                            + +d+eL tD  + +    +g++e d e+ + +  + a++  +i D l++ +  ++ n+    fr   + +    r L a + +  q 
+         XP_022328339.1 156 DTNDEELDTDAAKEAErPESGNQEIDNEEPD-IESNAATESNKIEDALNKMLAMGFHNDGGWLFRLLVQNDGHIDRVLEAILPDDRQN 242
+                            56789******99988799*********999.99999***************999999988888887777778888888888888888 PP
+
+  BID_conserved_domains 139 ypaDleqek 147
+                              ++ e+ek
+         XP_022328339.1 243 RKRESEKEK 251
+                            777777777 PP
+
+  == domain 2  score: -3.7 bits;  conditional E-value: 1.6
+  BID_conserved_domains 100 rsiqpelvnqLaaqfrne 117
+                             +i   lv+ L++ f ne
+         XP_022328339.1 445 PKIANALVEMLSMGFHNE 462
+                            578899999999999997 PP
+
+
+
+Internal pipeline statistics summary:
+-------------------------------------
+Query model(s):                              1  (196 nodes)
+Target sequences:                        60213  (39280004 residues searched)
+Passed MSV filter:                      2678  (0.0444754); expected 1204.3 (0.02)
+Passed bias filter:                     1060  (0.0176042); expected 1204.3 (0.02)
+Passed Vit filter:                        65  (0.0010795); expected 60.2 (0.001)
+Passed Fwd filter:                         4  (6.64308e-05); expected 0.6 (1e-05)
+Initial search space (Z):              60213  [actual number of targets]
+Domain search space  (domZ):               4  [number of targets reported over threshold]
+# CPU time: 0.61u 0.04s 00:00:00.65 Elapsed: 00:00:00.64
+# Mc/sec: 12029.50
+//
+[ok]

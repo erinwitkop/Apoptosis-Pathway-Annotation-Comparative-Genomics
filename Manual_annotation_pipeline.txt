@@ -1,0 +1,40 @@
+MANUAL ANNOTATION PIPELINE (March 4th, 2018) 
+
+GOAL: Gather three lines of evidence to make decisions
+	1. -Search by protein name in NCBI, select protein, narrow results to C. gigas, D. melanogaster, H. sapiens
+		this can be done using the customize tab in the upper left corner. 
+	2. -sequence homology to model organisms and closest relative (tBLASTn) (https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=tblastn&PAGE_TYPE=BlastSearch, C. gigas, D. melanogaster, H. sapiens)
+	3. -domain similarity: align top hit C_vir to conserved domains (TCOFFEE) (download conserved domains from NCBI conserved domains,
+		copy and paste in the protein sequence from your C virginica best hit protein, compare side by side with 
+		TCOFFEE, analyze results on the html file after downloading it locally) 
+		-If no conserved domains listed, use reference sequence to find conserved domains with 
+		https://www.ncbi.nlm.nih.gov/Structure/cdd/wrpsb.cgi,
+		-AND SMART BLAST TO DOWNLOAD SEQUENCES: SMARTBLAST (https://blast.ncbi.nlm.nih.gov/smartblast/smartBlast.cgi), insert sequence,
+		select each of top best hits from model organisms, select GenPept, select all sequences,
+		send to file, FASTA format. Paste in query protein sequence from Cgig and top Cvir hit
+		-TCOFFEE TO GET ALIGNMENT FILE FOR HMM (NOT 
+	4. -Look for presence of critical domains identified in pfam and uniprot (look up protein on pfam and uniprot), 
+		note publications about the domain
+	5. -Use HMMER to align conserved domains to the C_virginica genome to find best hit based on domain architecturex
+		-use hmmbuild to build a profile with the conserved domain alignments from NCBI
+		-use script HMM
+		-use hmmsearch against the sequence database of the CV fna transcript full genome file
+	6. -Save all screenshots in the Desktop folder with correct name, make new folder for each 
+	of the gene families
+
+Criteria that is less important: Intron, exon structure (because of high polymorphism in oysters) 
+
+
+ALIGNMENT OPTION 2 (since clustalw may not be the best tool, see the multiple alignment ppt in my protocols folder): TCOFFEE
+6. Run Tcoffee in default mode
+T-Coffee produces three different files:
+sh3.dnd: guide tree used to assemble the progressive alignment.
+sh3.aln: final alignment given in ClustalW format.
+sh3.html: final alignment colored in function of the CORE index from red (very consistent) to blue (poorly consistent) (Figure 2).
+
+-Understanding the output:http://www.tcoffee.org/Projects/tcs/
+The top of the output provides the average conistency (0-100) for each sequence, thus indicating wether some sequences may have a less reliable alignment. A score lower than 50 should be considered poor.
+-generate publication quality alignments. https://labs.mcdb.ucsb.edu/weimbs/thomas/sites/labs.mcdb.ucsb.edu.weimbs.thomas/files/docs/multiplesequencealignmenttutorial.pdf
+
+CONSERVED DOMAIN RETRIEVAL TOOL: https://www.ncbi.nlm.nih.gov/Structure/cdd/docs/cdd_how_to_domain_architecture.html
+	Enter a query (either as protein sequence, set of conserved domains, or multiple queries) directly into the Conserved Domain Architecture Retrieval Tool (CDART) page

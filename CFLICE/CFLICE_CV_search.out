@@ -1,0 +1,702 @@
+# hmmsearch :: search profile(s) against a sequence database
+# HMMER 3.1b2 (February 2015); http://hmmer.org/
+# Copyright (C) 2015 Howard Hughes Medical Institute.
+# Freely distributed under the GNU General Public License (GPLv3).
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# query HMM file:                  /data3/marine_diseases_lab/erin/HMMER_analysis/CFLICE.hmm
+# target sequence database:        /data3/marine_diseases_lab/shared/GCF_002022765.2_C_virginica-3.0_protein.faa
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Query:       CFLIP_conserved  [M=462]
+Scores for complete sequences (score includes all domains):
+   --- full sequence ---   --- best 1 domain ---    -#dom-
+    E-value  score  bias    E-value  score  bias    exp  N  Sequence       Description
+    ------- ------ -----    ------- ------ -----   ---- --  --------       -----------
+    2.4e-32  114.6  10.4    2.1e-17   65.3   3.0    3.2  3  XP_022321371.1  caspase-8-like [Crassostrea virginica]
+    2.4e-32  114.6  10.4    2.1e-17   65.3   3.0    3.2  3  XP_022321372.1  caspase-8-like [Crassostrea virginica]
+    2.4e-32  114.6  10.4    2.1e-17   65.3   3.0    3.2  3  XP_022321373.1  caspase-8-like [Crassostrea virginica]
+    4.8e-31  110.3  10.8    2.5e-16   61.8   3.4    3.2  3  XP_022327245.1  caspase-8-like [Crassostrea virginica]
+    4.8e-31  110.3  10.8    2.5e-16   61.8   3.4    3.2  3  XP_022327246.1  caspase-8-like [Crassostrea virginica]
+    4.8e-31  110.3  10.8    2.5e-16   61.8   3.4    3.2  3  XP_022327247.1  caspase-8-like [Crassostrea virginica]
+    1.1e-11   46.5  17.6    1.1e-07   33.3   0.6    3.3  3  XP_022325102.1  caspase-8-like [Crassostrea virginica]
+     0.0005   21.2   0.3     0.0014   19.7   0.3    1.7  1  XP_022330360.1  uncharacterized protein LOC111128796 [Crassos
+  ------ inclusion threshold ------
+      0.038   15.0   0.1      0.047   14.7   0.1    1.2  1  XP_022313380.1  caspase-3-like isoform X3 [Crassostrea virgin
+       0.04   14.9   0.1      0.051   14.6   0.1    1.3  1  XP_022313378.1  caspase-3-like isoform X1 [Crassostrea virgin
+      0.047   14.7   0.5      0.064   14.3   0.5    1.2  1  XP_022337029.1  caspase-7-like [Crassostrea virginica]
+      0.047   14.7   0.5      0.064   14.3   0.5    1.2  1  XP_022337030.1  caspase-7-like [Crassostrea virginica]
+      0.047   14.7   0.5      0.064   14.3   0.5    1.2  1  XP_022337032.1  caspase-7-like [Crassostrea virginica]
+      0.096   13.7   0.0       0.12   13.4   0.0    1.1  1  XP_022313588.1  caspase-3-like isoform X3 [Crassostrea virgin
+        0.1   13.6   0.0       0.13   13.3   0.0    1.2  1  XP_022313587.1  caspase-3-like isoform X2 [Crassostrea virgin
+       0.11   13.5   0.0       0.13   13.2   0.0    1.2  1  XP_022313586.1  caspase-3-like isoform X1 [Crassostrea virgin
+       0.13   13.2   0.2       0.18   12.8   0.2    1.1  1  XP_022341800.1  caspase-6-like [Crassostrea virginica]
+       0.13   13.2   0.2       0.18   12.8   0.2    1.1  1  XP_022341801.1  caspase-6-like [Crassostrea virginica]
+       0.18   12.8   0.2       0.18   12.8   0.2    1.6  2  XP_022294672.1  uncharacterized protein LOC111104823 [Crassos
+       0.18   12.8   0.2       0.18   12.8   0.2    1.6  2  XP_022294673.1  uncharacterized protein LOC111104823 [Crassos
+       0.18   12.8   0.2       0.18   12.8   0.2    1.6  2  XP_022337024.1  uncharacterized protein LOC111133185 [Crassos
+       0.18   12.8   0.2       0.18   12.8   0.2    1.6  2  XP_022337025.1  uncharacterized protein LOC111133185 [Crassos
+       0.27   12.2   3.5       0.73   10.8   0.9    2.3  2  XP_022294613.1  caspase-6-like [Crassostrea virginica]
+       0.32   12.0   0.0        0.4   11.7   0.0    1.1  1  XP_022313590.1  caspase-3-like isoform X2 [Crassostrea virgin
+       0.33   11.9   0.0       0.44   11.5   0.0    1.2  1  XP_022313379.1  caspase-3-like isoform X2 [Crassostrea virgin
+       0.33   11.9   0.0       0.44   11.5   0.0    1.2  1  XP_022313589.1  caspase-3-like isoform X1 [Crassostrea virgin
+        5.9    7.8   3.8         20    6.0   0.5    2.4  3  XP_022294614.1  caspase-8-like [Crassostrea virginica]
+
+
+Domain annotation for each sequence (and alignments):
+>> XP_022321371.1  caspase-8-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   38.6   1.7   1.2e-12   2.7e-09      99     175 ..      23     101 ..       6     107 .. 0.90
+   2 !   65.3   3.0   9.4e-21   2.1e-17      76     193 ..     112     227 ..     105     250 .. 0.86
+   3 !   12.7   0.0   8.6e-05      0.19     269     372 ..     515     615 ..     510     722 .. 0.67
+
+  Alignments for each domain:
+  == domain 1  score: 38.6 bits;  conditional E-value: 1.2e-12
+  CFLIP_conserved  99 dYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPe..klDlLekcLrnirRiDLkkki 175
+                      d+   +v  +  Ld+sD+e L FLl+ + p  + +k+ + Ldl +eL + + + P+  +l lLe+cL  i+R DL k i
+   XP_022321371.1  23 DFGQFLVALDSRLDSSDVENLKFLLRGFIPDSRLQKADRGLDLFTELQNTGVIDPDenDLELLEECLYRIHRKDLLKTI 101
+                      555667788889*******************************************6337999*************9988 PP
+
+  == domain 2  score: 65.3 bits;  conditional E-value: 9.4e-21
+  CFLIP_conserved  76 lrklktdkktveeellrnssllsdYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPeklDlLekcLrnirRi 169
+                      lrkl+ d k  +++l   s++ls++RvL+ ei+E+ d ++ +s++F l +l p+g+ +k ks  dl + LEk ++ s +++++L   L+ i R 
+   XP_022321371.1 112 LRKLQEDIKRNVTHLN-SSRFLSPFRVLLFEIGEDIDDEEFKSIRFTLTSLVPKGQLSKMKSIFDLFLFLEKKDEMSHTDVSVLQRVLKVIDRA 204
+                      5777778888888865.689************************************************************************** PP
+
+  CFLIP_conserved 170 DLkkkiqkYkqqaqarpvhspnaf 193
+                      DL+ k+ +Y  +aq+++++s+ + 
+   XP_022321371.1 205 DLIPKVNQYI-SAQSPSTKSKSQN 227
+                      *********7.4666666665543 PP
+
+  == domain 3  score: 12.7 bits;  conditional E-value: 8.6e-05
+  CFLIP_conserved 269 letellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikld.qlakglplllikkylladscpilrgkekl 361
+                      l+ e+l + f +l   v+ + +l+ +++n +l   +    +  +d fv+   s g  +++++++  l     l  i++     +cp l+gk+kl
+   XP_022321371.1 515 LDAEKLTYIFQKLNFYVRRFDNLEDFKMNRRLVE-VSFEDHSQYDCFVCCILSHGVLQNIYGTNgRLVRIAELTGIFR---SGKCPSLAGKPKL 604
+                      67889999999999*****************987.6899**********************98622222233333322...3456666666666 PP
+
+  CFLIP_conserved 362 dkiqeadvpes 372
+                      ++iq   + e 
+   XP_022321371.1 605 FFIQACQGREK 615
+                      66655444443 PP
+
+>> XP_022321372.1  caspase-8-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   38.6   1.7   1.2e-12   2.7e-09      99     175 ..      23     101 ..       6     107 .. 0.90
+   2 !   65.3   3.0   9.4e-21   2.1e-17      76     193 ..     112     227 ..     105     250 .. 0.86
+   3 !   12.7   0.0   8.6e-05      0.19     269     372 ..     515     615 ..     510     722 .. 0.67
+
+  Alignments for each domain:
+  == domain 1  score: 38.6 bits;  conditional E-value: 1.2e-12
+  CFLIP_conserved  99 dYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPe..klDlLekcLrnirRiDLkkki 175
+                      d+   +v  +  Ld+sD+e L FLl+ + p  + +k+ + Ldl +eL + + + P+  +l lLe+cL  i+R DL k i
+   XP_022321372.1  23 DFGQFLVALDSRLDSSDVENLKFLLRGFIPDSRLQKADRGLDLFTELQNTGVIDPDenDLELLEECLYRIHRKDLLKTI 101
+                      555667788889*******************************************6337999*************9988 PP
+
+  == domain 2  score: 65.3 bits;  conditional E-value: 9.4e-21
+  CFLIP_conserved  76 lrklktdkktveeellrnssllsdYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPeklDlLekcLrnirRi 169
+                      lrkl+ d k  +++l   s++ls++RvL+ ei+E+ d ++ +s++F l +l p+g+ +k ks  dl + LEk ++ s +++++L   L+ i R 
+   XP_022321372.1 112 LRKLQEDIKRNVTHLN-SSRFLSPFRVLLFEIGEDIDDEEFKSIRFTLTSLVPKGQLSKMKSIFDLFLFLEKKDEMSHTDVSVLQRVLKVIDRA 204
+                      5777778888888865.689************************************************************************** PP
+
+  CFLIP_conserved 170 DLkkkiqkYkqqaqarpvhspnaf 193
+                      DL+ k+ +Y  +aq+++++s+ + 
+   XP_022321372.1 205 DLIPKVNQYI-SAQSPSTKSKSQN 227
+                      *********7.4666666665543 PP
+
+  == domain 3  score: 12.7 bits;  conditional E-value: 8.6e-05
+  CFLIP_conserved 269 letellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikld.qlakglplllikkylladscpilrgkekl 361
+                      l+ e+l + f +l   v+ + +l+ +++n +l   +    +  +d fv+   s g  +++++++  l     l  i++     +cp l+gk+kl
+   XP_022321372.1 515 LDAEKLTYIFQKLNFYVRRFDNLEDFKMNRRLVE-VSFEDHSQYDCFVCCILSHGVLQNIYGTNgRLVRIAELTGIFR---SGKCPSLAGKPKL 604
+                      67889999999999*****************987.6899**********************98622222233333322...3456666666666 PP
+
+  CFLIP_conserved 362 dkiqeadvpes 372
+                      ++iq   + e 
+   XP_022321372.1 605 FFIQACQGREK 615
+                      66655444443 PP
+
+>> XP_022321373.1  caspase-8-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   38.6   1.7   1.2e-12   2.7e-09      99     175 ..      23     101 ..       6     107 .. 0.90
+   2 !   65.3   3.0   9.4e-21   2.1e-17      76     193 ..     112     227 ..     105     250 .. 0.86
+   3 !   12.7   0.0   8.6e-05      0.19     269     372 ..     515     615 ..     510     722 .. 0.67
+
+  Alignments for each domain:
+  == domain 1  score: 38.6 bits;  conditional E-value: 1.2e-12
+  CFLIP_conserved  99 dYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPe..klDlLekcLrnirRiDLkkki 175
+                      d+   +v  +  Ld+sD+e L FLl+ + p  + +k+ + Ldl +eL + + + P+  +l lLe+cL  i+R DL k i
+   XP_022321373.1  23 DFGQFLVALDSRLDSSDVENLKFLLRGFIPDSRLQKADRGLDLFTELQNTGVIDPDenDLELLEECLYRIHRKDLLKTI 101
+                      555667788889*******************************************6337999*************9988 PP
+
+  == domain 2  score: 65.3 bits;  conditional E-value: 9.4e-21
+  CFLIP_conserved  76 lrklktdkktveeellrnssllsdYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPeklDlLekcLrnirRi 169
+                      lrkl+ d k  +++l   s++ls++RvL+ ei+E+ d ++ +s++F l +l p+g+ +k ks  dl + LEk ++ s +++++L   L+ i R 
+   XP_022321373.1 112 LRKLQEDIKRNVTHLN-SSRFLSPFRVLLFEIGEDIDDEEFKSIRFTLTSLVPKGQLSKMKSIFDLFLFLEKKDEMSHTDVSVLQRVLKVIDRA 204
+                      5777778888888865.689************************************************************************** PP
+
+  CFLIP_conserved 170 DLkkkiqkYkqqaqarpvhspnaf 193
+                      DL+ k+ +Y  +aq+++++s+ + 
+   XP_022321373.1 205 DLIPKVNQYI-SAQSPSTKSKSQN 227
+                      *********7.4666666665543 PP
+
+  == domain 3  score: 12.7 bits;  conditional E-value: 8.6e-05
+  CFLIP_conserved 269 letellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikld.qlakglplllikkylladscpilrgkekl 361
+                      l+ e+l + f +l   v+ + +l+ +++n +l   +    +  +d fv+   s g  +++++++  l     l  i++     +cp l+gk+kl
+   XP_022321373.1 515 LDAEKLTYIFQKLNFYVRRFDNLEDFKMNRRLVE-VSFEDHSQYDCFVCCILSHGVLQNIYGTNgRLVRIAELTGIFR---SGKCPSLAGKPKL 604
+                      67889999999999*****************987.6899**********************98622222233333322...3456666666666 PP
+
+  CFLIP_conserved 362 dkiqeadvpes 372
+                      ++iq   + e 
+   XP_022321373.1 605 FFIQACQGREK 615
+                      66655444443 PP
+
+>> XP_022327245.1  caspase-8-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   38.6   1.7   1.2e-12   2.7e-09      99     175 ..      23     101 ..       6     107 .. 0.90
+   2 !   61.8   3.4   1.1e-19   2.5e-16      76     192 ..     112     226 ..     104     249 .. 0.87
+   3 !   11.9   0.0   0.00015      0.32     269     372 ..     515     615 ..     510     722 .. 0.67
+
+  Alignments for each domain:
+  == domain 1  score: 38.6 bits;  conditional E-value: 1.2e-12
+  CFLIP_conserved  99 dYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPe..klDlLekcLrnirRiDLkkki 175
+                      d+   +v  +  Ld+sD+e L FLl+ + p  + +k+ + Ldl +eL + + + P+  +l lLe+cL  i+R DL k i
+   XP_022327245.1  23 DFGQFLVALDSRLDSSDVENLKFLLRGFIPDSRLQKADRGLDLFTELQNTGVIDPDenDLELLEECLYRIHRKDLLKTI 101
+                      555667788889*******************************************6337999*************9988 PP
+
+  == domain 2  score: 61.8 bits;  conditional E-value: 1.1e-19
+  CFLIP_conserved  76 lrklktdkktveeellrnssllsdYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPeklDlLekcLrnirRi 169
+                      lrkl+ d k  +++l   s++ls++RvL+ ei+E+ d ++ +s++F l +l p+g+ +k ks  dl + LEk ++ s  ++++L   L+ i R 
+   XP_022327245.1 112 LRKLQEDIKRNVTHLN-SSRFLSPFRVLLFEIGEDIDDEEFKSIRFTLTSLVPKGQLSKMKSIFDLFLFLEKKDEMSHIDVSVLQRVLKVIDRA 204
+                      5777777888888865.589************************************************************************** PP
+
+  CFLIP_conserved 170 DLkkkiqkYkqqaqarpvhspna 192
+                      DL+ k+ +Y  +aq+++++s+ +
+   XP_022327245.1 205 DLIPKVNQYI-SAQSPSTKSKSQ 226
+                      *********6.566666666554 PP
+
+  == domain 3  score: 11.9 bits;  conditional E-value: 0.00015
+  CFLIP_conserved 269 letellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikld.qlakglplllikkylladscpilrgkekl 361
+                      l+ e+l + f +l   v+ + +l+ +++n +l   +    +  +d fv+   s g  +++++++  l     l  i++     +cp l+gk+kl
+   XP_022327245.1 515 LDAEKLTYIFQKLNFFVRRFDNLEDFKMNRRLVE-VSFEDHSQYDCFVCCILSHGVLQNIYGTNgRLVRIAELTGIFR---SGKCPSLAGKPKL 604
+                      6778889999999999999***********9987.6899**********************98622222233333322...3456666666666 PP
+
+  CFLIP_conserved 362 dkiqeadvpes 372
+                      ++iq   + e 
+   XP_022327245.1 605 FFIQACQGREK 615
+                      66655444443 PP
+
+>> XP_022327246.1  caspase-8-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   38.6   1.7   1.2e-12   2.7e-09      99     175 ..      23     101 ..       6     107 .. 0.90
+   2 !   61.8   3.4   1.1e-19   2.5e-16      76     192 ..     112     226 ..     104     249 .. 0.87
+   3 !   11.9   0.0   0.00015      0.32     269     372 ..     515     615 ..     510     722 .. 0.67
+
+  Alignments for each domain:
+  == domain 1  score: 38.6 bits;  conditional E-value: 1.2e-12
+  CFLIP_conserved  99 dYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPe..klDlLekcLrnirRiDLkkki 175
+                      d+   +v  +  Ld+sD+e L FLl+ + p  + +k+ + Ldl +eL + + + P+  +l lLe+cL  i+R DL k i
+   XP_022327246.1  23 DFGQFLVALDSRLDSSDVENLKFLLRGFIPDSRLQKADRGLDLFTELQNTGVIDPDenDLELLEECLYRIHRKDLLKTI 101
+                      555667788889*******************************************6337999*************9988 PP
+
+  == domain 2  score: 61.8 bits;  conditional E-value: 1.1e-19
+  CFLIP_conserved  76 lrklktdkktveeellrnssllsdYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPeklDlLekcLrnirRi 169
+                      lrkl+ d k  +++l   s++ls++RvL+ ei+E+ d ++ +s++F l +l p+g+ +k ks  dl + LEk ++ s  ++++L   L+ i R 
+   XP_022327246.1 112 LRKLQEDIKRNVTHLN-SSRFLSPFRVLLFEIGEDIDDEEFKSIRFTLTSLVPKGQLSKMKSIFDLFLFLEKKDEMSHIDVSVLQRVLKVIDRA 204
+                      5777777888888865.589************************************************************************** PP
+
+  CFLIP_conserved 170 DLkkkiqkYkqqaqarpvhspna 192
+                      DL+ k+ +Y  +aq+++++s+ +
+   XP_022327246.1 205 DLIPKVNQYI-SAQSPSTKSKSQ 226
+                      *********6.566666666554 PP
+
+  == domain 3  score: 11.9 bits;  conditional E-value: 0.00015
+  CFLIP_conserved 269 letellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikld.qlakglplllikkylladscpilrgkekl 361
+                      l+ e+l + f +l   v+ + +l+ +++n +l   +    +  +d fv+   s g  +++++++  l     l  i++     +cp l+gk+kl
+   XP_022327246.1 515 LDAEKLTYIFQKLNFFVRRFDNLEDFKMNRRLVE-VSFEDHSQYDCFVCCILSHGVLQNIYGTNgRLVRIAELTGIFR---SGKCPSLAGKPKL 604
+                      6778889999999999999***********9987.6899**********************98622222233333322...3456666666666 PP
+
+  CFLIP_conserved 362 dkiqeadvpes 372
+                      ++iq   + e 
+   XP_022327246.1 605 FFIQACQGREK 615
+                      66655444443 PP
+
+>> XP_022327247.1  caspase-8-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   38.6   1.7   1.2e-12   2.7e-09      99     175 ..      23     101 ..       6     107 .. 0.90
+   2 !   61.8   3.4   1.1e-19   2.5e-16      76     192 ..     112     226 ..     104     249 .. 0.87
+   3 !   11.9   0.0   0.00015      0.32     269     372 ..     515     615 ..     510     722 .. 0.67
+
+  Alignments for each domain:
+  == domain 1  score: 38.6 bits;  conditional E-value: 1.2e-12
+  CFLIP_conserved  99 dYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPe..klDlLekcLrnirRiDLkkki 175
+                      d+   +v  +  Ld+sD+e L FLl+ + p  + +k+ + Ldl +eL + + + P+  +l lLe+cL  i+R DL k i
+   XP_022327247.1  23 DFGQFLVALDSRLDSSDVENLKFLLRGFIPDSRLQKADRGLDLFTELQNTGVIDPDenDLELLEECLYRIHRKDLLKTI 101
+                      555667788889*******************************************6337999*************9988 PP
+
+  == domain 2  score: 61.8 bits;  conditional E-value: 1.1e-19
+  CFLIP_conserved  76 lrklktdkktveeellrnssllsdYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPeklDlLekcLrnirRi 169
+                      lrkl+ d k  +++l   s++ls++RvL+ ei+E+ d ++ +s++F l +l p+g+ +k ks  dl + LEk ++ s  ++++L   L+ i R 
+   XP_022327247.1 112 LRKLQEDIKRNVTHLN-SSRFLSPFRVLLFEIGEDIDDEEFKSIRFTLTSLVPKGQLSKMKSIFDLFLFLEKKDEMSHIDVSVLQRVLKVIDRA 204
+                      5777777888888865.589************************************************************************** PP
+
+  CFLIP_conserved 170 DLkkkiqkYkqqaqarpvhspna 192
+                      DL+ k+ +Y  +aq+++++s+ +
+   XP_022327247.1 205 DLIPKVNQYI-SAQSPSTKSKSQ 226
+                      *********6.566666666554 PP
+
+  == domain 3  score: 11.9 bits;  conditional E-value: 0.00015
+  CFLIP_conserved 269 letellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikld.qlakglplllikkylladscpilrgkekl 361
+                      l+ e+l + f +l   v+ + +l+ +++n +l   +    +  +d fv+   s g  +++++++  l     l  i++     +cp l+gk+kl
+   XP_022327247.1 515 LDAEKLTYIFQKLNFFVRRFDNLEDFKMNRRLVE-VSFEDHSQYDCFVCCILSHGVLQNIYGTNgRLVRIAELTGIFR---SGKCPSLAGKPKL 604
+                      6778889999999999999***********9987.6899**********************98622222233333322...3456666666666 PP
+
+  CFLIP_conserved 362 dkiqeadvpes 372
+                      ++iq   + e 
+   XP_022327247.1 605 FFIQACQGREK 615
+                      66655444443 PP
+
+>> XP_022325102.1  caspase-8-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   18.7   4.1   1.3e-06    0.0028      99     175 ..       6      82 ..       1      82 [. 0.97
+   2 !   33.3   0.6   4.8e-11   1.1e-07      64     161 ..      67     167 ..      58     172 .. 0.91
+   3 !    9.1   1.8     0.001       2.3     202     368 ..     236     414 ..     213     422 .. 0.70
+
+  Alignments for each domain:
+  == domain 1  score: 18.7 bits;  conditional E-value: 1.3e-06
+  CFLIP_conserved  99 dYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPeklDlLekcLrnirRiDLkkki 175
+                      d+R L+++i+  Ld++Dle L FL +d  p     k k+ Ld+ + LE  + +  +k   L +c+  ++R DL++k+
+   XP_022325102.1   6 DFRELLLDIDAHLDSKDLELLKFLCRDVVPFSVLEKCKRSLDIFTNLEQRGKLKEGKSIYLQECFHYMKRKDLIRKL 82 
+                      8**************************************************************************96 PP
+
+  == domain 2  score: 33.3 bits;  conditional E-value: 4.8e-11
+  CFLIP_conserved  64 evlyrvkrrdlllrklktdkktveeell.rnssllsdYRvLMveisEeLdksDlesLiFLlkdlmpsgkkakdk..sFLdlVveLEkLnLVsPe 154
+                       + + +++r +l rkl  d+++ e  +  +++  l+++RvL+ ei E+  k++le + F +k+ +  +kk ++k    Ldl  +LEk  L+   
+   XP_022325102.1  67 QECFHYMKRKDLIRKLGGDPQKLEDRIRyEGPAHLFPFRVLLFEIAEDCGKEELEKMKFYSKTTLHLPKKMTEKvkNCLDLFSALEKEELITNI 160
+                      5678899999999***********9985489********************************9999998888888***********9999988 PP
+
+  CFLIP_conserved 155 klDlLek 161
+                      ++  Le+
+   XP_022325102.1 161 QVRTLEQ 167
+                      8888876 PP
+
+  == domain 3  score: 9.1 bits;  conditional E-value: 0.001
+  CFLIP_conserved 202 klkslvrpsenirteekrlkeqeeelfqeeqesiseserketesvglevyiveskalgleliidllgletellres..flglkeevkk.....d 288
+                      +  s+ +   +++++    ++ +e l   +q  ++ ++  e++  + + y++ sk+ g +lii+   + +e+++     +  +ee +k     +
+   XP_022325102.1 236 RTSSPRISYSSLNSMTPPAQDAGESLLSRQQFPQTPQVTPEPSDDFINFYKMTSKPRGYCLIINNQKFHGEIKFVErkGTDIDEEKLKnvfgkH 329
+                      55555556666666666677777777788888888999999***************************98876654004444555555111114 PP
+
+  CFLIP_conserved 289 lklsvqt....inqilrkvaillkgrssdsf.vialvsrglslslikldqlakglplllikkylladscpilrgkekldkiqead 368
+                      l+ ++ +     +q++  + +    ++ + f +ia + +  + ++       k++  + i   + a  cp l+ k+kl++ q   
+   XP_022325102.1 330 LHFKMDVtkdaTSQQIKNICRDFSKKDHSQFdCIAVCVLSHGTTGAVYGSDCKKVNIQEITSCFTASRCPTLANKPKLFFFQACQ 414
+                      4444443111123344444443445566666577778888888888888888999999**********************99765 PP
+
+>> XP_022330360.1  uncharacterized protein LOC111128796 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !   19.7   0.3   6.3e-07    0.0014     104     178 ..      42     118 ..      35     129 .. 0.94
+
+  Alignments for each domain:
+  == domain 1  score: 19.7 bits;  conditional E-value: 6.3e-07
+  CFLIP_conserved 104 MveisEeLdksDlesLiFLlkdlmpsgkkakdk..sFLdlVveLEkLnLVsPeklDlLekcLrnirRiDLkkkiqkY 178
+                      ++eis  Ld++Dl+ L FL     ++gk +++     Ldl + L  ++L+  +++  L  +L ++ R DL+k+ +k+
+   XP_022330360.1  42 LLEISDALDSDDLRRLKFLCEGKYGIGKAKLERitCPLDLFTTLREMGLLNKTNMITLQAMLWTVQRRDLQKRYIKF 118
+                      789***************************9999789***********************************99988 PP
+
+>> XP_022313380.1  caspase-3-like isoform X3 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   14.7   0.1   2.1e-05     0.047     254     375 ..      69     186 ..      54     275 .. 0.72
+
+  Alignments for each domain:
+  == domain 1  score: 14.7 bits;  conditional E-value: 2.1e-05
+  CFLIP_conserved 254 eskalgleliidllgletellresfl..glkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglplllikk 345
+                      + + +++ l   +  l++++ r+  +  +++++   d +l    ++ i + +a  l + +sd f++a  s g    ++++d   + lpl     
+   XP_022313380.1  69 GTDVDAERLEERFQDLGFDVRRYNDVssSKLLQLMNDAHLI---MSSIDILTAAQLDHSDSDCFGCAILSYGIEGRVYATD---GMLPLDVLIV 156
+                      44444444544444455555555444004444444444443...4445567888999***************988888766...5678888888 PP
+
+  CFLIP_conserved 346 ylladscpilrgkekldkiqeadvpeseqe 375
+                       + +d+cp+l+gk+kl+ +q+  +++ eq+
+   XP_022313380.1 157 PFKGDKCPMLVGKPKLFILQSCRCSNLEQS 186
+                      888999999999999999999888876665 PP
+
+>> XP_022313378.1  caspase-3-like isoform X1 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   14.6   0.1   2.3e-05     0.051     254     375 ..      81     198 ..      66     287 .. 0.73
+
+  Alignments for each domain:
+  == domain 1  score: 14.6 bits;  conditional E-value: 2.3e-05
+  CFLIP_conserved 254 eskalgleliidllgletellresfl..glkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglplllikk 345
+                      + + +++ l   +  l++++ r+  +  +++++   d +l    ++ i + +a  l + +sd f++a  s g    ++++d   + lpl     
+   XP_022313378.1  81 GTDVDAERLEERFQDLGFDVRRYNDVssSKLLQLMNDAHLI---MSSIDILTAAQLDHSDSDCFGCAILSYGIEGRVYATD---GMLPLDVLIV 168
+                      44444444544444455555555444004444444444443...4445567888999***************988888766...5678888888 PP
+
+  CFLIP_conserved 346 ylladscpilrgkekldkiqeadvpeseqe 375
+                       + +d+cp+l+gk+kl+ +q+  +++ eq+
+   XP_022313378.1 169 PFKGDKCPMLVGKPKLFILQSCRCSNLEQS 198
+                      888999999999999999999888876665 PP
+
+>> XP_022337029.1  caspase-7-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   14.3   0.5   2.9e-05     0.064     272     375 ..      41     154 ..      16     166 .. 0.75
+
+  Alignments for each domain:
+  == domain 1  score: 14.3 bits;  conditional E-value: 2.9e-05
+  CFLIP_conserved 272 ellresflglkeevkkdlklsvqti.........nqilrkvaillkgrssdsfvialvsrglslslikldql.akglplllikkylladscpil 355
+                      +  +++f  l+ +v+++ + + +++         +++l+k  +   g+ss +  +    + + +s  ++++  +  +    i +y+ +++c++l
+   XP_022337029.1  41 KYMKKTFKRLGFKVECHTDVKTHKMkrllehysnLEDLGKYNCFAFGISSHGIEVKERENKKFVSHHAVQMFdHDYFYTKDIIEYFRDRKCKAL 134
+                      444555555555555555555544422222222257888888888888888888888888888888888887355678889************* PP
+
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqe 375
+                      r k+k+++iq    pe+++ 
+   XP_022337029.1 135 RNKPKMFFIQACRIPEDKLH 154
+                      ****************9876 PP
+
+>> XP_022337030.1  caspase-7-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   14.3   0.5   2.9e-05     0.064     272     375 ..      41     154 ..      16     166 .. 0.75
+
+  Alignments for each domain:
+  == domain 1  score: 14.3 bits;  conditional E-value: 2.9e-05
+  CFLIP_conserved 272 ellresflglkeevkkdlklsvqti.........nqilrkvaillkgrssdsfvialvsrglslslikldql.akglplllikkylladscpil 355
+                      +  +++f  l+ +v+++ + + +++         +++l+k  +   g+ss +  +    + + +s  ++++  +  +    i +y+ +++c++l
+   XP_022337030.1  41 KYMKKTFKRLGFKVECHTDVKTHKMkrllehysnLEDLGKYNCFAFGISSHGIEVKERENKKFVSHHAVQMFdHDYFYTKDIIEYFRDRKCKAL 134
+                      444555555555555555555544422222222257888888888888888888888888888888888887355678889************* PP
+
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqe 375
+                      r k+k+++iq    pe+++ 
+   XP_022337030.1 135 RNKPKMFFIQACRIPEDKLH 154
+                      ****************9876 PP
+
+>> XP_022337032.1  caspase-7-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   14.3   0.5   2.9e-05     0.064     272     375 ..      41     154 ..      16     166 .. 0.75
+
+  Alignments for each domain:
+  == domain 1  score: 14.3 bits;  conditional E-value: 2.9e-05
+  CFLIP_conserved 272 ellresflglkeevkkdlklsvqti.........nqilrkvaillkgrssdsfvialvsrglslslikldql.akglplllikkylladscpil 355
+                      +  +++f  l+ +v+++ + + +++         +++l+k  +   g+ss +  +    + + +s  ++++  +  +    i +y+ +++c++l
+   XP_022337032.1  41 KYMKKTFKRLGFKVECHTDVKTHKMkrllehysnLEDLGKYNCFAFGISSHGIEVKERENKKFVSHHAVQMFdHDYFYTKDIIEYFRDRKCKAL 134
+                      444555555555555555555544422222222257888888888888888888888888888888888887355678889************* PP
+
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqe 375
+                      r k+k+++iq    pe+++ 
+   XP_022337032.1 135 RNKPKMFFIQACRIPEDKLH 154
+                      ****************9876 PP
+
+>> XP_022313588.1  caspase-3-like isoform X3 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   13.4   0.0   5.2e-05      0.12     258     437 ..      73     254 ..      39     272 .. 0.58
+
+  Alignments for each domain:
+  == domain 1  score: 13.4 bits;  conditional E-value: 5.2e-05
+  CFLIP_conserved 258 lgleliidllgletellresfl.glkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglplllikkyll.a 349
+                      +++ l   +  l++++ r+  + + k+ ++ +++ ++ +   + +++ail+ g++   +  +     l l++  +++ + ++p+l +k++l+  
+   XP_022313588.1  73 DAERLEERFQDLGFDVRRYNDVdSSKLLQLMNEAAQLDHSDSDCFGCAILSYGIEGRVYATDG---MLPLDVLIVPFKGDKCPMLVGKPKLFiL 163
+                      444444445555555555443313445555666666666666666666666665554443332...2556666666666666666666665414 PP
+
+  CFLIP_conserved 350 dscpilrgkekldkiqeadvpeseqesss.....lsevdadkvlssekvaelkllqsssleslyltallealnlvkkrkqssllliltallrk 437
+                      +sc ++  ++   +  ++    se ++ s     +++v+ad       v   +   ++   s + +al+ +   ++  +++ ll +lt ++r 
+   XP_022313588.1 164 QSCRCPNLEQSVEDTVSYKSFLSEDSERSfsgmrKIPVEADFLFFYSTVPGFYSWRNHQEGSWFIQALCIVI--ENYGSKMELLHMLTQVNRM 254
+                      566666666666666666542222222211122255666666666666666666666666666666666555..5555566666666666655 PP
+
+>> XP_022313587.1  caspase-3-like isoform X2 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   13.3   0.0   5.6e-05      0.13     258     437 ..      85     266 ..      48     284 .. 0.57
+
+  Alignments for each domain:
+  == domain 1  score: 13.3 bits;  conditional E-value: 5.6e-05
+  CFLIP_conserved 258 lgleliidllgletellresfl.glkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglplllikkyll.a 349
+                      +++ l   +  l++++ r+  + + k+ ++ +++ ++ +   + +++ail+ g++   +  +     l l++  +++ + ++p+l +k++l+  
+   XP_022313587.1  85 DAERLEERFQDLGFDVRRYNDVdSSKLLQLMNEAAQLDHSDSDCFGCAILSYGIEGRVYATDG---MLPLDVLIVPFKGDKCPMLVGKPKLFiL 175
+                      444444444444555555443313445555566666666666666666666555544443332...2556666666666666666666665414 PP
+
+  CFLIP_conserved 350 dscpilrgkekldkiqeadvpeseqesss.....lsevdadkvlssekvaelkllqsssleslyltallealnlvkkrkqssllliltallrk 437
+                      +sc ++  ++   +  ++    se ++ s     +++v+ad       v   +   ++   s + +al+ +   ++  +++ ll +lt ++r 
+   XP_022313587.1 176 QSCRCPNLEQSVEDTVSYKSFLSEDSERSfsgmrKIPVEADFLFFYSTVPGFYSWRNHQEGSWFIQALCIVI--ENYGSKMELLHMLTQVNRM 266
+                      566666666666666665542222222111122255666666666666666666666666666666666555..5555556666666666555 PP
+
+>> XP_022313586.1  caspase-3-like isoform X1 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   13.2   0.0     6e-05      0.13     258     437 ..      91     272 ..      55     290 .. 0.57
+
+  Alignments for each domain:
+  == domain 1  score: 13.2 bits;  conditional E-value: 6e-05
+  CFLIP_conserved 258 lgleliidllgletellresfl.glkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglplllikkyll.a 349
+                      +++ l   +  l++++ r+  + + k+ ++ +++ ++ +   + +++ail+ g++   +  +     l l++  +++ + ++p+l +k++l+  
+   XP_022313586.1  91 DAERLEERFQDLGFDVRRYNDVdSSKLLQLMNEAAQLDHSDSDCFGCAILSYGIEGRVYATDG---MLPLDVLIVPFKGDKCPMLVGKPKLFiL 181
+                      444444444444555555443313445555566666666666666666666555544443332...2556666666666666666666665414 PP
+
+  CFLIP_conserved 350 dscpilrgkekldkiqeadvpeseqesss.....lsevdadkvlssekvaelkllqsssleslyltallealnlvkkrkqssllliltallrk 437
+                      +sc ++  ++   +  ++    se ++ s     +++v+ad       v   +   ++   s + +al+ +   ++  +++ ll +lt ++r 
+   XP_022313586.1 182 QSCRCPNLEQSVEDTVSYKSFLSEDSERSfsgmrKIPVEADFLFFYSTVPGFYSWRNHQEGSWFIQALCIVI--ENYGSKMELLHMLTQVNRM 272
+                      566666666666666665542222222111122255666666666666666666666666666666666555..5555556666666666555 PP
+
+>> XP_022341800.1  caspase-6-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   12.8   0.2     8e-05      0.18     258     370 ..      68     180 ..      49     200 .. 0.75
+
+  Alignments for each domain:
+  == domain 1  score: 12.8 bits;  conditional E-value: 8e-05
+  CFLIP_conserved 258 lgleliidllgletellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldq..lakglplllikkylla 349
+                      + +   + +lg++++ll++  l+ +++ k d+  +      + ++++i   gr+  +f  +++    + s  ++ +  +++ +    i  ++ +
+   XP_022341800.1  68 NSMSKLFSSLGFDVKLLINLTLE-QLSLKLDEIQDGISNDCDCFVCVISTHGREVPTFYQQTDI-KVAYSKTEHYFlnTSGEVRTRVIMDMFDD 159
+                      55566678889999988874443.333444444443444447888999999********99984.4555555555511667789999999999* PP
+
+  CFLIP_conserved 350 dscpilrgkekldkiqeadvp 370
+                      + c +lrgk++l++iq   ++
+   XP_022341800.1 160 RHCRALRGKPRLFFIQACRGN 180
+                      ****************87665 PP
+
+>> XP_022341801.1  caspase-6-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   12.8   0.2     8e-05      0.18     258     370 ..      68     180 ..      49     200 .. 0.75
+
+  Alignments for each domain:
+  == domain 1  score: 12.8 bits;  conditional E-value: 8e-05
+  CFLIP_conserved 258 lgleliidllgletellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldq..lakglplllikkylla 349
+                      + +   + +lg++++ll++  l+ +++ k d+  +      + ++++i   gr+  +f  +++    + s  ++ +  +++ +    i  ++ +
+   XP_022341801.1  68 NSMSKLFSSLGFDVKLLINLTLE-QLSLKLDEIQDGISNDCDCFVCVISTHGREVPTFYQQTDI-KVAYSKTEHYFlnTSGEVRTRVIMDMFDD 159
+                      55566678889999988874443.333444444443444447888999999********99984.4555555555511667789999999999* PP
+
+  CFLIP_conserved 350 dscpilrgkekldkiqeadvp 370
+                      + c +lrgk++l++iq   ++
+   XP_022341801.1 160 RHCRALRGKPRLFFIQACRGN 180
+                      ****************87665 PP
+
+>> XP_022294672.1  uncharacterized protein LOC111104823 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   12.8   0.2   7.9e-05      0.18     263     375 ..      42     152 ..      20     164 .. 0.75
+   2 ?   -2.5   0.2       3.4   7.6e+03     356     411 ..     274     329 ..     253     345 .. 0.61
+
+  Alignments for each domain:
+  == domain 1  score: 12.8 bits;  conditional E-value: 7.9e-05
+  CFLIP_conserved 263 iidllgletellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglp.lllikkylladscpil 355
+                      + ++ +l++++ +++ ++ +   k  ++       ++l+k  +   g+ss +  +    + + +s  ++++   g      i +y+ +++c++l
+   XP_022294672.1  42 KETFKRLGFKVEFHTDVNTGDMKKLLEQY---STHKDLGKYNCFAFGISSHGIEVKKKENKKFVSHHAVQMFDHGYMyTKDIIEYFRDRKCKAL 132
+                      44455555555555555554433333333...3346888888999999999999999999999999999999777551667************* PP
+
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqe 375
+                      r k+k+++iq    pe+++ 
+   XP_022294672.1 133 RNKPKMFFIQACRIPEDKTT 152
+                      ****************9986 PP
+
+  == domain 2  score: -2.5 bits;  conditional E-value: 3.4
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqessslsevdadkvlssekvaelkllqsssleslylta 411
+                      r+ e+ + +++  v+    e+   +  +  +  +   ++e ++lqs   +s   t+
+   XP_022294672.1 274 RESEDKGSVEKGFVSSTDDEDALAIQNKENDAQIAASKSEENDLQSAANQSQVQTS 329
+                      55555555555555666666666666666666666666666666666666555544 PP
+
+>> XP_022294673.1  uncharacterized protein LOC111104823 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   12.8   0.2   7.9e-05      0.18     263     375 ..      42     152 ..      20     164 .. 0.75
+   2 ?   -2.5   0.2       3.4   7.6e+03     356     411 ..     274     329 ..     253     345 .. 0.61
+
+  Alignments for each domain:
+  == domain 1  score: 12.8 bits;  conditional E-value: 7.9e-05
+  CFLIP_conserved 263 iidllgletellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglp.lllikkylladscpil 355
+                      + ++ +l++++ +++ ++ +   k  ++       ++l+k  +   g+ss +  +    + + +s  ++++   g      i +y+ +++c++l
+   XP_022294673.1  42 KETFKRLGFKVEFHTDVNTGDMKKLLEQY---STHKDLGKYNCFAFGISSHGIEVKKKENKKFVSHHAVQMFDHGYMyTKDIIEYFRDRKCKAL 132
+                      44455555555555555554433333333...3346888888999999999999999999999999999999777551667************* PP
+
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqe 375
+                      r k+k+++iq    pe+++ 
+   XP_022294673.1 133 RNKPKMFFIQACRIPEDKTT 152
+                      ****************9986 PP
+
+  == domain 2  score: -2.5 bits;  conditional E-value: 3.4
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqessslsevdadkvlssekvaelkllqsssleslylta 411
+                      r+ e+ + +++  v+    e+   +  +  +  +   ++e ++lqs   +s   t+
+   XP_022294673.1 274 RESEDKGSVEKGFVSSTDDEDALAIQNKENDAQIAASKSEENDLQSAANQSQVQTS 329
+                      55555555555555666666666666666666666666666666666666555544 PP
+
+>> XP_022337024.1  uncharacterized protein LOC111133185 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   12.8   0.2   7.9e-05      0.18     263     375 ..      42     152 ..      20     164 .. 0.75
+   2 ?   -2.5   0.2       3.4   7.6e+03     356     411 ..     274     329 ..     253     345 .. 0.61
+
+  Alignments for each domain:
+  == domain 1  score: 12.8 bits;  conditional E-value: 7.9e-05
+  CFLIP_conserved 263 iidllgletellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglp.lllikkylladscpil 355
+                      + ++ +l++++ +++ ++ +   k  ++       ++l+k  +   g+ss +  +    + + +s  ++++   g      i +y+ +++c++l
+   XP_022337024.1  42 KETFKRLGFKVEFHTDVNTGDMKKLLEQY---STHKDLGKYNCFAFGISSHGIEVKKKENKKFVSHHAVQMFDHGYMyTKDIIEYFRDRKCKAL 132
+                      44455555555555555554433333333...3346888888999999999999999999999999999999777551667************* PP
+
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqe 375
+                      r k+k+++iq    pe+++ 
+   XP_022337024.1 133 RNKPKMFFIQACRIPEDKTT 152
+                      ****************9986 PP
+
+  == domain 2  score: -2.5 bits;  conditional E-value: 3.4
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqessslsevdadkvlssekvaelkllqsssleslylta 411
+                      r+ e+ + +++  v+    e+   +  +  +  +   ++e ++lqs   +s   t+
+   XP_022337024.1 274 RESEDKGSVEKGFVSSTDDEDALAIQNKENDAQIAASKSEENDLQSAANQSQVQTS 329
+                      55555555555555666666666666666666666666666666666666555544 PP
+
+>> XP_022337025.1  uncharacterized protein LOC111133185 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   12.8   0.2   7.9e-05      0.18     263     375 ..      42     152 ..      20     164 .. 0.75
+   2 ?   -2.5   0.2       3.4   7.6e+03     356     411 ..     274     329 ..     253     345 .. 0.61
+
+  Alignments for each domain:
+  == domain 1  score: 12.8 bits;  conditional E-value: 7.9e-05
+  CFLIP_conserved 263 iidllgletellresflglkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglp.lllikkylladscpil 355
+                      + ++ +l++++ +++ ++ +   k  ++       ++l+k  +   g+ss +  +    + + +s  ++++   g      i +y+ +++c++l
+   XP_022337025.1  42 KETFKRLGFKVEFHTDVNTGDMKKLLEQY---STHKDLGKYNCFAFGISSHGIEVKKKENKKFVSHHAVQMFDHGYMyTKDIIEYFRDRKCKAL 132
+                      44455555555555555554433333333...3346888888999999999999999999999999999999777551667************* PP
+
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqe 375
+                      r k+k+++iq    pe+++ 
+   XP_022337025.1 133 RNKPKMFFIQACRIPEDKTT 152
+                      ****************9986 PP
+
+  == domain 2  score: -2.5 bits;  conditional E-value: 3.4
+  CFLIP_conserved 356 rgkekldkiqeadvpeseqessslsevdadkvlssekvaelkllqsssleslylta 411
+                      r+ e+ + +++  v+    e+   +  +  +  +   ++e ++lqs   +s   t+
+   XP_022337025.1 274 RESEDKGSVEKGFVSSTDDEDALAIQNKENDAQIAASKSEENDLQSAANQSQVQTS 329
+                      55555555555555666666666666666666666666666666666666555544 PP
+
+>> XP_022294613.1  caspase-6-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   10.8   0.9   0.00033      0.73     101     175 ..       4      83 ..       3     121 .. 0.91
+   2 ?    1.4   0.1      0.23   5.1e+02     306     370 ..     324     386 ..     300     401 .. 0.74
+
+  Alignments for each domain:
+  == domain 1  score: 10.8 bits;  conditional E-value: 0.00033
+  CFLIP_conserved 101 RvLMveisEeLdksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPe.....klDlLekcLrnirRiDLkkki 175
+                      R  ++ei  e  k+Dl+   +L kd+     ++k  s Ldl  +LEk   + +      ++ +L +c+  +rR  L++k+
+   XP_022294613.1   4 RNVLIEIHNEMGKDDLKMFSYLTKDYISNRERKKIDSALDLFAALEKRSVITCVegkefRVGFLIDCFTLMRRRNLVRKL 83 
+                      566899*********************999999999****************964444479************9999997 PP
+
+  == domain 2  score: 1.4 bits;  conditional E-value: 0.23
+  CFLIP_conserved 306 llkgrssdsfvialvsrglslslikldqlakglplllikkylladscpilrgkekldkiqeadvp 370
+                         +++   f++ + s g    + +    ++ +p       + adscp l+gk+k + +q   + 
+   XP_022294613.1 324 TRDHKDHGAFIVCTLSHGDHTGVSG--ACGQTIPIDSMTSLFRADSCPTLAGKPKIFIYQACQGQ 386
+                      4567777788888888776555443..34667788888899999*************99987665 PP
+
+>> XP_022313590.1  caspase-3-like isoform X2 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   11.7   0.0   0.00018       0.4     258     439 ..      73     256 ..      52     273 .. 0.57
+
+  Alignments for each domain:
+  == domain 1  score: 11.7 bits;  conditional E-value: 0.00018
+  CFLIP_conserved 258 lgleliidllgletellresfl.glkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglplllikkyll.a 349
+                      +++ l   +  l++++ r+  + + k+ ++ + + ++ +   + +++ail+ g++   +  +     l l++  +++ + ++p+l +k++l+  
+   XP_022313590.1  73 DAERLEERFQDLGFDVRRYNDVsSSKLLQLMNDAAQLDHSDSDCFGCAILSYGIEGRVYATDG---MLPLDVLIVPFKGDKCPMLVGKPKLFiL 163
+                      444444444444444444443313445555666666666666666666666666554443332...2566777777777777777777665424 PP
+
+  CFLIP_conserved 350 dscpilrgkekldkiqeadvpeseqesss.....lsevdadkvlssekvaelkllqsssleslyltallealnlvkkrkqssllliltallrkn 438
+                      +sc +   ++   +  ++    se ++ s     +++v+ad       v   +   ++   s + +al+ +   ++  +++ ll +lt ++r +
+   XP_022313590.1 164 QSCRCSNLEQSVEDTVSYKSFLSEDSERSfsgmrKIPVEADFLFFYSTVPGFYSWRNHQEGSWFIQALCIVI--ENYGSKMELLHMLTQVNRMV 255
+                      667777777766666666543222222211122256666666666666666666666666666666666665..55566666666666666665 PP
+
+  CFLIP_conserved 439 s 439
+                       
+   XP_022313590.1 256 T 256
+                      5 PP
+
+>> XP_022313379.1  caspase-3-like isoform X2 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   11.5   0.0    0.0002      0.44     258     439 ..      85     268 ..      63     285 .. 0.57
+
+  Alignments for each domain:
+  == domain 1  score: 11.5 bits;  conditional E-value: 0.0002
+  CFLIP_conserved 258 lgleliidllgletellresfl.glkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglplllikkyll.a 349
+                      +++ l   +  l++++ r+  + + k+ ++ + + ++ +   + +++ail+ g++   +  +     l l++  +++ + ++p+l +k++l+  
+   XP_022313379.1  85 DAERLEERFQDLGFDVRRYNDVsSSKLLQLMNDAAQLDHSDSDCFGCAILSYGIEGRVYATDG---MLPLDVLIVPFKGDKCPMLVGKPKLFiL 175
+                      444444444444444444443313345555566666666666666666666666554443332...2566677777777777777777665424 PP
+
+  CFLIP_conserved 350 dscpilrgkekldkiqeadvpeseqesss.....lsevdadkvlssekvaelkllqsssleslyltallealnlvkkrkqssllliltallrkn 438
+                      +sc +   ++   +  ++    se ++ s     +++v+ad       v   +   ++   s + +al+ +   ++  +++ ll +lt ++r +
+   XP_022313379.1 176 QSCRCSNLEQSVEDTVSYKSFLSEDSERSfsgmrKIPVEADFLFFYSTVPGFYSWRNHQEGSWFIQALCIVI--ENYGSKMELLHMLTQVNRMV 267
+                      667777777666666666543222222211122256666666666666666666666666666666666665..55566666666666666655 PP
+
+  CFLIP_conserved 439 s 439
+                       
+   XP_022313379.1 268 T 268
+                      5 PP
+
+>> XP_022313589.1  caspase-3-like isoform X1 [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?   11.5   0.0    0.0002      0.44     258     439 ..      85     268 ..      63     285 .. 0.57
+
+  Alignments for each domain:
+  == domain 1  score: 11.5 bits;  conditional E-value: 0.0002
+  CFLIP_conserved 258 lgleliidllgletellresfl.glkeevkkdlklsvqtinqilrkvaillkgrssdsfvialvsrglslslikldqlakglplllikkyll.a 349
+                      +++ l   +  l++++ r+  + + k+ ++ + + ++ +   + +++ail+ g++   +  +     l l++  +++ + ++p+l +k++l+  
+   XP_022313589.1  85 DAERLEERFQDLGFDVRRYNDVsSSKLLQLMNDAAQLDHSDSDCFGCAILSYGIEGRVYATDG---MLPLDVLIVPFKGDKCPMLVGKPKLFiL 175
+                      444444444444444444443313345555566666666666666666666666554443332...2566677777777777777777665424 PP
+
+  CFLIP_conserved 350 dscpilrgkekldkiqeadvpeseqesss.....lsevdadkvlssekvaelkllqsssleslyltallealnlvkkrkqssllliltallrkn 438
+                      +sc +   ++   +  ++    se ++ s     +++v+ad       v   +   ++   s + +al+ +   ++  +++ ll +lt ++r +
+   XP_022313589.1 176 QSCRCSNLEQSVEDTVSYKSFLSEDSERSfsgmrKIPVEADFLFFYSTVPGFYSWRNHQEGSWFIQALCIVI--ENYGSKMELLHMLTQVNRMV 267
+                      667777777666666666543222222211122256666666666666666666666666666666666665..55566666666666666655 PP
+
+  CFLIP_conserved 439 s 439
+                       
+   XP_022313589.1 268 T 268
+                      5 PP
+
+>> XP_022294614.1  caspase-8-like [Crassostrea virginica]
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 ?    6.0   0.5    0.0089        20     113     175 ..       3      70 ..       1      84 [. 0.90
+   2 ?   -2.2   0.0       2.9   6.4e+03      92     125 ..      81     114 ..      72     124 .. 0.77
+   3 ?    2.1   0.1      0.14   3.1e+02     306     370 ..     309     371 ..     283     387 .. 0.75
+
+  Alignments for each domain:
+  == domain 1  score: 6.0 bits;  conditional E-value: 0.0089
+  CFLIP_conserved 113 ksDlesLiFLlkdlmpsgkkakdksFLdlVveLEkLnLVsPe.....klDlLekcLrnirRiDLkkki 175
+                      k+Dl+   +L kd+     ++k  s Ldl  +LEk   + +      ++ +L +c+  ++R  L++k+
+   XP_022294614.1   3 KDDLKMVSYLTKDYISNRERKKIDSALDLFAALEKKSVITCVegkefRVGFLIECFTLMSRMNLVRKL 70 
+                      799************999999999****************96444447****************9997 PP
+
+  == domain 2  score: -2.2 bits;  conditional E-value: 2.9
+  CFLIP_conserved  92 rnssllsdYRvLMveisEeLdksDlesLiFLlkd 125
+                        +s+l + R+L+  ++Ee   s+l +L   l++
+   XP_022294614.1  81 TMESVLNEKRKLLFTVGEETGGSELNALKTQLSS 114
+                      5678889999*********999999999655555 PP
+
+  == domain 3  score: 2.1 bits;  conditional E-value: 0.14
+  CFLIP_conserved 306 llkgrssdsfvialvsrglslslikldqlakglplllikkylladscpilrgkekldkiqeadvp 370
+                         +++   f++ + s g    + +    ++ +p  l    + adscp l+gk+k + +q   + 
+   XP_022294614.1 309 TRDHKDHGAFIVCTLSHGDHTGVSG--ACGQTIPIDLMTSLFRADSCPTLAGKPKIFIYQACQGQ 371
+                      5668888888888888886555544..35677899999999999*************99987665 PP
+
+
+
+Internal pipeline statistics summary:
+-------------------------------------
+Query model(s):                              1  (462 nodes)
+Target sequences:                        60213  (39280004 residues searched)
+Passed MSV filter:                      5817  (0.096607); expected 1204.3 (0.02)
+Passed bias filter:                     1112  (0.0184678); expected 1204.3 (0.02)
+Passed Vit filter:                       164  (0.00272366); expected 60.2 (0.001)
+Passed Fwd filter:                        44  (0.000730739); expected 0.6 (1e-05)
+Initial search space (Z):              60213  [actual number of targets]
+Domain search space  (domZ):              27  [number of targets reported over threshold]
+# CPU time: 1.53u 0.06s 00:00:01.59 Elapsed: 00:00:01.59
+# Mc/sec: 11413.44
+//
+[ok]
