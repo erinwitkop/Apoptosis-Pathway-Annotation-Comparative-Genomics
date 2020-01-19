@@ -262,15 +262,15 @@ C_vir_rtracklayer_apop_product <- C_vir_rtracklayer[grepl(paste(Apoptosis_names_
                         C_vir_rtracklayer$product, ignore.case = TRUE),]
 
 # Terms to remove
-# remove complement C1q proteins, dual specificity protein phosphatase 1B-like, remove kunitz-type, and other kDA protein names
+# remove complement C1q proteins, dual specificity protein phosphatase 1B-like, remove kunitz-type, and NOT other kDA protein names so I can keep all heat shock proteins
 C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product[!grepl("complement C1q", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) & 
-                                 !grepl("activator of 90 kDa", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) & # for the heat shock proteins
-                          !grepl("60 kDA", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) & # for the heat shock proteins
-                            !grepl("10 kDA", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) & # for the heat shock proteins
   !grepl("dual specificity protein phosphatase 1B-like", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
   !grepl("kunitz-type", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("mannosyl", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
-    !grepl("S-acyl", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE),]
+    !grepl("S-acyl", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
+    !grepl("dynamin-like",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
+    !grepl("activator of 90 kDa", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
+    !grepl("zinc finger protein", C_vir_rtracklayer_apop_product$product),]
 
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet., then checked by "Supplementary Table 2. C. virginica apoptosis.xlsx" table that I have
@@ -317,7 +317,7 @@ nrow(C_vir_rtracklayer_apop_product_final_product_joined) #1091 rows PERFECT
 
 # Recode members of the RHO superfamily to all be included together and IAP repeat containing and putative inhibitor of apoptosis to be together in IAP family
 C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- recode(C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query, 
-  "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho "= "Rho superfamily", "ras-"="Rho superfamily", "RAC" = "Rho superfamily",
+  "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho"= "Rho superfamily", "ras-"="Rho superfamily", "RAC" = "Rho superfamily",
     "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis")
 head(C_vir_rtracklayer_apop_product_final_product_joined)
 
@@ -627,12 +627,8 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
   nrow(C_gig_rtracklayer_apop_product) #797
   
   # Terms to remove
-  # remove complement C1q proteins, dual specificity protein phosphatase 1B-like, remove kunitz-type, and other kDA protein names
+  # remove complement C1q proteins, dual specificity protein phosphatase 1B-like, remove kunitz-type, and other NOT kDA protein names so I can keep heat shock proteins in both
   C_gig_rtracklayer_apop_product_final <- C_gig_rtracklayer_apop_product[!grepl("complement C1q", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-                                                                           !grepl("activator of 90 kDa", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) & # for the heat shock proteins
-   !grepl("60 kDA", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) & # for the heat shock proteins
-   !grepl("10 kDA", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-     !grepl("75 kDA", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) & # for the heat shock proteins
    # !grepl("dual specificity protein phosphatase 1B-like", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) & not present in list
    !grepl("kunitz-type", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
    !grepl("mannosyl", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
@@ -640,7 +636,9 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
      !grepl("cytochrome c oxidase", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
    !grepl("cytochrome c-type heme lyase", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
      !grepl("cytochrome c1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-     !grepl("interferon alpha-inducible protein 27-like protein 2",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
+     !grepl("interferon alpha-inducible protein 27-like protein 2",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+    !grepl("dynamin-like",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+     !grepl("activator of 90 kDa", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
   nrow(C_gig_rtracklayer_apop_product_final) #686
 
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
@@ -689,7 +687,7 @@ nrow(C_gig_rtracklayer_apop_product_final_product_joined) #686 rows same as befo
 
 # Recode members of the RHO superfamily to all be included together and IAP repeat containing and putative inhibitor of apoptosis to be together in IAP family
 C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- recode(C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query, 
-                                                                                    "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho "= "Rho superfamily", "ras-"="Rho superfamily", "RAC" = "Rho superfamily",
+                                                                                    "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho"= "Rho superfamily", "ras-"="Rho superfamily", "RAC" = "Rho superfamily",
                                                                                     "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis","Heat shock protein"="heat shock protein")
 
 
@@ -760,6 +758,9 @@ combined_gene_name_yes_no_table <- full_join(C_vir_rtracklayer_apop_product_fina
 #remove duplicate gene names
 combined_gene_name_yes_no_table_unique <- combined_gene_name_yes_no_table[!duplicated(combined_gene_name_yes_no_table$gene_name),]
 
+#join on the pathway descriptions for the molecules 
+# load in table with pathway descriptions for each 
+
 # Still a few discrepancies in the gene names, namely when they are named in C. virginica "* homolog"
   # Need to mention in methods that I rmemoved "like" from the end of names
   # C_ virginica: lipopolysaccharide-induced tumor necrosis factor-alpha factor homolog, C_gig: lipopolysaccharide-induced tumor necrosis factor-alpha
@@ -768,6 +769,10 @@ combined_gene_name_yes_no_table_unique <- combined_gene_name_yes_no_table[!dupli
 
 # Genes in C vir and not in C gig (all the C_gig_gene_LOC NA's)
 c_vir_not_c_gig <- combined_gene_name_yes_no_table_unique %>% filter(is.na(C_gig_gene_LOC))
+# Genes in C gig and not in C vir (all the C_vir_gene_LOC NA's)
+c_gig_not_c_vir <- combined_gene_name_yes_no_table_unique %>% filter(is.na(C_vir_gene_LOC))
+# shared in both 
+shared_apoptosis_gene_names <- na.omit(combined_gene_name_yes_no_table_unique)
 
 ### 2. Make combined table with gene family statistics
 # investigate differences in apoptosis_names_df and apoptosis_names_df_CG 
@@ -803,11 +808,11 @@ gene_family_statistics_joined_plot_long <- gather(gene_family_statistics_joined_
 # Subset plot for those that are actually real gene families of interest (some that I'm calling gene famlies right now are just gene names)
 gene_family_statistics_joined_plot_long_gene_family_members <- gene_family_statistics_joined_plot_long %>% filter(gene_family_stat == "gene_family_members")
 
-# subset into two plots for those that are 0 -10 and then 10-100 
-gene_family_statistics_joined_plot_long_gene_family_members_0_10 <- 
+# subset into two plots for those that are greater than 2
+gene_family_statistics_joined_plot_long_gene_family_members_greater2 <- gene_family_statistics_joined_plot_long_gene_family_members %>% filter(Count > 2) 
   
   
-ggplot(gene_family_statistics_joined_plot_long_gene_family_members, aes(x=apoptosis_names_query, y =Count, fill = Species)) + 
+ggplot(gene_family_statistics_joined_plot_long_gene_family_members_greater2, aes(x=apoptosis_names_query, y =Count, fill = Species)) + 
   geom_col(position = "dodge") + theme(axis.text.x = element_text(hjust=0.5,angle = 45)) + coord_flip()
 
 
