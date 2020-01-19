@@ -5,6 +5,8 @@
 library(tidyverse)
 library(rtracklayer)
 library(sqldf)
+library(bbplot)
+library(viridis) #for colors
 
 #### Import Genome Annotation and add GO terms ####
 
@@ -318,7 +320,8 @@ nrow(C_vir_rtracklayer_apop_product_final_product_joined) #1091 rows PERFECT
 # Recode members of the RHO superfamily to all be included together and IAP repeat containing and putative inhibitor of apoptosis to be together in IAP family
 C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- recode(C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query, 
   "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho"= "Rho superfamily", "ras-"="Rho superfamily", "RAC" = "Rho superfamily",
-    "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis")
+    "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis", "protein BTG1" = "B-cell translocation gene 1",
+   "FAS-associated death domain protein" = "fas-associated death domain protein")
 head(C_vir_rtracklayer_apop_product_final_product_joined)
 
 ### How many transcripts in each gene?
@@ -688,7 +691,8 @@ nrow(C_gig_rtracklayer_apop_product_final_product_joined) #686 rows same as befo
 # Recode members of the RHO superfamily to all be included together and IAP repeat containing and putative inhibitor of apoptosis to be together in IAP family
 C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- recode(C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query, 
                                                                                     "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho"= "Rho superfamily", "ras-"="Rho superfamily", "RAC" = "Rho superfamily",
-                                                                                    "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis","Heat shock protein"="heat shock protein")
+                                                                                    "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis","Heat shock protein"="heat shock protein",
+                                                                                    "FAS-associated death domain protein" = "fas-associated death domain protein")
 
 
 head(C_gig_rtracklayer_apop_product_final_product_joined)
@@ -800,6 +804,13 @@ C_gig_genes_transcripts_per_gene_family_transcripts_per_gene_plot  <- C_gig_gene
 C_vir_genes_transcripts_per_gene_family_transcripts_per_gene_plot$Species <- "Crassostrea virginica"
 C_gig_genes_transcripts_per_gene_family_transcripts_per_gene_plot$Species <- "Crassostrea gigas"
 
+# find non shared families, format ab$a[!(ab$a %in% ab$b)]
+C_vir_genes_transcripts_per_gene_family_transcripts_per_gene_plot$apoptosis_names_query[!(C_vir_genes_transcripts_per_gene_family_transcripts_per_gene_plot$apoptosis_names_query %in% C_gig_genes_transcripts_per_gene_family_transcripts_per_gene_plot$apoptosis_names_query)]
+# "anti-apoptotic protein NR13" "lymphotoxin-alpha"     
+C_gig_genes_transcripts_per_gene_family_transcripts_per_gene_plot$apoptosis_names_query[!(C_gig_genes_transcripts_per_gene_family_transcripts_per_gene_plot$apoptosis_names_query %in% C_vir_genes_transcripts_per_gene_family_transcripts_per_gene_plot$apoptosis_names_query)]
+# cellular tumor antigen p53,    diablo homolog, mitochondrial, high mobility group box 1 
+
+# created joined table
 gene_family_statistics_joined_plot <- full_join(C_vir_genes_transcripts_per_gene_family_transcripts_per_gene_plot, C_gig_genes_transcripts_per_gene_family_transcripts_per_gene_plot)
 
 # In order to graph shift table into long format rather than wide
@@ -808,28 +819,54 @@ gene_family_statistics_joined_plot_long <- gather(gene_family_statistics_joined_
 # Subset plot for those that are actually real gene families of interest (some that I'm calling gene famlies right now are just gene names)
 gene_family_statistics_joined_plot_long_gene_family_members <- gene_family_statistics_joined_plot_long %>% filter(gene_family_stat == "gene_family_members")
 
-# subset into two plots for those that are greater than 2
-gene_family_statistics_joined_plot_long_gene_family_members_greater2 <- gene_family_statistics_joined_plot_long_gene_family_members %>% filter(Count > 2) 
+# remove non-shared gene families
+gene_family_statistics_joined_plot_long_gene_family_members_shared <- gene_family_statistics_joined_plot_long_gene_family_members %>% filter(apoptosis_names_query !="anti-apoptotic protein NR13") %>%
+                                                                                                                                      filter(apoptosis_names_query !="lymphotoxin-alpha") %>%
+                                                                                                                                       filter(apoptosis_names_query != "protein BTG1") %>%
+    filter(apoptosis_names_query != "cellular tumor antigen p53") %>% filter(apoptosis_names_query != "diablo homolog, mitochondrial") %>% filter(apoptosis_names_query != "high mobility group box 1")
   
+## bar graph version
+ggplot(gene_family_statistics_joined_plot_long_gene_family_members_shared, aes(x=apoptosis_names_query, y =Count, fill = Species)) + 
+geom_col(position = "dodge") + theme(axis.text.x = element_text(hjust=0.5,angle = 45))  + bbc_style()
   
-ggplot(gene_family_statistics_joined_plot_long_gene_family_members_greater2, aes(x=apoptosis_names_query, y =Count, fill = Species)) + 
-  geom_col(position = "dodge") + theme(axis.text.x = element_text(hjust=0.5,angle = 45)) + coord_flip()
+## heatmap version
+# cut the continues Count variable in discrete bins
+gene_family_statistics_joined_plot_long_gene_family_members_shared_binned <- gene_family_statistics_joined_plot_long_gene_family_members_shared %>%
+mutate(countfactor = cut(Count, breaks=c(0,5,10,20,40,60,80,100,120,140, max(Count,na.rm=TRUE)),   # create a new variable from count
+        labels=c("0-5","5-10","10-20","20-40","40-60","60-80","80-100",
+        "100-120","120-140",">140"))) %>%
+mutate(countfactor=factor(as.character(countfactor),levels=rev(levels(countfactor)))) # change level order
 
+# helpful link for pretty ggplot heatmaps: https://www.royfrancis.com/a-guide-to-elegant-tiled-heatmaps-in-r-2019/
+# get viridis color pallette of hexcodes
+viridis(10, alpha=1)
 
+# plot heatmap of all the gene families
+gene_family_cvir_cgig_heatmap <- ggplot(gene_family_statistics_joined_plot_long_gene_family_members_shared_binned, aes(x=Species, y =apoptosis_names_query, fill = countfactor)) +
+                    geom_tile(colour="white",size=0.25) +    #add border white colour of line thickness 0.25
+                    scale_y_discrete(expand=c(0,0)) + #remove extra space
+                    scale_fill_manual(values=c("#440154FF", "#482878FF", "#3E4A89FF", "#31688EFF", "#26828EFF", "#1F9E89FF", "#35B779FF", "#6DCD59FF",
+                           "#B4DE2CFF", "#FDE725FF"),na.value = "grey90")+
+                    guides(fill=guide_legend(title="Number of Genes in Gene Family"))+
+                    labs(x="",y="",title="Gene Family Members in C. gigas and C. virginica")+
+                    theme_grey(base_size=9) 
+                    
+# subset heatmap for the more interesting gene families I care about
 
-+ xlab("Cell Type") +
-  ylab("Percent Hemocytes") +
-  ggtitle("Percent Caspase 3/7 Active Hemocytes") +
-  theme(panel.background=element_blank(),
-        panel.grid=element_blank(),panel.border=element_rect(fill=NA), 
-        text=element_text(family="serif",size=16), 
-        axis.title.y=element_text(family="serif",size=16),
-        axis.title.x=element_text(family="serif",size=16),
-        legend.key=element_rect(fill=NA)) + 
-  theme(text=element_text(size=16))  +
-  scale_y_continuous(labels = function(x) paste0(x, "%"), limits=c(0,100))+
-  theme(axis.text.x = element_text(size=16)) +
-  theme(legend.text = element_text(size=16)) +
-  scale_x_discrete(labels=c("casp_apop_combined_granular"="Granular", "casp_apop_combined_agranular"="Agranular")) +
-  scale_fill_manual(name="Cell Type", labels=c("Notched Control", "Dermo Injected"), values = c("#e08c67","#6388ca")) 
+# extra plot formatting code for reference 
+#+ xlab("Cell Type") +
+#  ylab("Percent Hemocytes") +
+#  ggtitle("Percent Caspase 3/7 Active Hemocytes") +
+#  theme(panel.background=element_blank(),
+#        panel.grid=element_blank(),panel.border=element_rect(fill=NA), 
+#        text=element_text(family="serif",size=16), 
+#        axis.title.y=element_text(family="serif",size=16),
+#        axis.title.x=element_text(family="serif",size=16),
+#        legend.key=element_rect(fill=NA)) + 
+#  theme(text=element_text(size=16))  +
+#  scale_y_continuous(labels = function(x) paste0(x, "%"), limits=c(0,100))+
+#  theme(axis.text.x = element_text(size=16)) +
+#  theme(legend.text = element_text(size=16)) +
+#  scale_x_discrete(labels=c("casp_apop_combined_granular"="Granular", "casp_apop_combined_agranular"="Agranular")) +
+#  scale_fill_manual(name="Cell Type", labels=c("Notched Control", "Dermo Injected"), values = c("#e08c67","#6388ca")) 
 
