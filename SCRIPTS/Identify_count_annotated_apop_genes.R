@@ -18,9 +18,9 @@ C_vir_rtracklayer <- as.data.frame(C_vir_rtracklayer)
 Apoptosis_names_list <- c('bcl-2-related protein A1',
 'apoptosis-inducing factor 1',
 'akt1',
-'RAC-alpha',
+'RAC-alpha serine/threonine-protein kinase-',
 'RAC-gamma serine/threonine-protein kinase-',
-'APAF-1 interacting protein',
+'methylthioribulose-1-phosphate dehydratase',
 'tumor necrosis factor ligand superfamily member 10',
 'tumor necrosis factor superfamily member 12',
 'cell death regulator Aven',
@@ -86,7 +86,7 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'mitogen-activated protein kinase 1',
 'dual specificity mitogen-activated protein kinase kinase 1',
 'mitogen-activated protein kinase kinase kinase 7-like',
-'MYC proto-oncogene',
+'transcriptional regulator Myc-A',
 'myeloid differentiation primary response protein MyD88',
 'phorbol-12-myristate-13-acetate-induced protein 1',
 'nuclear factor NF-kappa-B p105 subunit',
@@ -98,7 +98,7 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'anti-apoptotic protein NR13',
 'nuclear mitotic apparatus protein 1',
 'dynamin-like 120 kDa protein',
-'Early 35 kDa protein',
+'cyclin-dependent kinase 5 activator 1',
 'cellular tumor antigen p53',
 'programmed cell death protein',
 'p53 and DNA damage-regulated protein 1',
@@ -162,8 +162,9 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated with bcl-2 'bcl-2-related protein A1',
 'apoptosis-inducing factor 1',
 'akt1',
-'RAC',
-'APAF-1 interacting protein',
+'RAC-alpha',
+'RAC-gamma',
+'methylthioribulose-1-phosphate dehydratase',
 'tumor necrosis factor',
 'cell death regulator Aven',
 'bcl-2',
@@ -196,7 +197,7 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'stress-activated protein kinase JNK',
 'induced myeloid leukemia cell differentiation protein Mcl-1',
 'mitogen-activated protein kinase',
-'MYC proto-oncogene',
+'transcriptional regulator Myc-A',
 'myeloid differentiation primary response protein MyD88',
 'phorbol-12-myristate-13-acetate-induced protein 1',
 'transcription factor p65',
@@ -205,7 +206,7 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'anti-apoptotic protein NR13',
 'nuclear mitotic apparatus protein 1',
 'dynamin-like 120 kDa protein',
-'Early 35 kDa protein',
+'cyclin-dependent kinase 5 activator 1',
 'cellular tumor antigen p53',
 'programmed cell death protein',
 'p53 and DNA damage-regulated protein 1',
@@ -317,11 +318,21 @@ C_vir_rtracklayer_apop_product_final_product_joined <- full_join(C_vir_rtracklay
 #View(C_vir_rtracklayer_apop_product_final_product_joined)
 nrow(C_vir_rtracklayer_apop_product_final_product_joined) #1091 rows PERFECT
 
-# Recode members of the RHO superfamily to all be included together and IAP repeat containing and putative inhibitor of apoptosis to be together in IAP family
+# Recode Gene Family Members to be all included together if they have several different names
 C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- recode(C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query, 
-  "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho"= "Rho superfamily", "ras-"="Rho superfamily", "RAC" = "Rho superfamily",
-    "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis", "protein BTG1" = "B-cell translocation gene 1",
-   "FAS-associated death domain protein" = "fas-associated death domain protein")
+      # the RHO superfamily to all be included together                                                                                 
+      "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho"= "Rho superfamily", "ras-"="Rho superfamily",
+      # IAP repeat containing and putative inhibitor of apoptosis to be together in IAP family
+      "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis", 
+      # Protein BTG1
+      "protein BTG1" = "B-cell translocation gene 1",
+      # fas associated death domain
+      "FAS-associated death domain protein" = "fas-associated death domain protein", 
+      # Nf-kappa B family includes transcription factor p65 (aka RELA) and RELB proto-oncogene 
+      "transcription factor p65"="NF-kappa-B",
+      "RELB proto-oncogene "="NF-kappa-B")
+
+# NOTE : RAC-alpha and RAC-gamma are not part of the Rho superfamily
 head(C_vir_rtracklayer_apop_product_final_product_joined)
 
 ### How many transcripts in each gene?
@@ -347,11 +358,11 @@ C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final <- C_vir_
 
 ## Count number of genes in gene family
 C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final_families <- C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final %>% group_by(apoptosis_names_query) %>% summarize(gene_family_members = n())
-View(C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final_families)
+#View(C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final_families)
 
 ## Number of genes with same gene name
 C_vir_rtracklayer_apop_product_final_product_joined_by_gene_duplicates <- C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final %>% group_by(gene_name) %>% summarize(gene_duplicates = n())
-View(C_vir_rtracklayer_apop_product_final_product_joined_by_gene_duplicates)
+#View(C_vir_rtracklayer_apop_product_final_product_joined_by_gene_duplicates)
 
 # avg transcripts per gene family
 C_vir_rtracklayer_apop_product_final_product_joined_avg_transcripts_per_gene_family <- C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final %>% group_by(apoptosis_names_query) %>%
@@ -360,7 +371,7 @@ C_vir_rtracklayer_apop_product_final_product_joined_avg_transcripts_per_gene_fam
 ## Join genes per gene family and transcripts for gene family into one table
 C_vir_genes_transcripts_per_gene_family <- full_join(C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final_families,  C_vir_rtracklayer_apop_product_final_product_joined_by_gene_family)
 C_vir_genes_transcripts_per_gene_family_transcripts_per_gene <- full_join(C_vir_genes_transcripts_per_gene_family, C_vir_rtracklayer_apop_product_final_product_joined_avg_transcripts_per_gene_family)
-View(C_vir_genes_transcripts_per_gene_family_transcripts_per_gene)
+#View(C_vir_genes_transcripts_per_gene_family_transcripts_per_gene)
 
 #### Repeat Analysis using Crassostrea gigas ####
 
@@ -368,9 +379,9 @@ View(C_vir_genes_transcripts_per_gene_family_transcripts_per_gene)
 Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'apoptosis-inducing factor 1',
                           'akt1',
-                          'RAC-alpha',
+                          'RAC-alpha serine/threonine-protein kinase-',
                           'RAC-gamma serine/threonine-protein kinase-',
-                          'APAF-1 interacting protein',
+                          'methylthioribulose-1-phosphate dehydratase',
                           'tumor necrosis factor ligand superfamily member 10',
                           'tumor necrosis factor superfamily member 12',
                           'cell death regulator Aven',
@@ -436,7 +447,7 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'mitogen-activated protein kinase 1',
                           'dual specificity mitogen-activated protein kinase kinase 1',
                           'mitogen-activated protein kinase kinase kinase 7',
-                          'MYC proto-oncogene',
+                          'transcriptional regulator Myc-A',
                           'myeloid differentiation primary response protein MyD88',
                           'phorbol-12-myristate-13-acetate-induced protein 1',
                           'nuclear factor NF-kappa-B p105 subunit',
@@ -448,7 +459,7 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'anti-apoptotic protein NR13',
                           'nuclear mitotic apparatus protein 1',
                           'dynamin-like 120 kDa protein',
-                          'Early 35 kDa protein',
+                          'cyclin-dependent kinase 5 activator 1',
                           'cellular tumor antigen p53',
                           'programmed cell death protein',
                           'p53 and DNA damage-regulated protein 1',
@@ -513,8 +524,9 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
 Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because duplicated with bcl-2 'bcl-2-related protein A1',
                                            'apoptosis-inducing factor 1',
                                            'akt1',
-                                           'RAC',
-                                           'APAF-1 interacting protein',
+                                           'RAC-alpha',
+                                           'RAC-gamma',
+                                           'methylthioribulose-1-phosphate dehydratase',
                                            'tumor necrosis factor',
                                            'cell death regulator Aven',
                                            'bcl-2',
@@ -548,7 +560,7 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'stress-activated protein kinase JNK',
                                            'induced myeloid leukemia cell differentiation protein Mcl-1',
                                            'mitogen-activated protein kinase',
-                                           'MYC proto-oncogene',
+                                           'transcriptional regulator Myc-A',
                                            'myeloid differentiation primary response protein MyD88',
                                            'phorbol-12-myristate-13-acetate-induced protein 1',
                                            'transcription factor p65',
@@ -557,7 +569,7 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'anti-apoptotic protein NR13',
                                            'nuclear mitotic apparatus protein 1',
                                            'dynamin-like 120 kDa protein',
-                                           'Early 35 kDa protein',
+                                           'cyclin-dependent kinase 5 activator 1',
                                            'cellular tumor antigen p53',
                                            'programmed cell death protein',
                                            'p53 and DNA damage-regulated protein 1',
@@ -688,13 +700,22 @@ C_gig_rtracklayer_apop_product_final_product_joined <- full_join(C_gig_rtracklay
 #View(C_vir_rtracklayer_apop_product_final_product_joined)
 nrow(C_gig_rtracklayer_apop_product_final_product_joined) #686 rows same as before
 
-# Recode members of the RHO superfamily to all be included together and IAP repeat containing and putative inhibitor of apoptosis to be together in IAP family
+# Recode Gene Family Members to be all included together if they have several different names
 C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- recode(C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query, 
-                                                                                    "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho"= "Rho superfamily", "ras-"="Rho superfamily", "RAC" = "Rho superfamily",
-                                                                                    "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis","Heat shock protein"="heat shock protein",
-                                                                                    "FAS-associated death domain protein" = "fas-associated death domain protein")
+     # the RHO superfamily to all be included together   
+     "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho"= "Rho superfamily", "ras-"="Rho superfamily", 
+     # IAP repeat containing and putative inhibitor of apoptosis to be together in IAP family
+     "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis",
+    # recode heat shock proteins due to capitalization
+      "Heat shock protein"="heat shock protein",
+    # fas associated death domain
+     "FAS-associated death domain protein" = "fas-associated death domain protein",
+    # Nf-kappa B family includes transcription factor p65 (aka RELA) and RELB proto-oncogene 
+    "transcription factor p65"="NF-kappa-B",
+      "RELB proto-oncogene "="NF-kappa-B")
 
-
+# NOTE : RAC-alpha and RAC-gamma are not part of the Rho superfamily, do not recode
+    
 head(C_gig_rtracklayer_apop_product_final_product_joined)
 
 ### How many transcripts in each gene?
@@ -734,7 +755,7 @@ C_gig_rtracklayer_apop_product_final_product_joined_avg_transcripts_per_gene_fam
 ## Join genes per gene family and transcripts for gene family into one table
 C_gig_genes_transcripts_per_gene_family <- full_join(C_gig_rtracklayer_apop_product_final_product_joined_by_gene_name_final_families,  C_gig_rtracklayer_apop_product_final_product_joined_by_gene_family)
 C_gig_genes_transcripts_per_gene_family_transcripts_per_gene <- full_join(C_gig_genes_transcripts_per_gene_family, C_gig_rtracklayer_apop_product_final_product_joined_avg_transcripts_per_gene_family)
-View(C_gig_genes_transcripts_per_gene_family_transcripts_per_gene)
+#View(C_gig_genes_transcripts_per_gene_family_transcripts_per_gene)
 
 #### Combine C_vir and C_gig tables ######
 
