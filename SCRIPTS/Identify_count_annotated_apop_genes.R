@@ -53,14 +53,13 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'caspase-6',
 'caspase-4',
 'caspase-5',
-'caspase-14-like',
 'cell division cycle and apoptosis regulator protein 1',
 'CD151 antigen',
 'protein BTG1',
 'interferon alpha',
 'caspase activity and apoptosis inhibitor 1',
 'baculoviral IAP repeat-containing protein',
-'cAMP-responsive element modulator',
+'cAMP-responsive element',
 'cytochrome c-like',
 'death-associated inhibitor of apoptosis',
 'tumor necrosis factor receptor superfamily member 25',
@@ -151,12 +150,12 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'apoptosis inhibitor 5',
 'apoptotic chromatin condensation inducer in the nucleus',
 'interleukin 17-like protein',
-'calreticulin',
 'serine protease inhibitor',
 "high mobility group box 1",
 "pyrin",
 'ceramide synthase',
-'fatty acid synthase')
+'fatty acid synthase',
+'cyclic AMP-responsive element-binding protein')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated with bcl-2 'bcl-2-related protein A1',
@@ -182,7 +181,7 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'protein BTG1',
 'interferon alpha',
 'IAP',
-'cAMP-responsive element modulator',
+'cAMP-responsive element',
 'cytochrome c',
 'endonuclease G, mitochondrial',
 'FAS-associated death domain protein',
@@ -249,13 +248,13 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'apoptosis inhibitor 5',
 'apoptotic chromatin condensation inducer in the nucleus',
 'interleukin',
-'calreticulin',
 'serine protease inhibitor',
 "high mobility group box 1",
 "pyrin",
 "ceramide synthase",
 'inhibitor of apoptosis',
-'fatty acid synthase'))
+'fatty acid synthase',
+'cyclic AMP-responsive element-binding protein'))
 
 #### Grep Apoptosis protein names in genome files ####
 
@@ -414,14 +413,13 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'caspase-6',
                           'caspase-4',
                           'caspase-5',
-                          'caspase-14-like',
                           'cell division cycle and apoptosis regulator protein 1',
                           'CD151 antigen',
                           'B-cell translocation gene 1',
                           'interferon alpha',
                           'caspase activity and apoptosis inhibitor 1',
                           'baculoviral IAP repeat-containing protein',
-                          'cAMP-responsive element modulator',
+                          'cAMP-responsive element',
                           'cytochrome c',
                           'death-associated inhibitor of apoptosis',
                           'tumor necrosis factor receptor superfamily member 25',
@@ -513,12 +511,12 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'apoptosis inhibitor 5',
                           'apoptotic chromatin condensation inducer in the nucleus',
                           'interleukin 17-like protein',
-                          'calreticulin',
                           'serine protease inhibitor',
                           "high mobility group box 1",
                           "pyrin",
                           'ceramide synthase',
-                          'fatty acid synthase')
+                          'fatty acid synthase',
+                          'cyclic AMP-responsive element-binding protein')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because duplicated with bcl-2 'bcl-2-related protein A1',
@@ -544,7 +542,7 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'B-cell translocation gene 1',
                                            'interferon alpha',
                                            'IAP',
-                                           'cAMP-responsive element modulator',
+                                           'cAMP-responsive element',
                                            'cytochrome c',
                                            'endonuclease G, mitochondrial',
                                            'FAS-associated death domain protein',
@@ -613,13 +611,13 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'apoptosis inhibitor 5',
                                            'apoptotic chromatin condensation inducer in the nucleus',
                                            'interleukin',
-                                           'calreticulin',
                                            'serine protease inhibitor',
                                            "high mobility group box 1",
                                            "pyrin",
                                            "ceramide synthase",
                                            'inhibitor of apoptosis',
-                                           'fatty acid synthase'))
+                                           'fatty acid synthase',
+                                           'cyclic AMP-responsive element-binding protein'))
 
 
 # Import gff file, using new version of genome annotation
