@@ -149,13 +149,15 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'apoptosis-stimulating of p53 protein 2',
 'apoptosis inhibitor 5',
 'apoptotic chromatin condensation inducer in the nucleus',
-'interleukin 17-like protein',
 'serine protease inhibitor',
 "high mobility group box 1",
 "pyrin",
 'ceramide synthase',
-'fatty acid synthase',
-'cyclic AMP-responsive element-binding protein')
+'cyclic AMP-responsive element-binding protein',
+'cell death-inducing p53-target protein 1',
+'TP53-binding protein 1',
+'p53-induced death domain-containing protein 1',
+'death domain-containing protein CRADD')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated with bcl-2 'bcl-2-related protein A1',
@@ -247,14 +249,16 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'apoptosis-stimulating of p53 protein',
 'apoptosis inhibitor 5',
 'apoptotic chromatin condensation inducer in the nucleus',
-'interleukin',
 'serine protease inhibitor',
 "high mobility group box 1",
 "pyrin",
 "ceramide synthase",
 'inhibitor of apoptosis',
-'fatty acid synthase',
-'cyclic AMP-responsive element-binding protein'))
+'cyclic AMP-responsive element-binding protein',
+'cell death-inducing p53-target protein 1',
+'TP53-binding protein 1',
+'p53-induced death domain-containing protein 1',
+'death domain-containing protein CRADD'))
 
 #### Grep Apoptosis protein names in genome files ####
 
@@ -510,13 +514,15 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'apoptosis-stimulating of p53 protein 2',
                           'apoptosis inhibitor 5',
                           'apoptotic chromatin condensation inducer in the nucleus',
-                          'interleukin 17-like protein',
                           'serine protease inhibitor',
                           "high mobility group box 1",
                           "pyrin",
                           'ceramide synthase',
-                          'fatty acid synthase',
-                          'cyclic AMP-responsive element-binding protein')
+                          'cyclic AMP-responsive element-binding protein',
+                          'cell death-inducing p53-target protein 1',
+                          'TP53-binding protein 1',
+                          'p53-induced death domain-containing protein 1',
+                          'death domain-containing protein CRADD')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because duplicated with bcl-2 'bcl-2-related protein A1',
@@ -610,14 +616,16 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'apoptosis-stimulating of p53 protein',
                                            'apoptosis inhibitor 5',
                                            'apoptotic chromatin condensation inducer in the nucleus',
-                                           'interleukin',
                                            'serine protease inhibitor',
                                            "high mobility group box 1",
                                            "pyrin",
                                            "ceramide synthase",
                                            'inhibitor of apoptosis',
-                                           'fatty acid synthase',
-                                           'cyclic AMP-responsive element-binding protein'))
+                                           'cyclic AMP-responsive element-binding protein',
+                                           'cell death-inducing p53-target protein 1',
+                                           'TP53-binding protein 1',
+                                           'p53-induced death domain-containing protein 1',
+                                           'death domain-containing protein CRADD'))
 
 
 # Import gff file, using new version of genome annotation
