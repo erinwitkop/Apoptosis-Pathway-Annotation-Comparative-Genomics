@@ -127,8 +127,7 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'netrin receptor',
 'neurotrophic receptor tyrosine kinase 1',
 'sonic hedgehog receptor',
-'peptidyl-prolyl cis-trans isomerase A-like',
-'peptidyl-prolyl cis-trans isomerase B-like',
+'peptidyl-prolyl cis-trans isomerase',
 'receptor-interacting serine/threonine-protein kinase',
 'mixed lineage kinase domain',
 'heat shock protein',
@@ -151,7 +150,6 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'apoptotic chromatin condensation inducer in the nucleus',
 'serine protease inhibitor',
 "high mobility group box 1",
-"pyrin",
 'ceramide synthase',
 'cyclic AMP-responsive element-binding protein',
 'cell death-inducing p53-target protein 1',
@@ -251,7 +249,6 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'apoptotic chromatin condensation inducer in the nucleus',
 'serine protease inhibitor',
 "high mobility group box 1",
-"pyrin",
 "ceramide synthase",
 'inhibitor of apoptosis',
 'cyclic AMP-responsive element-binding protein',
@@ -276,7 +273,11 @@ C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product[!grepl("c
     !grepl("S-acyl", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("dynamin-like",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("activator of 90 kDa", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
-    !grepl("zinc finger protein", C_vir_rtracklayer_apop_product$product),]
+    !grepl("zinc finger protein", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)
+    !grepl("peptidyl-prolyl cis-trans isomerase A",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)
+    !grepl("peptidyl-prolyl cis-trans isomerase B",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)
+    !grepl("phosphatidylinositol 3-kinase 1", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)
+    !grepl("phosphatidylinositol 3-kinase 2", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) ,]
 
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet., then checked by "Supplementary Table 2. C. virginica apoptosis.xlsx" table that I have
@@ -491,8 +492,7 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'netrin receptor',
                           'neurotrophic receptor tyrosine kinase 1',
                           'sonic hedgehog receptor',
-                          'peptidyl-prolyl cis-trans isomerase A',
-                          'peptidyl-prolyl cis-trans isomerase B',
+                          'peptidyl-prolyl cis-trans isomerase',
                           'receptor-interacting serine/threonine-protein kinase',
                           'mixed lineage kinase domain',
                           'heat shock protein',
@@ -516,7 +516,6 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'apoptotic chromatin condensation inducer in the nucleus',
                           'serine protease inhibitor',
                           "high mobility group box 1",
-                          "pyrin",
                           'ceramide synthase',
                           'cyclic AMP-responsive element-binding protein',
                           'cell death-inducing p53-target protein 1',
@@ -618,7 +617,6 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'apoptotic chromatin condensation inducer in the nucleus',
                                            'serine protease inhibitor',
                                            "high mobility group box 1",
-                                           "pyrin",
                                            "ceramide synthase",
                                            'inhibitor of apoptosis',
                                            'cyclic AMP-responsive element-binding protein',
@@ -659,7 +657,11 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
      !grepl("cytochrome c1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
      !grepl("interferon alpha-inducible protein 27-like protein 2",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("dynamin-like",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-     !grepl("activator of 90 kDa", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
+     !grepl("activator of 90 kDa", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)
+   !grepl("peptidyl-prolyl cis-trans isomerase A",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)
+   !grepl("peptidyl-prolyl cis-trans isomerase B",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)
+   !grepl("phosphatidylinositol 3-kinase 1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)
+   !grepl("phosphatidylinositol 3-kinase 2", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
   nrow(C_gig_rtracklayer_apop_product_final) #686
 
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
