@@ -153,7 +153,9 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'cell death-inducing p53-target protein 1',
 'TP53-binding protein 1',
 'p53-induced death domain-containing protein 1',
-'death domain-containing protein CRADD')
+'death domain-containing protein CRADD',
+'p63',
+'p73')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated with bcl-2 'bcl-2-related protein A1',
@@ -171,7 +173,6 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'Bik-like killer protein',
 'CASP8 and FADD like apoptosis regulator',
 'transcription factor AP-1',
-'DNA fragmentation factor subunit beta',
 'adenylate cyclase',
 'caspase',
 'cell division cycle and apoptosis regulator protein 1',
@@ -187,8 +188,9 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'fas cell surface death receptor',
 'GTPase IMAP family member',
 'harakiri',
-'DNA fragmentation factor subunit alpha',
-'interferon-induced protein',
+'DNA fragmentation factor',
+'interferon-induced protein 44',
+'interferon alpha-inducible protein 27',
 'NF-kappa-B',
 'inositol 1,4,5-trisphosphate receptor',
 'stress-activated protein kinase JNK',
@@ -209,8 +211,7 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'p53 and DNA damage-regulated protein 1',
 'phosphatidylinositol 3-kinase',
 'cAMP-dependent protein kinase',
-'protein kinase C delta',
-'protein kinase C iota',
+'protein kinase C',
 'BCL2 binding component 3',
 'cdc42 homolog',
 'ras-',
@@ -251,7 +252,9 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'cell death-inducing p53-target protein 1',
 'TP53-binding protein 1',
 'p53-induced death domain-containing protein 1',
-'death domain-containing protein CRADD'))
+'death domain-containing protein CRADD',
+'p63',
+'p73'))
 
 #### Grep Apoptosis protein names in genome files ####
 
@@ -274,7 +277,9 @@ C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product[!grepl("c
     !grepl("phosphatidylinositol 3-kinase 2", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
     !grepl("DDB_G0272098",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
     !grepl("transcriptional regulator Myc-A",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-    !grepl("caspase-14", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE),]
+    !grepl("caspase-14", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
+    !grepl("WD repeat-containing protein WRAP73", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
+    !grepl("tumor protein p63-regulated gene 1-like protein", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE),]
 
 
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
@@ -332,7 +337,11 @@ C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- rec
       "FAS-associated death domain protein" = "fas-associated death domain protein", 
       # Nf-kappa B family includes transcription factor p65 (aka RELA) and RELB proto-oncogene 
       "transcription factor p65"="NF-kappa-B",
-      "RELB proto-oncogene "="NF-kappa-B")
+      "RELB proto-oncogene "="NF-kappa-B",
+      #recode Bcl-2 family
+      "BAX"="bcl-2",
+      #recode TNF family 
+      "CD40 ligand"="tumor necrosis factor")
 
 # NOTE : RAC-alpha and RAC-gamma are not part of the Rho superfamily
 head(C_vir_rtracklayer_apop_product_final_product_joined)
@@ -517,7 +526,9 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'cell death-inducing p53-target protein 1',
                           'TP53-binding protein 1',
                           'p53-induced death domain-containing protein 1',
-                          'death domain-containing protein CRADD')
+                          'death domain-containing protein CRADD',
+                          'p63',
+                          'p73')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because duplicated with bcl-2 'bcl-2-related protein A1',
@@ -535,7 +546,6 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'Bik-like killer protein',
                                            'CASP8 and FADD like apoptosis regulator',
                                            'transcription factor AP-1',
-                                           'DNA fragmentation factor subunit beta',
                                            'adenylate cyclase',
                                            'caspase',
                                            'cell division cycle and apoptosis regulator protein 1',
@@ -552,8 +562,9 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'fas cell surface death receptor',
                                            'GTPase IMAP family member',
                                            'harakiri',
-                                           'DNA fragmentation factor subunit alpha',
-                                           'interferon-induced protein',
+                                           'DNA fragmentation factor',
+                                           'interferon-induced protein 44',
+                                           'interferon alpha-inducible protein 27',
                                            'NF-kappa-B',
                                            'inositol 1,4,5-trisphosphate receptor',
                                            'stress-activated protein kinase JNK',
@@ -574,8 +585,7 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'p53 and DNA damage-regulated protein 1',
                                            'phosphatidylinositol 3-kinase',
                                            'cAMP-dependent protein kinase',
-                                           'protein kinase C delta',
-                                           'protein kinase C iota',
+                                           'protein kinase C',
                                            'BCL2 binding component 3',
                                            'cdc42 homolog',
                                            'ras-',
@@ -617,7 +627,9 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'cell death-inducing p53-target protein 1',
                                            'TP53-binding protein 1',
                                            'p53-induced death domain-containing protein 1',
-                                           'death domain-containing protein CRADD'))
+                                           'death domain-containing protein CRADD',
+                                           'p63',
+                                           'p73'))
 
 
 # Import gff file, using new version of genome annotation
@@ -656,9 +668,12 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
    !grepl("phosphatidylinositol 3-kinase 2", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
    !grepl("DDB_G0272098",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
    !grepl("transcriptional regulator Myc-A",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-   !grepl("caspase-14",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
+   !grepl("caspase-14",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+   !grepl("WD repeat-containing protein WRAP73", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+   !grepl("tumor protein p63-regulated gene 1-like protein", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
   nrow(C_gig_rtracklayer_apop_product_final) #686
-
+  
+  
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet.
 
@@ -669,6 +684,10 @@ C_gig_rtracklayer_apop_product_final_product <- C_gig_rtracklayer_apop_product_f
 Apoptosis_names_df_CG$rownames <- rownames(Apoptosis_names_df_CG)
 nrow(C_gig_rtracklayer_apop_product_final_product) #686
 unique(C_gig_rtracklayer_apop_product_final_product$product) #418
+
+# how many unique genes are there with unique products (also checking gene names)
+C_gig_rtracklayer_apop_product_final_gene_product_unique <-  unique(C_gig_rtracklayer_apop_product_final[,c("gene","product")])
+nrow(C_gig_rtracklayer_apop_product_final_gene_product_unique) #659
 
 # Make new index
 idx2 <- sapply(Apoptosis_names_df_CG$product, grep, C_gig_rtracklayer_apop_product_final_product$product)
@@ -716,7 +735,9 @@ C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- rec
      "FAS-associated death domain protein" = "fas-associated death domain protein",
     # Nf-kappa B family includes transcription factor p65 (aka RELA) and RELB proto-oncogene 
     "transcription factor p65"="NF-kappa-B",
-      "RELB proto-oncogene "="NF-kappa-B")
+      "RELB proto-oncogene "="NF-kappa-B",
+    "BAX"="bcl-2",
+    "CD40 ligand"="tumor necrosis factor")
 
 # NOTE : RAC-alpha and RAC-gamma are not part of the Rho superfamily, do not recode
     
@@ -855,6 +876,11 @@ gene_family_statistics_joined_plot_long_gene_family_members_shared <- gene_famil
                                                                                                                                        filter(apoptosis_names_query != "protein BTG1") %>%
     filter(apoptosis_names_query != "cellular tumor antigen p53") %>% filter(apoptosis_names_query != "diablo homolog, mitochondrial") %>% filter(apoptosis_names_query != "high mobility group box 1")
   
+# subset for gene families with less than one gene in them 
+
+gene_family_statistics_joined_final_reduced <- gene_family_statistics_joined_plot_long_gene_family_members_shared %>% filter(Count >= 2)
+
+
 ## bar graph version
 ggplot(gene_family_statistics_joined_plot_long_gene_family_members_shared, aes(x=apoptosis_names_query, y =Count, fill = Species)) + 
 geom_col(position = "dodge") + theme(axis.text.x = element_text(hjust=0.5,angle = 45))  + bbc_style()
