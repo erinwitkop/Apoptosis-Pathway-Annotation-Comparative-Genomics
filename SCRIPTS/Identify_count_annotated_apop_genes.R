@@ -271,12 +271,14 @@ C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product[!grepl("c
     !grepl("S-acyl", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("dynamin-like",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("activator of 90 kDa", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
-    !grepl("zinc finger protein", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)
-    !grepl("peptidyl-prolyl cis-trans isomerase A",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)
-    !grepl("peptidyl-prolyl cis-trans isomerase B",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)
-    !grepl("phosphatidylinositol 3-kinase 1", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)
-    !grepl("phosphatidylinositol 3-kinase 2", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)
-    !grepl("DDB_G0272098",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE),]
+    !grepl("zinc finger protein", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) & 
+    !grepl("peptidyl-prolyl cis-trans isomerase A",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) & 
+    !grepl("peptidyl-prolyl cis-trans isomerase B",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+    !grepl("phosphatidylinositol 3-kinase 1", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+    !grepl("phosphatidylinositol 3-kinase 2", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+    !grepl("DDB_G0272098",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+    !grepl("transcriptional regulator Myc-A",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+    !grepl("caspase-14", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE),]
 
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet., then checked by "Supplementary Table 2. C. virginica apoptosis.xlsx" table that I have
@@ -654,12 +656,14 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
      !grepl("cytochrome c1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
      !grepl("interferon alpha-inducible protein 27-like protein 2",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("dynamin-like",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-     !grepl("activator of 90 kDa", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)
-   !grepl("peptidyl-prolyl cis-trans isomerase A",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)
-   !grepl("peptidyl-prolyl cis-trans isomerase B",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)
-   !grepl("phosphatidylinositol 3-kinase 1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)
-   !grepl("phosphatidylinositol 3-kinase 2", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)
-   !grepl("DDB_G0272098",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
+     !grepl("activator of 90 kDa", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+   !grepl("peptidyl-prolyl cis-trans isomerase A",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+   !grepl("peptidyl-prolyl cis-trans isomerase B",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+   !grepl("phosphatidylinositol 3-kinase 1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+   !grepl("phosphatidylinositol 3-kinase 2", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+   !grepl("DDB_G0272098",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+   !grepl("transcriptional regulator Myc-A",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+   !grepl("caspase-14",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
   nrow(C_gig_rtracklayer_apop_product_final) #686
 
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
@@ -700,6 +704,7 @@ nrow(df_merged_CG_no_dup) #685, duplicates removed (one line disappeared?)
 
 # check that all transcript_ids originally found in search are still there
 setdiff(C_gig_rtracklayer_apop_product_final_product$transcript_id, df_merged_CG_no_dup$transcript_id) # none missing
+setdiff(df_merged_CG_no_dup$transcript_id, C_gig_rtracklayer_apop_product_final_product$transcript_id) #none missing 
 
 # merge new index with old
 C_gig_rtracklayer_apop_product_final_product_joined <- full_join(C_gig_rtracklayer_apop_product_final_product, df_merged_CG_no_dup) # Joining, by = c("Name", "product", "gene", "transcript_id")
@@ -807,7 +812,8 @@ shared_apoptosis_gene_names <- na.omit(combined_gene_name_yes_no_table_unique)
 
 ### 2. Make combined table with gene family statistics
 # investigate differences in apoptosis_names_df and apoptosis_names_df_CG 
-setdiff(Apoptosis_names_df$product, Apoptosis_names_df_CG$product)
+setdiff(Apoptosis_names_df$product, Apoptosis_names_df_CG$product) #protein BG-1
+setdiff(Apoptosis_names_df_CG$product, Apoptosis_names_df$product) # "B-cell translocation gene 1" "fas-associated death domain protein", "Heat shock protein"
 
 # Only differences are 
   #[1]  "protein BTG1" (because in C gigas its called B cell translocation gene 1, yes these are the same, see Liu et al., 2017) 
