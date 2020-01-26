@@ -127,7 +127,6 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'netrin receptor',
 'neurotrophic receptor tyrosine kinase 1',
 'sonic hedgehog receptor',
-'peptidyl-prolyl cis-trans isomerase',
 'receptor-interacting serine/threonine-protein kinase',
 'mixed lineage kinase domain',
 'heat shock protein',
@@ -227,7 +226,6 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'netrin receptor',
 'neurotrophic receptor tyrosine kinase 1',
 'sonic hedgehog receptor',
-'peptidyl-prolyl cis-trans isomerase',
 'receptor-interacting serine/threonine-protein kinase',
 'mixed lineage kinase domain',
 'heat shock protein',
@@ -272,13 +270,12 @@ C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product[!grepl("c
     !grepl("dynamin-like",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("activator of 90 kDa", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("zinc finger protein", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) & 
-    !grepl("peptidyl-prolyl cis-trans isomerase A",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) & 
-    !grepl("peptidyl-prolyl cis-trans isomerase B",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
     !grepl("phosphatidylinositol 3-kinase 1", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
     !grepl("phosphatidylinositol 3-kinase 2", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
     !grepl("DDB_G0272098",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
     !grepl("transcriptional regulator Myc-A",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
     !grepl("caspase-14", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE),]
+
 
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet., then checked by "Supplementary Table 2. C. virginica apoptosis.xlsx" table that I have
@@ -493,7 +490,6 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'netrin receptor',
                           'neurotrophic receptor tyrosine kinase 1',
                           'sonic hedgehog receptor',
-                          'peptidyl-prolyl cis-trans isomerase',
                           'receptor-interacting serine/threonine-protein kinase',
                           'mixed lineage kinase domain',
                           'heat shock protein',
@@ -595,7 +591,6 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'netrin receptor',
                                            'neurotrophic receptor tyrosine kinase 1',
                                            'sonic hedgehog receptor',
-                                           'peptidyl-prolyl cis-trans isomerase',
                                            'receptor-interacting serine/threonine-protein kinase',
                                            'mixed lineage kinase domain',
                                            'heat shock protein',
@@ -657,8 +652,6 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
      !grepl("interferon alpha-inducible protein 27-like protein 2",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("dynamin-like",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
      !grepl("activator of 90 kDa", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-   !grepl("peptidyl-prolyl cis-trans isomerase A",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-   !grepl("peptidyl-prolyl cis-trans isomerase B",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
    !grepl("phosphatidylinositol 3-kinase 1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
    !grepl("phosphatidylinositol 3-kinase 2", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
    !grepl("DDB_G0272098",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
@@ -809,6 +802,10 @@ c_vir_not_c_gig <- combined_gene_name_yes_no_table_unique %>% filter(is.na(C_gig
 c_gig_not_c_vir <- combined_gene_name_yes_no_table_unique %>% filter(is.na(C_vir_gene_LOC))
 # shared in both 
 shared_apoptosis_gene_names <- na.omit(combined_gene_name_yes_no_table_unique)
+
+# Load gene pathway key with protein aliases curated in excel
+gene_name_pathway_key_merged <- read.csv("Gene_name_pathway_key.csv", head=TRUE)
+
 
 ### 2. Make combined table with gene family statistics
 # investigate differences in apoptosis_names_df and apoptosis_names_df_CG 
