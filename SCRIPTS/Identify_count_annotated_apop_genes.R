@@ -261,7 +261,8 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'p73',
 'interferon regulatory factor',
 'stimulator of interferon genes',
-'interleukin'))
+'interleukin 17-like protein',
+'interleukin-17'))
 
 #### Grep Apoptosis protein names in genome files ####
 
@@ -382,7 +383,7 @@ C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final <- C_vir_
 
 ## Count number of genes in gene family
 C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final_families <- C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final %>% group_by(apoptosis_names_query) %>% summarize(gene_family_members = n())
-#View(C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final_families)
+View(C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final_families)
 
 ## Number of genes with same gene name
 C_vir_rtracklayer_apop_product_final_product_joined_by_gene_duplicates <- C_vir_rtracklayer_apop_product_final_product_joined_by_gene_name_final %>% group_by(gene_name) %>% summarize(gene_duplicates = n())
@@ -834,6 +835,7 @@ combined_gene_name_yes_no_table <- full_join(C_vir_rtracklayer_apop_product_fina
                                              by = "gene_name")
 #remove duplicate gene names
 combined_gene_name_yes_no_table_unique <- combined_gene_name_yes_no_table[!duplicated(combined_gene_name_yes_no_table$gene_name),]
+write.table(combined_gene_name_yes_no_table_unique, file="combined_gene_name_yes_no_table_unique.txt")
 
 #join on the pathway descriptions for the molecules 
 # load in table with pathway descriptions for each in Excel 
