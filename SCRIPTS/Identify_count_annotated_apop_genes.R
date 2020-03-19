@@ -1,4 +1,6 @@
-# R script to identify and count annotated apoptosis genes in the genome
+#### R script to identify and count annotated apoptosis genes in the C. virginica and C. gigas genomes
+# Erin Roberts, 2020
+# PhD Candidate University of Rhode Island 
 
 #### Load Packages ####
 
