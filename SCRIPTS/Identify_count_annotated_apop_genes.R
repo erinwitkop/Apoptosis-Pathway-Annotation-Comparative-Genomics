@@ -64,13 +64,10 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'cAMP-responsive element',
 'cytochrome c-like',
 'death-associated inhibitor of apoptosis',
-'tumor necrosis factor receptor superfamily member 25',
-'tumor necrosis factor receptor superfamily member 10A',
-'tumor necrosis factor receptor superfamily member 10B',
+'tumor necrosis factor receptor superfamily member',
 'endonuclease G, mitochondrial',
 'FAS-associated death domain protein',
 'fas apoptotic inhibitory molecule 1',
-'tumor necrosis factor receptor superfamily member 6',
 'fas cell surface death receptor',
 'GTPase IMAP family member',
 'harakiri',
@@ -83,10 +80,9 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'stress-activated protein kinase JNK',
 'lipopolysaccharide-induced tumor necrosis factor-alpha',
 'induced myeloid leukemia cell differentiation protein Mcl-1-like',
-'mitogen-activated protein kinase kinase kinase 1-like',
 'mitogen-activated protein kinase 1',
 'dual specificity mitogen-activated protein kinase kinase 1',
-'mitogen-activated protein kinase kinase kinase 7-like',
+'mitogen-activated protein kinase kinase kinase',
 'transcriptional regulator Myc-A',
 'myeloid differentiation primary response protein MyD88',
 'phorbol-12-myristate-13-acetate-induced protein 1',
@@ -122,7 +118,6 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'tumor necrosis factor',
 'lymphotoxin-alpha',
 'CD40 ligand',
-'tumor necrosis factor receptor superfamily member',
 'TNFRSF1A associated via death domain',
 'TNF receptor-associated factor',
 'E3 ubiquitin-protein ligase XIAP',
@@ -161,16 +156,43 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
  'interferon regulatory factor',
  'stimulator of interferon genes',
 'interleukin 17-like protein',
-'interleukin-17')
+'interleukin-17',
+'interleukin-1 receptor-associated kinase 4',
+'interleukin-1 receptor-associated kinase 1-binding protein',
+'TGF-beta-activated kinase 1 and MAP3K7-binding protein',
+'sterile alpha and TIR motif-containing protein',
+'tyrosine-protein kinase JAK2',
+'signal transducer and activator of transcription',
+'serine-protein kinase ATM',
+'MAP kinase-activating death domain protein',
+'death domain-associated protein 6',
+'leucine-rich repeat and death domain-containing protein',
+'serine/threonine-protein kinase/endoribonuclease IRE1',
+'eukaryotic translation initiation factor 2-alpha kinase 3',
+'growth arrest and DNA damage-inducible protein GADD45',
+'calpain',
+'tyrosine-protein phosphatase non-receptor type 13',
+'HTRA2',
+'3-phosphoinositide-dependent protein kinase 1',
+'dronc',
+'pyrin',
+'proto-oncogene c-Rel',
+'leukocyte elastase inhibitor',
+'protein patched homolog 1',
+'cyclic AMP-dependent transcription factor ATF-4')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated with bcl-2 'bcl-2-related protein A1',
-'apoptosis-inducing factor 1',
+'^apoptosis-inducing factor 1',
+'nuclear apoptosis-inducing factor 1',
 'akt1',
 'RAC-alpha',
 'RAC-gamma',
 'methylthioribulose-1-phosphate dehydratase',
-'tumor necrosis factor',
+'^tumor necrosis factor receptor',
+'^tumor necrosis factor ligand',
+'tumor necrosis factor alpha-induced protein',
+'lipopolysaccharide-induced tumor necrosis factor-alpha',
 'cell death regulator Aven',
 'bcl-2',
 'BAX',
@@ -180,12 +202,13 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'CASP8 and FADD like apoptosis regulator',
 'transcription factor AP-1',
 'adenylate cyclase',
-'caspase',
+'caspase-',
+'caspase activity and apoptosis inhibitor 1',
 'cell division cycle and apoptosis regulator protein 1',
 'CD151 antigen',
 'protein BTG1',
-'interferon alpha',
-'IAP',
+'baculoviral IAP',
+'E3 ubiquitin-protein ligase XIAP',
 'cAMP-responsive element',
 'cytochrome c',
 'endonuclease G, mitochondrial',
@@ -201,7 +224,8 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'inositol 1,4,5-trisphosphate receptor',
 'stress-activated protein kinase JNK',
 'induced myeloid leukemia cell differentiation protein Mcl-1',
-'mitogen-activated protein kinase',
+'mitogen-activated protein kinase kinase kinase',
+'mitogen-activated protein kinase-',
 'transcriptional regulator Myc-A',
 'myeloid differentiation primary response protein MyD88',
 'phorbol-12-myristate-13-acetate-induced protein 1',
@@ -220,9 +244,9 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'protein kinase C',
 'BCL2 binding component 3',
 'cdc42 homolog',
-'ras-',
-'Rho',
-'racA',
+'ras-related',
+'rho-related',
+'ras-like',
 'receptor-interacting serine/threonine-protein kinase',
 'diablo homolog, mitochondrial',
 'toll-like receptor',
@@ -233,7 +257,6 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'netrin receptor',
 'neurotrophic receptor tyrosine kinase 1',
 'sonic hedgehog receptor',
-'receptor-interacting serine/threonine-protein kinase',
 'mixed lineage kinase domain',
 'heat shock protein',
 'E3 ubiquitin-protein ligase CHIP',
@@ -264,7 +287,33 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'interferon regulatory factor',
 'stimulator of interferon genes',
 'interleukin 17-like protein',
-'interleukin-17'))
+'interleukin-17',
+'interleukin-1 receptor-associated kinase 4',
+'interleukin-1 receptor-associated kinase 1-binding protein',
+'TGF-beta-activated kinase 1 and MAP3K7-binding protein',
+'sterile alpha and TIR motif-containing protein',
+'tyrosine-protein kinase JAK2',
+'signal transducer and activator of transcription',
+'serine-protein kinase ATM',
+'MAP kinase-activating death domain protein',
+'death domain-associated protein 6',
+'leucine-rich repeat and death domain-containing protein',
+'serine/threonine-protein kinase/endoribonuclease IRE1',
+'eukaryotic translation initiation factor 2-alpha kinase 3',
+'growth arrest and DNA damage-inducible protein GADD45',
+'calpain',
+'tyrosine-protein phosphatase non-receptor type 13',
+'HTRA2',
+'3-phosphoinositide-dependent protein kinase 1',
+'dronc',
+'pyrin',
+'proto-oncogene c-Rel',
+'leukocyte elastase inhibitor',
+'protein patched homolog 1',
+'cyclic AMP-dependent transcription factor ATF-4',
+'dual specificity mitogen-activated protein kinase kinase 1',
+'mitogen-activated protein kinase 1',
+'mitochondrial Rho GTPase 1'))
 
 #### Grep Apoptosis protein names in genome files ####
 
@@ -275,34 +324,40 @@ C_vir_rtracklayer_apop_product <- C_vir_rtracklayer[grepl(paste(Apoptosis_names_
 
 # Terms to remove
 # remove complement C1q proteins, dual specificity protein phosphatase 1B-like, remove kunitz-type, and NOT other kDA protein names so I can keep all heat shock proteins
-C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product[!grepl("complement C1q", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) & 
+C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product[ 
   !grepl("dual specificity protein phosphatase 1B-like", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
   !grepl("kunitz-type", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
+    !grepl("complement C1q", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("mannosyl", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("S-acyl", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
-    !grepl("dynamin-like",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("activator of 90 kDa", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("zinc finger protein", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) & 
-    !grepl("phosphatidylinositol 3-kinase 1", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-    !grepl("phosphatidylinositol 3-kinase 2", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
     !grepl("DDB_G0272098",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-    !grepl("transcriptional regulator Myc-A",C_vir_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-    !grepl("caspase-14", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("WD repeat-containing protein WRAP73", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
-    !grepl("tumor protein p63-regulated gene 1-like protein", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE),]
+    !grepl("tumor protein p63-regulated gene 1-like protein", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
+    !grepl("mitogen-activated protein kinase kinase kinase kinase 3", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE),] # get rid of MAP4K
 
-nrow(C_vir_rtracklayer_apop_product_final) # 1054
+nrow(C_vir_rtracklayer_apop_product_final) # 1243
+#View(C_vir_rtracklayer_apop_product_final[26][!duplicated(C_vir_rtracklayer_apop_product_final$product),])
+
+# remove duplicated rows
+C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product_final[!duplicated(C_vir_rtracklayer_apop_product_final$product),]
+nrow(C_vir_rtracklayer_apop_product_final) # 600 unique transcripts
+#View(C_vir_rtracklayer_apop_product_final)
+
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet., then checked by "Supplementary Table 2. C. virginica apoptosis.xlsx" table that I have
-# saved in my Qualifying Exam table to check my numbers for C. virginica
+# Checking to make sure all YES proteins are actually present 
+
+# How many unique gene LOC are in this list (this is going in summary paragraph for paper)
+C_vir_rtracklayer_apop_product_final_LOC <- C_vir_rtracklayer_apop_product_final[!duplicated(C_vir_rtracklayer_apop_product_final$gene),]
+nrow(C_vir_rtracklayer_apop_product_final_LOC )#288
 
 ### Add Gene family Key with gene family names in Apoptosis_names_df  ####
-
 # Subset apoptosis grepl data frame and Apoptosis_names_df and check nrows
 C_vir_rtracklayer_apop_product_final_product <- C_vir_rtracklayer_apop_product_final[,c("Name","product","gene","transcript_id")]
 Apoptosis_names_df$rownames <- rownames(Apoptosis_names_df)
-nrow(C_vir_rtracklayer_apop_product_final_product) #1054
-unique(C_vir_rtracklayer_apop_product_final_product$product) #474
+nrow(C_vir_rtracklayer_apop_product_final_product) #600
 
 # Make new index
 idx2 <- sapply(Apoptosis_names_df$product, grep, C_vir_rtracklayer_apop_product_final_product$product)
@@ -311,21 +366,24 @@ idx1 <- sapply(seq_along(idx2), function(i) rep(i, length(idx2[[i]])))
 # create df_merged which has duplicated product column for gene name hits, first column is the index name
 df_merged <- cbind(Apoptosis_names_df[unlist(idx1),,drop=F], C_vir_rtracklayer_apop_product_final_product[unlist(idx2),,drop=F])
 head(df_merged)
-
+df_merged[is.na(df_merged),]
+nrow(df_merged) # 600 (non duplicated)
+View(df_merged)
 # change column names
 colnames(df_merged)[1] <- "apoptosis_names_query" 
 # subset rownames column
 df_merged <- df_merged[,-2]
 head(df_merged)
 
+# Check df_merged apoptosis gene family name assignments here
+setdiff(C_vir_rtracklayer_apop_product_final_product$transcript_id,df_merged$transcript_id) # none missing
+setdiff(df_merged$transcript_id,C_vir_rtracklayer_apop_product_final_product$transcript_id)
+df_merged[duplicated(df_merged$transcript_id),]
+
 # check for NAs (meaning duplicate term hits)
 df_merged %>% filter(is.na(product)) %>% View() # NO NA's yay! 
 df_merged %>% filter(is.na(apoptosis_names_query)) %>% View() # NO NA's yay!!
-nrow(df_merged) #1072 (duplicate rows were added! BAD)
-
-# remove duplicated transcript_id rows, meaning that two search terms hit to it
-df_merged <- df_merged[!duplicated(df_merged$transcript_id),]
-nrow(df_merged) #1039 duplicates removed
+nrow(df_merged) #600 ( no duplicates)
 
 # check that all transcript_ids originally found in search are still there
 setdiff(C_vir_rtracklayer_apop_product_final_product$transcript_id, df_merged$transcript_id) # no differences, none misssing
@@ -334,12 +392,20 @@ setdiff(df_merged$transcript_id, C_vir_rtracklayer_apop_product_final_product$tr
 # merge new index with old
 C_vir_rtracklayer_apop_product_final_product_joined <- full_join(C_vir_rtracklayer_apop_product_final_product, df_merged) # Joining, by = c("Name", "product", "gene", "transcript_id")
 #View(C_vir_rtracklayer_apop_product_final_product_joined)
-nrow(C_vir_rtracklayer_apop_product_final_product_joined) #1054 rows PERFECT
+nrow(C_vir_rtracklayer_apop_product_final_product_joined) #600 rows PERFECT
+
+# recode  mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog, transcript variant X1 (X2,X3)
+class(C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query) # factor
+C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- as.character(C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query)
+C_vir_rtracklayer_apop_product_final_product_joined <- within(C_vir_rtracklayer_apop_product_final_product_joined, apoptosis_names_query[ apoptosis_names_query == 'mitogen-activated protein kinase kinase kinase' & product == 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog, transcript variant X1'] <- 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog')
+C_vir_rtracklayer_apop_product_final_product_joined <- within(C_vir_rtracklayer_apop_product_final_product_joined, apoptosis_names_query[ apoptosis_names_query == 'mitogen-activated protein kinase kinase kinase' & product == 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog, transcript variant X2'] <- 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog')
+C_vir_rtracklayer_apop_product_final_product_joined <- within(C_vir_rtracklayer_apop_product_final_product_joined, apoptosis_names_query[ apoptosis_names_query == 'mitogen-activated protein kinase kinase kinase' & product == 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog, transcript variant X3'] <- 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog')
+nrow(C_vir_rtracklayer_apop_product_final_product_joined) # 600
 
 # Recode Gene Family Members to be all included together if they have several different names
 C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- recode(C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query, 
       # the RHO superfamily to all be included together                                                                                 
-      "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho"= "Rho superfamily", "ras-"="Rho superfamily",
+      "cdc42 homolog" = "Rho superfamily", "ras-related"= "Rho superfamily", "ras-like"="Rho superfamily", "rho-related"= "Rho superfamily",
       # IAP repeat containing and putative inhibitor of apoptosis to be together in IAP family
       "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis", 
       # Protein BTG1
@@ -354,13 +420,14 @@ C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- rec
       #recode TNF family 
       "CD40 ligand"="tumor necrosis factor")
 
+
 # NOTE : RAC-alpha and RAC-gamma are not part of the Rho superfamily
 head(C_vir_rtracklayer_apop_product_final_product_joined)
 
 ### How many transcripts in each gene?
 C_vir_rtracklayer_apop_product_final_product_joined_by_gene <- C_vir_rtracklayer_apop_product_final_product_joined %>%
   group_by(gene) %>% summarize(number_transcripts_per_gene = n() )
-nrow(C_vir_rtracklayer_apop_product_final_product_joined_by_gene) #581 genes
+nrow(C_vir_rtracklayer_apop_product_final_product_joined_by_gene) #288 genes
 # Match with names of gene family members
 C_vir_rtracklayer_apop_product_final_product_joined_by_gene_product <- left_join(C_vir_rtracklayer_apop_product_final_product_joined_by_gene, C_vir_rtracklayer[,c("gene","product")], by = "gene")
 C_vir_rtracklayer_apop_product_final_product_joined_by_gene_product <- C_vir_rtracklayer_apop_product_final_product_joined_by_gene_product[!duplicated(C_vir_rtracklayer_apop_product_final_product_joined_by_gene_product$gene),]
@@ -450,13 +517,10 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'cAMP-responsive element',
                           'cytochrome c',
                           'death-associated inhibitor of apoptosis',
-                          'tumor necrosis factor receptor superfamily member 25',
-                          'tumor necrosis factor receptor superfamily member 10A',
-                          'tumor necrosis factor receptor superfamily member 10B',
+                          'tumor necrosis factor receptor superfamily member',
                           'endonuclease G, mitochondrial',
                           'FAS-associated death domain protein',
                           'fas apoptotic inhibitory molecule 1',
-                          'tumor necrosis factor receptor superfamily member 6',
                           'fas cell surface death receptor',
                           'GTPase IMAP family member',
                           'harakiri',
@@ -469,7 +533,7 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'stress-activated protein kinase JNK',
                           'lipopolysaccharide-induced tumor necrosis factor-alpha',
                           'induced myeloid leukemia cell differentiation protein Mcl-1',
-                          'mitogen-activated protein kinase kinase kinase 1,',
+                          'mitogen-activated protein kinase kinase kinase,',
                           'mitogen-activated protein kinase 1',
                           'dual specificity mitogen-activated protein kinase kinase 1',
                           'mitogen-activated protein kinase kinase kinase 7',
@@ -508,7 +572,6 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'tumor necrosis factor',
                           'lymphotoxin-alpha',
                           'CD40 ligand',
-                          'tumor necrosis factor receptor superfamily member',
                           'TNFRSF1A associated via death domain',
                           'TNF receptor-associated factor',
                           'E3 ubiquitin-protein ligase XIAP',
@@ -548,16 +611,42 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
                           'interferon regulatory factor',
                           'stimulator of interferon genes',
                           'interleukin 17-like protein',
-                          'interleukin-17')
+                          'interleukin-17',
+                          'interleukin-1 receptor-associated kinase 4',
+'interleukin-1 receptor-associated kinase 1-binding protein',
+'TGF-beta-activated kinase 1 and MAP3K7-binding protein',
+'sterile alpha and TIR motif-containing protein',
+'tyrosine-protein kinase JAK2',
+'signal transducer and activator of transcription',
+'serine-protein kinase ATM',
+'MAP kinase-activating death domain protein',
+'death domain-associated protein 6',
+'leucine-rich repeat and death domain-containing protein',
+'serine/threonine-protein kinase/endoribonuclease IRE1',
+'eukaryotic translation initiation factor 2-alpha kinase 3',
+'growth arrest and DNA damage-inducible protein GADD45',
+'calpain',
+'tyrosine-protein phosphatase non-receptor type 13',
+'HTRA2',
+'3-phosphoinositide-dependent protein kinase 1',
+'dronc',
+'pyrin',
+'proto-oncogene c-Rel',
+'leukocyte elastase inhibitor',
+'protein patched homolog 1',
+'cyclic AMP-dependent transcription factor ATF-4')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because duplicated with bcl-2 'bcl-2-related protein A1',
-                                           'apoptosis-inducing factor 1',
+                                           '^apoptosis-inducing factor 1',
+                                           'nuclear apoptosis-inducing factor 1',
                                            'akt1',
                                            'RAC-alpha',
                                            'RAC-gamma',
                                            'methylthioribulose-1-phosphate dehydratase',
-                                           'tumor necrosis factor',
+                                           '^tumor necrosis factor*superfamily',
+                                           'tumor necrosis factor alpha-induced protein',
+                                           'lipopolysaccharide-induced tumor necrosis factor-alpha',
                                            'cell death regulator Aven',
                                            'bcl-2',
                                            'BAX',
@@ -567,12 +656,13 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'CASP8 and FADD like apoptosis regulator',
                                            'transcription factor AP-1',
                                            'adenylate cyclase',
-                                           'caspase',
+                                           'caspase-',
+                                           'caspase activity and apoptosis inhibitor 1',
                                            'cell division cycle and apoptosis regulator protein 1',
                                            'CD151 antigen',
                                            'B-cell translocation gene 1',
-                                           'interferon alpha',
-                                           'IAP',
+                                           'baculoviral IAP',
+                                           'E3 ubiquitin-protein ligase XIAP',
                                            'cAMP-responsive element',
                                            'cytochrome c',
                                            'endonuclease G, mitochondrial',
@@ -589,7 +679,8 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'inositol 1,4,5-trisphosphate receptor',
                                            'stress-activated protein kinase JNK',
                                            'induced myeloid leukemia cell differentiation protein Mcl-1',
-                                           'mitogen-activated protein kinase',
+                                           'mitogen-activated protein kinase kinase kinase',
+                                           'mitogen-activated protein kinase-',
                                            'transcriptional regulator Myc-A',
                                            'myeloid differentiation primary response protein MyD88',
                                            'phorbol-12-myristate-13-acetate-induced protein 1',
@@ -608,9 +699,9 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'protein kinase C',
                                            'BCL2 binding component 3',
                                            'cdc42 homolog',
-                                           'ras-',
-                                           'Rho',
-                                           'racA',
+                                           'ras-related',
+                                           'rho-related',
+                                           'ras-like',
                                            'receptor-interacting serine/threonine-protein kinase',
                                            'diablo homolog, mitochondrial',
                                            'toll-like receptor',
@@ -621,7 +712,6 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'netrin receptor',
                                            'neurotrophic receptor tyrosine kinase 1',
                                            'sonic hedgehog receptor',
-                                           'receptor-interacting serine/threonine-protein kinase',
                                            'mixed lineage kinase domain',
                                            'heat shock protein',
                                            'Heat shock protein', #will need to recode these later to be in the same group, case sensitivity caused problem
@@ -652,7 +742,34 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'p73',
                                            'interferon regulatory factor',
                                            'stimulator of interferon genes',
-                                           'interleukin'))
+                                           'interleukin 17-like protein',
+                                           'interleukin-17',
+                                           'interleukin-1 receptor-associated kinase 4',
+                                           'interleukin-1 receptor-associated kinase 1-binding protein',
+                                           'TGF-beta-activated kinase 1 and MAP3K7-binding protein',
+                                           'sterile alpha and TIR motif-containing protein',
+                                           'tyrosine-protein kinase JAK2',
+                                           'signal transducer and activator of transcription',
+                                           'serine-protein kinase ATM',
+                                           'MAP kinase-activating death domain protein',
+                                           'death domain-associated protein 6',
+                                           'leucine-rich repeat and death domain-containing protein',
+                                           'serine/threonine-protein kinase/endoribonuclease IRE1',
+                                           'eukaryotic translation initiation factor 2-alpha kinase 3',
+                                           'growth arrest and DNA damage-inducible protein GADD45',
+                                           'calpain',
+                                           'tyrosine-protein phosphatase non-receptor type 13',
+                                           'HTRA2',
+                                           '3-phosphoinositide-dependent protein kinase 1',
+                                           'dronc',
+                                           'pyrin',
+                                           'proto-oncogene c-Rel',
+                                           'leukocyte elastase inhibitor',
+                                           'protein patched homolog 1',
+                                           'cyclic AMP-dependent transcription factor ATF-4',
+                                           'dual specificity mitogen-activated protein kinase kinase 1',
+                                           'mitogen-activated protein kinase 1',
+                                           'mitochondrial Rho GTPase 1'))
 
 
 # Import gff file, using new version of genome annotation
@@ -661,56 +778,61 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
   
 #### Grep Apoptosis protein names in genome files ####
   
-  ## Note unlike C. vir file, C. gigas file has gene names in the "product" column, and still includes comma with transcript info for some
-    # than a comman and the transcript name
-    # All transcripts from the same gene share the LOC ID in the "gene" column, though the Name column differs
+## Note unlike C. vir file, C. gigas file has gene names in the "product" column, and still includes comma with transcript info for some
+  # than a comman and the transcript name
+  # All transcripts from the same gene share the LOC ID in the "gene" column, though the Name column differs
+
+# C gigas, filter for rows that have NA gene, this will also keep all the lines with transcript information. Filter out gbkey CDS 
+  # because I only care about the number of transcripts and genes
+C_gig_rtracklayer_filtered <- C_gig_rtracklayer %>% filter(type =="mRNA")
+
+# only genes have the description, the mRNA id's will match with the ID
+C_gig_rtracklayer_apop_product <- C_gig_rtracklayer_filtered[grepl(paste(Apoptosis_names_list_CG,collapse="|"), 
+                                                          C_gig_rtracklayer_filtered$product, ignore.case = TRUE),]
+nrow(C_gig_rtracklayer_apop_product) #812
   
-  # C gigas, filter for rows that have NA gene, this will also keep all the lines with transcript information. Filter out gbkey CDS 
-    # because I only care about the number of transcripts and genes
-  C_gig_rtracklayer_filtered <- C_gig_rtracklayer %>% filter(type =="mRNA")
+# Terms to remove
+# remove complement C1q proteins, dual specificity protein phosphatase 1B-like, remove kunitz-type, and other NOT kDA protein names so I can keep heat shock proteins in both
+C_gig_rtracklayer_apop_product_final <- C_gig_rtracklayer_apop_product[
+# !grepl("dual specificity protein phosphatase 1B-like", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) & not present in list
+!grepl("kunitz-type", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+!grepl("mannosyl", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+!grepl("S-acyl", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+  !grepl("complement C1q", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+!grepl("cytochrome c oxidase", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+!grepl("cytochrome c-type heme lyase", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+!grepl("cytochrome c1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+!grepl("activator of 90 kDa", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+!grepl("phosphatidylinositol 3-kinase 1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+!grepl("phosphatidylinositol 3-kinase 2", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+!grepl("DDB_G0272098",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
+!grepl("WD repeat-containing protein WRAP73", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+!grepl("tumor protein p63-regulated gene 1-like protein", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
+  !grepl("mitogen-activated protein kinase kinase kinase kinase 3", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
+nrow(C_gig_rtracklayer_apop_product_final) #716
   
-  # only genes have the description, the mRNA id's will match with the ID
-  C_gig_rtracklayer_apop_product <- C_gig_rtracklayer_filtered[grepl(paste(Apoptosis_names_list_CG,collapse="|"), 
-                                                            C_gig_rtracklayer_filtered$product, ignore.case = TRUE),]
-  nrow(C_gig_rtracklayer_apop_product) #788
-  
-  # Terms to remove
-  # remove complement C1q proteins, dual specificity protein phosphatase 1B-like, remove kunitz-type, and other NOT kDA protein names so I can keep heat shock proteins in both
-  C_gig_rtracklayer_apop_product_final <- C_gig_rtracklayer_apop_product[!grepl("complement C1q", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-   # !grepl("dual specificity protein phosphatase 1B-like", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) & not present in list
-   !grepl("kunitz-type", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-   !grepl("mannosyl", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-   !grepl("S-acyl", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-     !grepl("cytochrome c oxidase", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-   !grepl("cytochrome c-type heme lyase", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-     !grepl("cytochrome c1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-     !grepl("interferon alpha-inducible protein 27-like protein 2",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-    !grepl("dynamin-like",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-     !grepl("activator of 90 kDa", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-   !grepl("phosphatidylinositol 3-kinase 1", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-   !grepl("phosphatidylinositol 3-kinase 2", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-   !grepl("DDB_G0272098",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-   !grepl("transcriptional regulator Myc-A",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE)  & 
-   !grepl("caspase-14",C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-   !grepl("WD repeat-containing protein WRAP73", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
-   !grepl("tumor protein p63-regulated gene 1-like protein", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
-  nrow(C_gig_rtracklayer_apop_product_final) #684
-  
-  
+# remove duplicated rows
+C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product_final[!duplicated(C_vir_rtracklayer_apop_product_final$product),]
+nrow(C_vir_rtracklayer_apop_product_final) # 598 unique transcripts
+
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet.
+
+# How many unique gene LOC are in this list (this is going in summary paragraph for paper)
+C_gig_rtracklayer_apop_product_final_LOC <- C_gig_rtracklayer_apop_product_final[!duplicated(C_gig_rtracklayer_apop_product_final$gene),]
+nrow(C_gig_rtracklayer_apop_product_final_LOC ) #443
 
 ### Add Gene family Key with gene family names in Apoptosis_names_df ####
   
 # Subset apoptosis grepl data frame and Apoptosis_names_df and check nrows
 C_gig_rtracklayer_apop_product_final_product <- C_gig_rtracklayer_apop_product_final[,c("Name","product","gene","transcript_id")]
 Apoptosis_names_df_CG$rownames <- rownames(Apoptosis_names_df_CG)
-nrow(C_gig_rtracklayer_apop_product_final_product) #684
-unique(C_gig_rtracklayer_apop_product_final_product$product) #438
+nrow(C_gig_rtracklayer_apop_product_final_product) #716
+unique(C_gig_rtracklayer_apop_product_final_product$product) #462
 
 # how many unique genes are there with unique products (also checking gene names)
 C_gig_rtracklayer_apop_product_final_gene_product_unique <-  unique(C_gig_rtracklayer_apop_product_final[,c("gene","product")])
-nrow(C_gig_rtracklayer_apop_product_final_gene_product_unique) #683
+nrow(C_gig_rtracklayer_apop_product_final_gene_product_unique) #715
 
 # Make new index
 idx2 <- sapply(Apoptosis_names_df_CG$product, grep, C_gig_rtracklayer_apop_product_final_product$product)
@@ -729,13 +851,13 @@ head(df_merged_CG)
 # check for NAs (meaning duplicate term hits)
 df_merged_CG %>% filter(is.na(product)) %>% View() # NO NA's yay! 
 df_merged_CG %>% filter(is.na(apoptosis_names_query)) %>% View() # NO NA's yay!!
-nrow(df_merged_CG) #693 (duplicate rows were added! BAD)
+nrow(df_merged_CG) #736 (duplicate rows were added! BAD)
 
 # remove duplicated transcript_id rows, meaning that two search terms hit to it
 #investigate duplicates
 CG_duplicate <- df_merged_CG[duplicated(df_merged_CG$transcript_id),]
 df_merged_CG_no_dup <- df_merged_CG[!duplicated(df_merged_CG$transcript_id),]
-nrow(df_merged_CG_no_dup) #685, duplicates removed (one line disappeared?)
+nrow(df_merged_CG_no_dup) #715, duplicates removed 
 
 # check that all transcript_ids originally found in search are still there
 setdiff(C_gig_rtracklayer_apop_product_final_product$transcript_id, df_merged_CG_no_dup$transcript_id) # none missing
@@ -744,12 +866,12 @@ setdiff(df_merged_CG_no_dup$transcript_id, C_gig_rtracklayer_apop_product_final_
 # merge new index with old
 C_gig_rtracklayer_apop_product_final_product_joined <- full_join(C_gig_rtracklayer_apop_product_final_product, df_merged_CG_no_dup) # Joining, by = c("Name", "product", "gene", "transcript_id")
 #View(C_vir_rtracklayer_apop_product_final_product_joined)
-nrow(C_gig_rtracklayer_apop_product_final_product_joined) #686 rows same as before
+nrow(C_gig_rtracklayer_apop_product_final_product_joined) #716 rows same as before
 
 # Recode Gene Family Members to be all included together if they have several different names
 C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- recode(C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query, 
      # the RHO superfamily to all be included together   
-     "cdc42 homolog" = "Rho superfamily", "racA" = "Rho superfamily", "Rho"= "Rho superfamily", "ras-"="Rho superfamily", 
+     "cdc42 homolog" = "Rho superfamily", "ras-related"= "Rho superfamily", "ras-like"="Rho superfamily", "rho-related"= "Rho superfamily",
      # IAP repeat containing and putative inhibitor of apoptosis to be together in IAP family
      "inhibitor of apoptosis" = "Inhibitor of apoptosis", "IAP" = "Inhibitor of apoptosis",
     # recode heat shock proteins due to capitalization
@@ -769,7 +891,7 @@ head(C_gig_rtracklayer_apop_product_final_product_joined)
 ### How many transcripts in each gene?
 C_gig_rtracklayer_apop_product_final_product_joined_by_gene <- C_gig_rtracklayer_apop_product_final_product_joined %>%
   group_by(gene) %>% summarize(number_transcripts_per_gene = n() )
-nrow(C_gig_rtracklayer_apop_product_final_product_joined_by_gene) #426
+nrow(C_gig_rtracklayer_apop_product_final_product_joined_by_gene) #443
 # Match with names of gene family members
 class(C_gig_rtracklayer_apop_product_final_product_joined_by_gene$gene)
 class(C_gig_rtracklayer$gene)
@@ -838,15 +960,12 @@ combined_gene_name_yes_no_table <- full_join(C_vir_rtracklayer_apop_product_fina
 #remove duplicate gene names
 combined_gene_name_yes_no_table_unique <- combined_gene_name_yes_no_table[!duplicated(combined_gene_name_yes_no_table$gene_name),]
 write.table(combined_gene_name_yes_no_table_unique, file="combined_gene_name_yes_no_table_unique.txt")
-
+nrow(combined_gene_name_yes_no_table_unique) #202
 #join on the pathway descriptions for the molecules 
 # load in table with pathway descriptions for each in Excel 
 
 # Still a few discrepancies in the gene names, namely when they are named in C. virginica "* homolog"
-  # Need to mention in methods that I rmemoved "like" from the end of names
-  # C_ virginica: lipopolysaccharide-induced tumor necrosis factor-alpha factor homolog, C_gig: lipopolysaccharide-induced tumor necrosis factor-alpha
-  # C_vir: putative transcription factor p65 homolog, C_gig: transcription factor p65 homolog
-  # C_vir: macrophage migration inhibitory factor homolog, C_gig: macrophage migration inhibitory factor
+# "mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog" is "TGF-beta-activated kinase 1 and MAP3K7-binding protein 3" - need to add one to the tally of shared
 
 # Genes in C vir and not in C gig (all the C_gig_gene_LOC NA's)
 c_vir_not_c_gig <- combined_gene_name_yes_no_table_unique %>% filter(is.na(C_gig_gene_LOC))
@@ -854,6 +973,15 @@ c_vir_not_c_gig <- combined_gene_name_yes_no_table_unique %>% filter(is.na(C_gig
 c_gig_not_c_vir <- combined_gene_name_yes_no_table_unique %>% filter(is.na(C_vir_gene_LOC))
 # shared in both 
 shared_apoptosis_gene_names <- na.omit(combined_gene_name_yes_no_table_unique)
+nrow(shared_apoptosis_gene_names) # 146
+write.table(shared_apoptosis_gene_names , file="shared_apoptosis_gene_names.txt")
+
+# number of uniquely names proteins in C_vir for paper
+C_vir_all <- combined_gene_name_yes_no_table_unique %>% filter(!is.na(C_vir_gene_LOC)) %>% select(C_vir_gene_LOC, gene_name) 
+nrow(C_vir_all) #175 
+# number of uniquely names proteins in C_gig for paper
+C_gig_all <- combined_gene_name_yes_no_table_unique %>% filter(!is.na(C_gig_gene_LOC)) %>% select(C_gig_gene_LOC, gene_name) 
+nrow(C_gig_all) #173 
 
 # Load gene pathway key with protein aliases curated in excel
 gene_name_pathway_key_merged <- read.csv("Gene_name_pathway_key.csv", head=TRUE)
