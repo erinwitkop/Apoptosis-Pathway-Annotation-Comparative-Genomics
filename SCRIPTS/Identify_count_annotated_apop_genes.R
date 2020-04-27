@@ -179,7 +179,8 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'proto-oncogene c-Rel',
 'leukocyte elastase inhibitor',
 'protein patched homolog 1',
-'cyclic AMP-dependent transcription factor ATF-4')
+'cyclic AMP-dependent transcription factor ATF-4',
+'Siva')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated with bcl-2 'bcl-2-related protein A1',
@@ -313,7 +314,8 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'cyclic AMP-dependent transcription factor ATF-4',
 'dual specificity mitogen-activated protein kinase kinase 1',
 'mitogen-activated protein kinase 1',
-'mitochondrial Rho GTPase 1'))
+'mitochondrial Rho GTPase 1',
+'Siva'))
 
 #### Grep Apoptosis protein names in genome files ####
 
@@ -337,13 +339,12 @@ C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product[
     !grepl("tumor protein p63-regulated gene 1-like protein", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE) &
     !grepl("mitogen-activated protein kinase kinase kinase kinase 3", C_vir_rtracklayer_apop_product$product, ignore.case = TRUE),] # get rid of MAP4K
 
-nrow(C_vir_rtracklayer_apop_product_final) # 1243
-#View(C_vir_rtracklayer_apop_product_final[26][!duplicated(C_vir_rtracklayer_apop_product_final$product),])
+nrow(C_vir_rtracklayer_apop_product_final) # 1245 
+#View(C_vir_rtracklayer_apop_product_final[26][!duplicated(C_vir_rtracklayer_apop_product_final$product),]) # NOT VALID TO REMOVE BASED ON DUPLICATED PRODUCT, ONLY DUPLICATED TRANSCRIPT
 
-# remove duplicated rows
-C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product_final[!duplicated(C_vir_rtracklayer_apop_product_final$product),]
-nrow(C_vir_rtracklayer_apop_product_final) # 600 unique transcripts
-View(C_vir_rtracklayer_apop_product_final)
+# remove rows with duplicated transcript_ids
+C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product_final[!duplicated(C_vir_rtracklayer_apop_product_final$transcript_id),]
+nrow(C_vir_rtracklayer_apop_product_final) # 1245
 
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet., then checked by "Supplementary Table 2. C. virginica apoptosis.xlsx" table that I have
@@ -351,13 +352,13 @@ View(C_vir_rtracklayer_apop_product_final)
 
 # How many unique gene LOC are in this list (this is going in summary paragraph for paper)
 C_vir_rtracklayer_apop_product_final_LOC <- C_vir_rtracklayer_apop_product_final[!duplicated(C_vir_rtracklayer_apop_product_final$gene),]
-nrow(C_vir_rtracklayer_apop_product_final_LOC )#288
+nrow(C_vir_rtracklayer_apop_product_final_LOC )#656
 
 ### Add Gene family Key with gene family names in Apoptosis_names_df  ####
 # Subset apoptosis grepl data frame and Apoptosis_names_df and check nrows
 C_vir_rtracklayer_apop_product_final_product <- C_vir_rtracklayer_apop_product_final[,c("Name","product","gene","transcript_id")]
 Apoptosis_names_df$rownames <- rownames(Apoptosis_names_df)
-nrow(C_vir_rtracklayer_apop_product_final_product) #600
+nrow(C_vir_rtracklayer_apop_product_final_product) #1245
 
 # Make new index
 idx2 <- sapply(Apoptosis_names_df$product, grep, C_vir_rtracklayer_apop_product_final_product$product)
@@ -367,7 +368,7 @@ idx1 <- sapply(seq_along(idx2), function(i) rep(i, length(idx2[[i]])))
 df_merged <- cbind(Apoptosis_names_df[unlist(idx1),,drop=F], C_vir_rtracklayer_apop_product_final_product[unlist(idx2),,drop=F])
 head(df_merged)
 df_merged[is.na(df_merged),]
-nrow(df_merged) # 600 (non duplicated)
+nrow(df_merged) # 1245 
 View(df_merged)
 # change column names
 colnames(df_merged)[1] <- "apoptosis_names_query" 
@@ -383,7 +384,7 @@ df_merged[duplicated(df_merged$transcript_id),]
 # check for NAs (meaning duplicate term hits)
 df_merged %>% filter(is.na(product)) %>% View() # NO NA's yay! 
 df_merged %>% filter(is.na(apoptosis_names_query)) %>% View() # NO NA's yay!!
-nrow(df_merged) #600 ( no duplicates)
+nrow(df_merged) #1245 ( no duplicates)
 
 # check that all transcript_ids originally found in search are still there
 setdiff(C_vir_rtracklayer_apop_product_final_product$transcript_id, df_merged$transcript_id) # no differences, none misssing
@@ -392,7 +393,7 @@ setdiff(df_merged$transcript_id, C_vir_rtracklayer_apop_product_final_product$tr
 # merge new index with old
 C_vir_rtracklayer_apop_product_final_product_joined <- full_join(C_vir_rtracklayer_apop_product_final_product, df_merged) # Joining, by = c("Name", "product", "gene", "transcript_id")
 #View(C_vir_rtracklayer_apop_product_final_product_joined)
-nrow(C_vir_rtracklayer_apop_product_final_product_joined) #600 rows PERFECT
+nrow(C_vir_rtracklayer_apop_product_final_product_joined) #1245 rows PERFECT
 
 # recode  mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog, transcript variant X1 (X2,X3)
 class(C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query) # factor
@@ -400,7 +401,7 @@ C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- as.
 C_vir_rtracklayer_apop_product_final_product_joined <- within(C_vir_rtracklayer_apop_product_final_product_joined, apoptosis_names_query[ apoptosis_names_query == 'mitogen-activated protein kinase kinase kinase' & product == 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog, transcript variant X1'] <- 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog')
 C_vir_rtracklayer_apop_product_final_product_joined <- within(C_vir_rtracklayer_apop_product_final_product_joined, apoptosis_names_query[ apoptosis_names_query == 'mitogen-activated protein kinase kinase kinase' & product == 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog, transcript variant X2'] <- 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog')
 C_vir_rtracklayer_apop_product_final_product_joined <- within(C_vir_rtracklayer_apop_product_final_product_joined, apoptosis_names_query[ apoptosis_names_query == 'mitogen-activated protein kinase kinase kinase' & product == 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog, transcript variant X3'] <- 'mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog')
-nrow(C_vir_rtracklayer_apop_product_final_product_joined) # 600
+nrow(C_vir_rtracklayer_apop_product_final_product_joined) # 1245
 
 # Recode Gene Family Members to be all included together if they have several different names
 C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- recode(C_vir_rtracklayer_apop_product_final_product_joined$apoptosis_names_query, 
@@ -427,7 +428,7 @@ head(C_vir_rtracklayer_apop_product_final_product_joined)
 ### How many transcripts in each gene?
 C_vir_rtracklayer_apop_product_final_product_joined_by_gene <- C_vir_rtracklayer_apop_product_final_product_joined %>%
   group_by(gene) %>% summarize(number_transcripts_per_gene = n() )
-nrow(C_vir_rtracklayer_apop_product_final_product_joined_by_gene) #288 genes
+nrow(C_vir_rtracklayer_apop_product_final_product_joined_by_gene) #656 genes
 # Match with names of gene family members
 C_vir_rtracklayer_apop_product_final_product_joined_by_gene_product <- left_join(C_vir_rtracklayer_apop_product_final_product_joined_by_gene, C_vir_rtracklayer[,c("gene","product")], by = "gene")
 C_vir_rtracklayer_apop_product_final_product_joined_by_gene_product <- C_vir_rtracklayer_apop_product_final_product_joined_by_gene_product[!duplicated(C_vir_rtracklayer_apop_product_final_product_joined_by_gene_product$gene),]
@@ -633,7 +634,8 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
 'proto-oncogene c-Rel',
 'leukocyte elastase inhibitor',
 'protein patched homolog 1',
-'cyclic AMP-dependent transcription factor ATF-4')
+'cyclic AMP-dependent transcription factor ATF-4',
+'Siva')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because duplicated with bcl-2 'bcl-2-related protein A1',
@@ -770,7 +772,8 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'cyclic AMP-dependent transcription factor ATF-4',
                                            'dual specificity mitogen-activated protein kinase kinase 1',
                                            'mitogen-activated protein kinase 1',
-                                           'mitochondrial Rho GTPase 1'))
+                                           'mitochondrial Rho GTPase 1',
+                                           'Siva'))
 
 
 # Import gff file, using new version of genome annotation
@@ -790,7 +793,7 @@ C_gig_rtracklayer_filtered <- C_gig_rtracklayer %>% filter(type =="mRNA")
 # only genes have the description, the mRNA id's will match with the ID
 C_gig_rtracklayer_apop_product <- C_gig_rtracklayer_filtered[grepl(paste(Apoptosis_names_list_CG,collapse="|"), 
                                                           C_gig_rtracklayer_filtered$product, ignore.case = TRUE),]
-nrow(C_gig_rtracklayer_apop_product) #936
+nrow(C_gig_rtracklayer_apop_product) #937
   
 # Terms to remove
 # remove complement C1q proteins, dual specificity protein phosphatase 1B-like, remove kunitz-type, and other NOT kDA protein names so I can keep heat shock proteins in both
@@ -811,26 +814,26 @@ C_gig_rtracklayer_apop_product_final <- C_gig_rtracklayer_apop_product[
 !grepl("tumor protein p63-regulated gene 1-like protein", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
   !grepl("mitogen-activated protein kinase kinase kinase kinase 3", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE) &
   !grepl("mitogen-activated protein kinase kinase kinase kinase 4", C_gig_rtracklayer_apop_product$product, ignore.case = TRUE),]
-nrow(C_gig_rtracklayer_apop_product_final) #833
+nrow(C_gig_rtracklayer_apop_product_final) #834
   
 # remove duplicated rows
-C_gig_rtracklayer_apop_product_final <- C_gig_rtracklayer_apop_product_final[!duplicated(C_gig_rtracklayer_apop_product_final$product),]
-nrow(C_gig_rtracklayer_apop_product_final) # 563 unique transcripts
+C_gig_rtracklayer_apop_product_final <- C_gig_rtracklayer_apop_product_final[!duplicated(C_gig_rtracklayer_apop_product_final$transcript_id),]
+nrow(C_gig_rtracklayer_apop_product_final) # 833 unique transcripts
 
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet.
 
 # How many unique gene LOC are in this list (this is going in summary paragraph for paper)
 C_gig_rtracklayer_apop_product_final_LOC <- C_gig_rtracklayer_apop_product_final[!duplicated(C_gig_rtracklayer_apop_product_final$gene),]
-nrow(C_gig_rtracklayer_apop_product_final_LOC ) #292
+nrow(C_gig_rtracklayer_apop_product_final_LOC ) #503
 
 ### Add Gene family Key with gene family names in Apoptosis_names_df ####
   
 # Subset apoptosis grepl data frame and Apoptosis_names_df and check nrows
 C_gig_rtracklayer_apop_product_final_product <- C_gig_rtracklayer_apop_product_final[,c("Name","product","gene","transcript_id")]
 Apoptosis_names_df_CG$rownames <- rownames(Apoptosis_names_df_CG)
-nrow(C_gig_rtracklayer_apop_product_final_product) #563
-unique(C_gig_rtracklayer_apop_product_final_product$product) #563
+nrow(C_gig_rtracklayer_apop_product_final_product) #564
+unique(C_gig_rtracklayer_apop_product_final_product$product) #564
 
 # Make new index
 idx2 <- sapply(Apoptosis_names_df_CG$product, grep, C_gig_rtracklayer_apop_product_final_product$product)
@@ -845,7 +848,7 @@ colnames(df_merged_CG)[1] <- "apoptosis_names_query"
 df_merged_CG <- df_merged_CG[,-2]
 head(df_merged_CG)
 df_merged_CG[is.na(df_merged_CG),]
-nrow(df_merged_CG) # 563 (none duplicated, missing two)
+nrow(df_merged_CG) # 833 (none duplicated, missing two)
 View(df_merged_CG)
 
 # Check df_merged_CG apoptosis gene family name assignments here
@@ -856,12 +859,12 @@ df_merged_CG[duplicated(df_merged_CG$transcript_id),]
 # check for NAs (meaning duplicate term hits)
 df_merged_CG %>% filter(is.na(product)) %>% View() # NO NA's yay! 
 df_merged_CG %>% filter(is.na(apoptosis_names_query)) %>% View() # NO NA's yay!!
-nrow(df_merged_CG) #563
+nrow(df_merged_CG) #833
 
 # merge new index with old
 C_gig_rtracklayer_apop_product_final_product_joined <- full_join(C_gig_rtracklayer_apop_product_final_product, df_merged_CG) # Joining, by = c("Name", "product", "gene", "transcript_id")
 #View(C_vir_rtracklayer_apop_product_final_product_joined)
-nrow(C_gig_rtracklayer_apop_product_final_product_joined) #563 rows same as before
+nrow(C_gig_rtracklayer_apop_product_final_product_joined) #833 rows same as before
 
 # Recode Gene Family Members to be all included together if they have several different names
 C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query <- recode(C_gig_rtracklayer_apop_product_final_product_joined$apoptosis_names_query, 
@@ -886,7 +889,7 @@ head(C_gig_rtracklayer_apop_product_final_product_joined)
 ### How many transcripts in each gene?
 C_gig_rtracklayer_apop_product_final_product_joined_by_gene <- C_gig_rtracklayer_apop_product_final_product_joined %>%
   group_by(gene) %>% summarize(number_transcripts_per_gene = n() )
-nrow(C_gig_rtracklayer_apop_product_final_product_joined_by_gene) #292
+nrow(C_gig_rtracklayer_apop_product_final_product_joined_by_gene) #503
 # Match with names of gene family members
 class(C_gig_rtracklayer_apop_product_final_product_joined_by_gene$gene)
 class(C_gig_rtracklayer$gene)
@@ -951,8 +954,8 @@ C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_na
 C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name <- C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name[!duplicated(C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name),]
 C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name <- C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name[!duplicated(C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name$gene_name),]
 
-nrow(C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name) # 207
-nrow(C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name) # 211
+nrow(C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name) # 208
+nrow(C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name) # 212
 View(C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name)
 
 # https://stackoverflow.com/questions/50861626/removing-dot-from-the-end-of-string
@@ -962,7 +965,7 @@ combined_gene_name_yes_no_table <- full_join(C_vir_rtracklayer_apop_product_fina
 #remove duplicate gene names
 combined_gene_name_yes_no_table_unique <- combined_gene_name_yes_no_table[!duplicated(combined_gene_name_yes_no_table$gene_name),]
 write.table(combined_gene_name_yes_no_table_unique, file="combined_gene_name_yes_no_table_unique.txt")
-nrow(combined_gene_name_yes_no_table_unique) #245
+nrow(combined_gene_name_yes_no_table_unique) #246
 #join on the pathway descriptions for the molecules 
 # load in table with pathway descriptions for each in Excel 
 
@@ -977,15 +980,15 @@ c_gig_not_c_vir <- combined_gene_name_yes_no_table_unique %>% filter(is.na(C_vir
 nrow(c_gig_not_c_vir) # 38
 # shared in both 
 shared_apoptosis_gene_names <- na.omit(combined_gene_name_yes_no_table_unique)
-nrow(shared_apoptosis_gene_names) # 173
+nrow(shared_apoptosis_gene_names) # 174
 write.table(shared_apoptosis_gene_names , file="shared_apoptosis_gene_names.txt")
 
 # number of uniquely names proteins in C_vir for paper
 C_vir_all <- combined_gene_name_yes_no_table_unique %>% filter(!is.na(C_vir_gene_LOC)) %>% select(C_vir_gene_LOC, gene_name) 
-nrow(C_vir_all) #207
+nrow(C_vir_all) #208
 # number of uniquely names proteins in C_gig for paper
 C_gig_all <- combined_gene_name_yes_no_table_unique %>% filter(!is.na(C_gig_gene_LOC)) %>% select(C_gig_gene_LOC, gene_name) 
-nrow(C_gig_all) #211 
+nrow(C_gig_all) #212 
 
 # Load gene pathway key with protein aliases curated in excel
 gene_name_pathway_key_merged <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/Gene_name_pathway_key.csv", head=TRUE)
@@ -1100,4 +1103,10 @@ gene_family_cvir_cgig_heatmap <- ggplot(gene_family_statistics_joined_plot_long_
 #  theme(legend.text = element_text(size=16)) +
 #  scale_x_discrete(labels=c("casp_apop_combined_granular"="Granular", "casp_apop_combined_agranular"="Agranular")) +
 #  scale_fill_manual(name="Cell Type", labels=c("Notched Control", "Dermo Injected"), values = c("#e08c67","#6388ca")) 
+
+#### EXPORT DATA FRAMES FOR USE IN DESEQ AND WGCNA ####
+
+save(C_gig_rtracklayer, C_vir_rtracklayer, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_annotations.RData")
+save(C_gig_rtracklayer_apop_product_final, C_vir_rtracklayer_apop_product_final, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_apoptosis_products.RData")
+
 
