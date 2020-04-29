@@ -18,53 +18,10 @@ library(rentrez)
 
 #### Upload Genome Annotations for each species in order to facilitate loookup #####
 C_vir_rtracklayer <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/ref_C_virginica-3.0_top_level.gff3")
+nrow(C_vir_rtracklayer)
 C_vir_rtracklayer <- as.data.frame(C_vir_rtracklayer)
 C_gig_rtracklayer <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/GCF_000297895.1_oyster_v9_genomic.gff")
 C_gig_rtracklayer <- as.data.frame(C_gig_rtracklayer)
-
-#### Plot Species Tree for Figure 2 ####
-# Helpful online tutorial regarding tool: https://www.molecularecologist.com/2017/02/phylogenetic-trees-in-r-using-ggtree/
-# Tree data vignette https://yulab-smu.github.io/treedata-book/faq.html#different-x-labels-for-different-facet-panels
-
-Species_Tree_text <- "((Caenorhabditis_elegans:0.72042,((Amphibalanus_amphitrite:0.432549,Penaeus_vannamei:0.373059)0.265388:0.0455497,(Daphnia_magna:0.393008,Drosophila_melanogaster:0.468793)0.246603:0.0407988)0.398481:0.0643439)0.239408:0.0202884,((((Acropora_millepora:0.158152,(Orbicella_faveolata:0.153909,Pocillopora_damicornis:0.121481)0.736211:0.0511311)0.907274:0.119056,(Actinia_tenebrosa:0.158645,Exaiptasia_pallida:0.178692)0.944045:0.115837)0.929656:0.186001,(((Danio_rerio:0.184049,(Mus_musculus:0.0471454,Homo_sapiens:0.0387577)0.974021:0.142751)0.966827:0.167685,Ciona_intestinalis:0.500739)0.251399:0.0407473,(((Strongylocentrotus_purpuratus:0.298998,Acanthaster_planci:0.286896)0.847722:0.0814753,Saccoglossus_kowalevskii:0.336273)0.470024:0.0436738,(Branchiostoma_floridae:0.0977097,Branchiostoma_belcheri:0.0921079)0.963629:0.242379)0.151479:0.0255123)0.0743405:0.0289695)0.149081:0.041054,(Priapulus_caudatus:0.401133,(Lingula_anatina:0.309775,((Octopus_bimaculoides:0.0552811,Octopus_sinensis:0.0418086)0.97482:0.306353,((Mizuhopecten_yessoensis:0.244137,(Crassostrea virginica:0.0766964,Crassostrea_gigas:0.0711655)0.980815:0.185791)0.768585:0.0563199,(Lottia_gigantea:0.228622,(((Aplysia_californica:0.1813,Biomphalaria_glabrata:0.222248)0.377298:0.0526096,Elysia_chlorotica:0.226705)0.808553:0.104453,Pomacea_canaliculata:0.262457)0.546763:0.0388776)0.347322:0.0279315)0.26299:0.0240144)0.419265:0.0420681)0.421663:0.0401548)0.131495:0.02577)0.239408:0.0202884);"
-Species_Tree <- read.newick(text=Species_Tree_text)
-
-# Plot tree
-# write out species and genus so I can 
-genus <- c('Caenorhabditis','Amphibalanus','Penaeus','Daphnia','Drosophila','Acropora','Orbicella',
-           'Pocillopora','Actinia','Exaiptasia','Danio','Mus','Homo','Ciona','Strongylocentrotus',
-           'Acanthaster','Saccoglossus','Branchiostoma','Branchiostoma','Priapulus','Lingula',
-           'Octopus','Octopus','Mizuhopecten','Crassostrea','Crassostrea','Lottia','Aplysia',
-           'Biomphalaria','Elysia','Pomacea')
-species <- c('elegans','amphitrite','vannamei','magna','melanogaster','millepora','faveolata',
-             'damicornis','tenebrosa','pallida','rerio','musculus','sapiens','intestinalis',
-             'purpuratus','planci','kowalevskii','floridae','belcheri','caudatus','anatina',
-             'bimaculoides','sinensis','yessoensis','virginica','gigas','gigantea','californica',
-             'glabrata','chlorotica','canaliculata')
-d <- data.frame(label = Species_Tree$tip.label, genus = genus,
-                species = species)
-# add phlyopic image
-#g <- ggimage::phylopic_uid(Species_Tree$tip.label)
-
-ggtree(Species_Tree, branch.length = "none") %<+% d + #%<+% g + # make it a cladogram with branch.length = "none" rather than plotting by evolutionary distance
-  geom_tiplab(align=TRUE, aes(label=paste0('italic(', genus, 
-                                           ')~italic(', species, ')')), 
-              parse=T) + # italicize species labels 
-  #geom_tiplab(aes(image=uid), geom="phylopic", offset=2.5) +
-  ggtitle("Species Tree Orthogroup Analysis") + 
-geom_hilight(node=52, fill="light green") + xlim(0,17)
-
-  #geom_hilight(node=33, fill="purple") +  
-  #geom_hilight(node=39, fill="blue") +    
-  #geom_hilight(node=44, fill="dark green") +    
-  #geom_text(aes(label=node), hjust=-.3) 
-# Edit colors on tree after looking at the results for groups for gene family expansion 
-# add blocks for protostome, deuterostomes, lophotrochozoa
-
-# Change tip labels to be properly formatted
-lb = get.tree(Species_Tree)$tip.label
-d = data.frame(label=lb, label2 = paste("AA", substring(lb, 1, 5)))
-ggtree(Species_Tree) %<+% d + geom_tiplab(aes(label=label2))
 
 ###### Identify C. vir and C. gig XPs for expanded gene families to search for ####
 
@@ -418,6 +375,8 @@ Cathepsin_XP_CV_list <- as.list(Cathepsin_XP_CV$protein_id)
 Cathepsin_XP_CG_list <- as.list(Cathepsin_XP_CG$protein_id)
 
 #### TLR analysis ####
+
+## USE CVIR AND CGIG GENOME ANNOTATIONS TO LOOKUP LINES WITH MATCHES TO PROTEINS ##
 TLR_CVlookup <- Orthogroups[grepl(paste(TLR_XP_CV_list,collapse="|"), Orthogroups$Crassostrea_virginica, ignore.case = TRUE),]
 # Are any XPs shared
 # Hit to four orthogroups: "OG0000019" "OG0012301" "OG0012607" "OG0015175"
@@ -425,7 +384,7 @@ TLR_CVlookup$Orthogroup
 TLR_CGlookup <- Orthogroups[grepl(paste(TLR_XP_CG_list,collapse="|"), Orthogroups$Crassostrea_gigas, ignore.case = TRUE),]
 # Hit to 6 orthgroups: "OG0000019" "OG0005331" "OG0013333" "OG0018123" "OG0019699" "OG0021942"
 
-# Do any proteins hit to multiple orthogroups? Parse and check for duplicates
+## CHECK FOR DUPLICATE PROTEIN HITS ##
 # Parse and trimws
 TLRC <- strsplit(TLR_CVlookup$Crassostrea_virginica, split = ",")
 TLRC_parse <-data.frame(Orthogroup = rep(TLR_CVlookup$Orthogroup, sapply(TLRC, length)), protein_id = unlist(TLRC))
@@ -442,16 +401,22 @@ TLRC_parse[duplicated(TLRC_parse),] # 0 duplicated
 TLRG_parse[duplicated(TLRG_parse$protein_id),] # 0 duplicated
 # No orthogroups need to be combined
 
+## CHECK FOR NON MAPPED PROTEINS FROM INITIAL CVIR CGIG ####
 # Were any C_vir or C_gig TLR annotated proteins NOT mapped to Orthogroups?
 TLR_CV_notmapped <- left_join(TLR_XP_CV, TLRC_parse, by ="protein_id") %>% filter(is.na(Orthogroup)) %>% View() # Three were not mapped to Orthogroups (need to check these and add to counts list)
 TLR_CG_notmapped <- left_join(TLR_XP_CG, TLRG_parse, by ="protein_id") %>% filter(is.na(Orthogroup)) %>% View() # All were mapped
 
+## GET LIST OF ALL ORTHOGROUPS TO PERFORM MULTIPLE ALIGNMENT WITH MUSCLE ON BLUEWAVES## 
 # Full join to get full list of TLR orthogroups
 TLR_Orthogroups <- full_join(TLR_CVlookup,TLR_CGlookup)
 ncol(TLR_Orthogroups) # 32 
 nrow(TLR_Orthogroups) # 9 total orthogroups
 TLR_Orthogroups$Orthogroup # "OG0000019" "OG0012301" "OG0012607" "OG0015175" "OG0005331" "OG0013333" "OG0018123" "OG0019699" "OG0021942"
+write.table(TLR_Orthogroups$Orthogroup, file= "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/TLR_Orthogroups_list.txt", 
+             row.names=FALSE, quote= FALSE, col.names = FALSE)
+# Export this to bluewaves so I can run MUSCLE on each tree 
 
+## GET LIST OF PROTEINS BY SPECIES ## 
 # Get full list of proteins for each species by transposing and uniting
 # Transpose the rows and column 
 TLR_Orthogroups_transpose <- t(TLR_Orthogroups)
@@ -459,44 +424,212 @@ class(TLR_Orthogroups_transpose) # matrix
 TLR_Orthogroups_transpose <- as.data.frame(TLR_Orthogroups_transpose)
 # unite all columns into one column 
 TLR_Orthogroups_transpose_united <- unite(TLR_Orthogroups_transpose[,c(1:9)], full_protein_list, sep=",")
+# remove NAs
+TLR_Orthogroups_transpose_united$full_protein_list <- gsub("NA,", "", TLR_Orthogroups_transpose_united$full_protein_list)
+TLR_Orthogroups_transpose_united$full_protein_list <- gsub(",NA", "", TLR_Orthogroups_transpose_united$full_protein_list)
+TLR_Orthogroups_transpose_united$full_protein_list <- gsub("NA", "", TLR_Orthogroups_transpose_united$full_protein_list)
 
-# Lookup gene LOC for each protein XP by using downloaded genome 
+TLRO <- strsplit(TLR_Orthogroups_transpose_united$full_protein_list, split = ",")
+TLRO_parse <-data.frame(full_protein_list = rep(TLR_Orthogroups_transpose_united$full_protein_list, sapply(TLRO, length)), protein_id  = unlist(TLRO))
 
-# Run each Orthogroup in Batch Entrez to see how they were annotated 
+# join back to get species_name
+TLR_Orthogroups_transpose_united["species_name"] <- row.names(TLR_Orthogroups_transpose_united)
+TLRO_parsed <- left_join(TLRO_parse, TLR_Orthogroups_transpose_united)
+TLRO_parsed <- TLRO_parsed %>% filter(species_name != "Orthogroup")
+TLRO_parsed$protein_id <- trimws(TLRO_parsed$protein_id)
+nrow(TLRO_parsed) # 1286
+
+# write to file and transfer to bluewaves to do lookup
+write.table(TLRO_parsed$protein_id, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/TLR_Orthogroup_protein_IDs.txt",
+             row.names=FALSE, quote= FALSE, col.names = FALSE)
+
+### GET LIST OF PROTEINS BY ORTHOGROUP ##
 # Write each orthogroup to file
 combined_OG0000019 <- unite(TLR_Orthogroups[1,], combined_OG0000019, 2:32, sep=',')
+OG0000019 <- strsplit(combined_OG0000019$combined_OG0000019, split = ",")
+combined_OG0000019 <- data.frame(combined_OG0000019 = rep(combined_OG0000019$combined_OG0000019, sapply(OG0000019, length)), single = unlist(OG0000019))
+combined_OG0000019$single<- trimws(combined_OG0000019$single)
+combined_OG0000019 <- combined_OG0000019 %>% filter(single != "NA")
+write.table(combined_OG0000019$single, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0000019.txt",  
+            row.names=FALSE, quote= FALSE, col.names = FALSE)
 
 # "OG0012301" 
 combined_OG0012301 <- unite(TLR_Orthogroups[2,], combined_OG0012301, 2:32, sep=',')
-
-# also contains leucine-rich repeats and immunoglobulin-like domains protein 
+OG0012301 <- strsplit(combined_OG0012301$combined_OG0012301, split = ",")
+combined_OG0012301 <- data.frame(combined_OG0012301= rep(combined_OG0012301$combined_OG0012301, sapply(OG0012301, length)), single = unlist(OG0012301))
+combined_OG0012301$single<- trimws(combined_OG0012301$single)
+combined_OG0012301 <- combined_OG0012301 %>% filter(single != "NA")
+write.table(combined_OG0012301$single, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0012301.txt",  
+            row.names=FALSE, quote= FALSE, col.names = FALSE)
 
 # "OG0012607" 
 combined_OG0012607 <- unite(TLR_Orthogroups[3,], combined_OG0012607, 2:32, sep=',')
+OG0012607 <- strsplit(combined_OG0012607$combined_OG0012607, split = ",")
+combined_OG0012607 <- data.frame(combined_OG0012607= rep(combined_OG0012607$combined_OG0012607, sapply(OG0012607, length)), single = unlist(OG0012607))
+combined_OG0012607$single<- trimws(combined_OG0012607$single)
+combined_OG0012607 <- combined_OG0012607 %>% filter(single != "NA")
+write.table(combined_OG0012607$single, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0012607.txt",  
+            row.names=FALSE, quote= FALSE, col.names = FALSE)
+
 # "OG0015175" 
 combined_OG0015175<- unite(TLR_Orthogroups[4,], combined_OG0015175, 2:32, sep=',')
+OG0015175 <- strsplit(combined_OG0015175$combined_OG0015175, split = ",")
+combined_OG0015175 <- data.frame(combined_OG0015175= rep(combined_OG0015175$combined_OG0015175, sapply(OG0015175, length)), single = unlist(OG0015175))
+combined_OG0015175$single<- trimws(combined_OG0015175$single)
+combined_OG0015175 <- combined_OG0015175 %>% filter(single != "NA")
+write.table(combined_OG0015175$single, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0015175.txt",  
+            row.names=FALSE, quote= FALSE, col.names = FALSE)
+
 # "OG0005331" 
 combined_OG0005331 <- unite(TLR_Orthogroups[5,], combined_OG0005331, 2:32, sep=',')
+OG0005331  <- strsplit(combined_OG0005331 $combined_OG0005331 , split = ",")
+combined_OG0005331  <- data.frame(combined_OG0005331 = rep(combined_OG0005331 $combined_OG0005331 , sapply(OG0005331 , length)), single = unlist(OG0005331 ))
+combined_OG0005331$single<- trimws(combined_OG0005331$single)
+combined_OG0005331  <- combined_OG0005331 %>% filter(single != "NA")
+write.table(combined_OG0005331 $single, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0005331.txt",  
+            row.names=FALSE, quote= FALSE, col.names = FALSE)
+
 # "OG0013333" 
 combined_OG0013333<- unite(TLR_Orthogroups[6,], combined_OG0013333, 2:32, sep=',')
+OG0013333 <- strsplit(combined_OG0013333$combined_OG0013333, split = ",")
+combined_OG0013333 <- data.frame(combined_OG0013333= rep(combined_OG0013333$combined_OG0013333, sapply(OG0013333, length)), single = unlist(OG0013333))
+combined_OG0013333$single<- trimws(combined_OG0013333$single)
+combined_OG0013333 <- combined_OG0013333 %>% filter(single != "NA")
+write.table(combined_OG0013333$single, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0013333.txt",  
+            row.names=FALSE, quote= FALSE, col.names = FALSE)
+
 # "OG0018123"
 combined_OG0018123<- unite(TLR_Orthogroups[7,], combined_OG0018123, 2:32, sep=',')
+OG0018123 <- strsplit(combined_OG0018123$combined_OG0018123, split = ",")
+combined_OG0018123 <- data.frame(combined_OG0018123= rep(combined_OG0018123$combined_OG0018123, sapply(OG0018123, length)), single = unlist(OG0018123))
+combined_OG0018123$single<- trimws(combined_OG0018123$single)
+combined_OG0018123 <- combined_OG0018123 %>% filter(single != "NA")
+write.table(combined_OG0018123$single, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0018123.txt",  
+            row.names=FALSE, quote= FALSE, col.names = FALSE)
+
 # "OG0019699" 
 combined_OG0019699 <- unite(TLR_Orthogroups[8,], combined_OG0019699, 2:32, sep=',')
+OG0019699 <- strsplit(combined_OG0019699$combined_OG0019699, split = ",")
+combined_OG0019699 <- data.frame(combined_OG0019699= rep(combined_OG0019699$combined_OG0019699, sapply(OG0019699, length)), single = unlist(OG0019699))
+combined_OG0019699$single<- trimws(combined_OG0019699$single)
+combined_OG0019699 <- combined_OG0019699 %>% filter(single != "NA")
+write.table(combined_OG0019699$single, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0019699.txt",  
+            row.names=FALSE, quote= FALSE, col.names = FALSE)
+
 # "OG0021942"
 combined_OG0021942 <- unite(TLR_Orthogroups[9,], combined_OG0021942, 2:32, sep=',')
-# looking at output from NCBI as to which TLRs are in this orthogroup 
-# Orthogroup doesn't just contain TLR-annotated proteins, some mucins, uncharacterized proteins, etc. How do I weed these out? Do I prune for only those that are annotated
+OG0021942 <- strsplit(combined_OG0021942$combined_OG0021942, split = ",")
+combined_OG0021942 <- data.frame(combined_OG0021942= rep(combined_OG0021942$combined_OG0021942, sapply(OG0021942, length)), single = unlist(OG0021942))
+combined_OG0021942$single<- trimws(combined_OG0021942$single)
+combined_OG0021942 <- combined_OG0021942 %>% filter(single != "NA")
+write.table(combined_OG0021942$single, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0021942.txt",  
+            row.names=FALSE, quote= FALSE, col.names = FALSE)
 
-# Checking how many TLR XPs were assigned for each species
-Elysia_chlorotica_TLR  <- unite(TLR_Orthogroups[,2], Elysia_chlorotica_TLR, sep=',')
-Elysia_chlorotica_TLR <- Elysia_chlorotica_TLR %>% filter(Elysia_chlorotica_TLR != "NA")
-ECTLR <- strsplit(Elysia_chlorotica_TLR$Elysia_chlorotica_TLR, split = ",")
-Elysia_chlorotica_TLR_parse <-data.frame(protein_id = rep(Elysia_chlorotica_TLR$Elysia_chlorotica_TLR, sapply(ECTLR, length)), protein_id  = unlist(ECTLR))
-# trimws for checking list later 
-Elysia_chlorotica_TLR <- Elysia_chlorotica_TLR_parse$protein_id.1
-summary(Elysia_chlorotica_TLR) # 19 in TLR orthogroups
+### ANNOTATE PROTEINS IN BLUEWAVES ###
 
-apply(TLR_Orthogroups[,c(2:32)], 2, unite, na.rm =TRUE)
+# Transfer above files to bluewaves:
+# cd /Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR
+#  scp ./* erin_roberts@bluewaves:/data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/OrthoFinder_2020/OrthoFinder_Data_Analysis/Results_Mar25/TLR
+# $ sbatch Annotate_Gene_Families.sh  to find annotations 
+# $ sbatch TCOFFEE_Gene_Families.sh to run trees
+# scp erin_roberts@bluewaves:/data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/OrthoFinder_2020/OrthoFinder_Data_Analysis/Results_Mar25/TLR/*annotated.txt .
 
+## LOAD AND REVIEW ANNOTATIONS
+# Load and parse annotations 
+combined_OG0000019_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0000019.txt_annotated.txt")
+combined_OG0005331_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0005331.txt_annotated.txt")
+combined_OG0012301_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0012301.txt_annotated.txt")
+combined_OG0012607_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0012607.txt_annotated.txt")
+combined_OG0013333_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0013333.txt_annotated.txt")
+combined_OG0015175_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0015175.txt_annotated.txt")
+combined_OG0018123_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0018123.txt_annotated.txt")
+combined_OG0019699_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0019699.txt_annotated.txt")
+combined_OG0021942_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0021942.txt_annotated.txt")
+TLR_Orthogroup_protein_IDs_ALL_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/TLR_Orthogroup_protein_IDs_ALL_annotated.txt")
+combined_OG0000019_annotated <- as.data.frame(combined_OG0000019_annotated)
+combined_OG0005331_annotated <- as.data.frame(combined_OG0005331_annotated)
+combined_OG0012301_annotated <- as.data.frame(combined_OG0012301_annotated)
+combined_OG0012607_annotated <- as.data.frame(combined_OG0012607_annotated)
+combined_OG0013333_annotated <- as.data.frame(combined_OG0013333_annotated)
+combined_OG0015175_annotated <- as.data.frame(combined_OG0015175_annotated)
+combined_OG0018123_annotated <- as.data.frame(combined_OG0018123_annotated)
+combined_OG0019699_annotated <- as.data.frame(combined_OG0019699_annotated)
+combined_OG0021942_annotated <- as.data.frame(combined_OG0021942_annotated)
+TLR_Orthogroup_protein_IDs_ALL_annotated <- as.data.frame(TLR_Orthogroup_protein_IDs_ALL_annotated)
+
+# Review the XPs
+combined_OG0000019_annotated$product
+combined_OG0005331_annotated$product 
+combined_OG0012301_annotated$product 
+combined_OG0012607_annotated$product 
+combined_OG0013333_annotated$product 
+combined_OG0015175_annotated$product 
+combined_OG0018123_annotated$product 
+combined_OG0019699_annotated$product 
+combined_OG0021942_annotated$product 
+TLR_Orthogroup_protein_IDs_ALL_annotated$product
+
+# Join full annotation with the species names
+TLRO_parsed_annot <- left_join(TLR_Orthogroup_protein_IDs_ALL_annotated, TLRO_parsed[,c("species_name","protein_id")])
+## COUNT NUMBER OF GENES ACROSS ALL ORTHOGROUPS IN EACH SPECIES
+# Several species have NAs in the gene tag but not for the locus tag (which is similar), and vice versa
+
+TLRO_parsed_annot_uniq_locus <- TLRO_parsed_annot %>% filter(is.na(gene)) 
+TLRO_parsed_annot_uniq_locus <- TLRO_parsed_annot_uniq_locus[!duplicated(TLRO_parsed_annot_uniq_locus$locus_tag),]
+TLRO_parsed_annot_uniq_gene <- TLRO_parsed_annot_uniq_gene %>% filter(!is.na(gene))
+TLRO_parsed_annot_uniq_gene <-  TLRO_parsed_annot_uniq_gene[!duplicated(TLRO_parsed_annot_uniq_gene$gene),]
+TLRO_parsed_annot_uniq_join <- rbind(TLRO_parsed_annot_uniq_locus, TLRO_parsed_annot_uniq_gene)
+TLRO_parsed_annot_uniq_count <- TLRO_parsed_annot_uniq_join %>% group_by(species_name) %>% summarize(gene_count = n())
+
+##### My approach is missing TLRs...meaning that there were TLRs in other trees that were not put into the same orthogroups by OrthoFinder
+
+
+## COMPARE WITH OTHER METHOD- GREPPING FOR TLR IN THE All_Genomes_CDS.gff file and then counting ##
+
+
+#### IAP ANALYSIS ####
+
+#### Plot Species Tree for Figure 2 ####
+# Helpful online tutorial regarding tool: https://www.molecularecologist.com/2017/02/phylogenetic-trees-in-r-using-ggtree/
+# Tree data vignette https://yulab-smu.github.io/treedata-book/faq.html#different-x-labels-for-different-facet-panels
+
+Species_Tree_text <- "((Caenorhabditis_elegans:0.72042,((Amphibalanus_amphitrite:0.432549,Penaeus_vannamei:0.373059)0.265388:0.0455497,(Daphnia_magna:0.393008,Drosophila_melanogaster:0.468793)0.246603:0.0407988)0.398481:0.0643439)0.239408:0.0202884,((((Acropora_millepora:0.158152,(Orbicella_faveolata:0.153909,Pocillopora_damicornis:0.121481)0.736211:0.0511311)0.907274:0.119056,(Actinia_tenebrosa:0.158645,Exaiptasia_pallida:0.178692)0.944045:0.115837)0.929656:0.186001,(((Danio_rerio:0.184049,(Mus_musculus:0.0471454,Homo_sapiens:0.0387577)0.974021:0.142751)0.966827:0.167685,Ciona_intestinalis:0.500739)0.251399:0.0407473,(((Strongylocentrotus_purpuratus:0.298998,Acanthaster_planci:0.286896)0.847722:0.0814753,Saccoglossus_kowalevskii:0.336273)0.470024:0.0436738,(Branchiostoma_floridae:0.0977097,Branchiostoma_belcheri:0.0921079)0.963629:0.242379)0.151479:0.0255123)0.0743405:0.0289695)0.149081:0.041054,(Priapulus_caudatus:0.401133,(Lingula_anatina:0.309775,((Octopus_bimaculoides:0.0552811,Octopus_sinensis:0.0418086)0.97482:0.306353,((Mizuhopecten_yessoensis:0.244137,(Crassostrea virginica:0.0766964,Crassostrea_gigas:0.0711655)0.980815:0.185791)0.768585:0.0563199,(Lottia_gigantea:0.228622,(((Aplysia_californica:0.1813,Biomphalaria_glabrata:0.222248)0.377298:0.0526096,Elysia_chlorotica:0.226705)0.808553:0.104453,Pomacea_canaliculata:0.262457)0.546763:0.0388776)0.347322:0.0279315)0.26299:0.0240144)0.419265:0.0420681)0.421663:0.0401548)0.131495:0.02577)0.239408:0.0202884);"
+Species_Tree <- read.newick(text=Species_Tree_text)
+
+# Plot tree
+# write out species and genus so I can 
+genus <- c('Caenorhabditis','Amphibalanus','Penaeus','Daphnia','Drosophila','Acropora','Orbicella',
+           'Pocillopora','Actinia','Exaiptasia','Danio','Mus','Homo','Ciona','Strongylocentrotus',
+           'Acanthaster','Saccoglossus','Branchiostoma','Branchiostoma','Priapulus','Lingula',
+           'Octopus','Octopus','Mizuhopecten','Crassostrea','Crassostrea','Lottia','Aplysia',
+           'Biomphalaria','Elysia','Pomacea')
+species <- c('elegans','amphitrite','vannamei','magna','melanogaster','millepora','faveolata',
+             'damicornis','tenebrosa','pallida','rerio','musculus','sapiens','intestinalis',
+             'purpuratus','planci','kowalevskii','floridae','belcheri','caudatus','anatina',
+             'bimaculoides','sinensis','yessoensis','virginica','gigas','gigantea','californica',
+             'glabrata','chlorotica','canaliculata')
+d <- data.frame(label = Species_Tree$tip.label, genus = genus,
+                species = species)
+# add phlyopic image
+#g <- ggimage::phylopic_uid(Species_Tree$tip.label)
+
+ggtree(Species_Tree, branch.length = "none") %<+% d + #%<+% g + # make it a cladogram with branch.length = "none" rather than plotting by evolutionary distance
+  geom_tiplab(align=TRUE, aes(label=paste0('italic(', genus, 
+                                           ')~italic(', species, ')')), 
+              parse=T) + # italicize species labels 
+  #geom_tiplab(aes(image=uid), geom="phylopic", offset=2.5) +
+  ggtitle("Species Tree Orthogroup Analysis") + 
+  geom_hilight(node=52, fill="light green") + xlim(0,17)
+
+#geom_hilight(node=33, fill="purple") +  
+#geom_hilight(node=39, fill="blue") +    
+#geom_hilight(node=44, fill="dark green") +    
+#geom_text(aes(label=node), hjust=-.3) 
+# Edit colors on tree after looking at the results for groups for gene family expansion 
+# add blocks for protostome, deuterostomes, lophotrochozoa
+
+# Change tip labels to be properly formatted
+lb = get.tree(Species_Tree)$tip.label
+d = data.frame(label=lb, label2 = paste("AA", substring(lb, 1, 5)))
+ggtree(Species_Tree) %<+% d + geom_tiplab(aes(label=label2))
 
