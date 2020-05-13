@@ -590,7 +590,6 @@ TLRO_parsed_annot_uniq_count <- TLRO_parsed_annot_uniq_join %>% group_by(species
 
 
 #### IAP ANALYSIS ####
-
 ## USE CVIR AND CGIG GENOME ANNOTATIONS TO LOOKUP LINES WITH MATCHES TO PROTEINS ##
 length(IAP_XP_CV_list) # 54
 length(IAP_XP_CG_list) # 439
@@ -628,18 +627,77 @@ IAP_ALL_XP_lookup$Orthogroup
 IAP_CVlookup$Orthogroup[!(IAP_CVlookup$Orthogroup %in% IAP_ALL_XP_lookup$Orthogroup)] #0
 IAP_CGlookup$Orthogroup[!(IAP_CGlookup$Orthogroup %in% IAP_ALL_XP_lookup$Orthogroup)] #0
 
-## OUTPUT  LIST OF ALL XPS (REGARDLESS OF ORTHOGROUPS) SO I CAN PULL OUT ALL PROTEIN SEQUENCES 
-
+## OUTPUT  LIST OF ALL XPS (REGARDLESS OF ORTHOGROUPS) SO I CAN PULL OUT ALL PROTEIN SEQUENCES IN BLUEWAVES
 # Concatenate all into single vector
 IAP_ALL_XP_lookup_all <- unite(IAP_ALL_XP_lookup, col = "all", sep = ",")
 IAP_ALL_XP_lookup_all_sep <- str_split(IAP_ALL_XP_lookup_all, pattern = ",")
 str(IAP_ALL_XP_lookup_all_sep) #$ list of 1
 IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep)
 colnames(IAP_ALL_XP_lookup_all_sep)[1] <- "list"
-IAP_ALL_XP_lookup_all_sep <- trimws(IAP_ALL_XP_lookup_all_sep$list, which="left")
+# remove NAs 
+IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep[!grepl("NA", IAP_ALL_XP_lookup_all_sep$list),])
+colnames(IAP_ALL_XP_lookup_all_sep)[1] <- "list"
+# remove row 1
+IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep[-1,1])
 
+# trimws
+IAP_ALL_XP_lookup_all_sep <- trimws(IAP_ALL_XP_lookup_all_sep[,1], which="left")
+length(IAP_ALL_XP_lookup_all_sep) # 18206
+class(IAP_ALL_XP_lookup_all_sep) # character
+
+# write out to file so I can get all of the sequences in bluewaves 
 write.table(IAP_ALL_XP_lookup_all_sep, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/IAP/IAP_ALL_XP_lookup_all_sep.txt",  
             row.names=FALSE, quote= FALSE, col.names = FALSE)
+
+# transferring file to bluewaves to fetch sequences with `fetch_all_IAP_seq.sh` to get sequences
+
+#### RUN MUSCLE ALIGNMENT AND MAKE TREES IN BLUEWAVES ####
+
+## USE GREPPED LIST OF DROSOPHILA IAPS TO LOOK AT MODEL ORGANISM ORTHOGROUPS 
+# go to path in bluewaves
+# $ pwd 
+# /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/OrthoFinder_2020/OrthoFinder_Data_Analysis/Results_Mar25/IAP
+# run /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Annotate_Gene_Families_Grep_Drosophila_5_8_2020.sh
+# scp data into local folder and run here 
+IAP_drosophila_list <- read_table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/IAP/IAP_protein_IDs_all_genomes_done.txt",col_names = FALSE)
+length(IAP_drosophila_list) # 708
+IAP_all_genomes_list <- as.list(unique(IAP_all_genomes_list$X1))
+
+## Check IAP_XP_CV_list is in IAP_all_genomes_list
+IAP_XP_CV_list %in% IAP_all_genomes_list # all are present
+IAP_XP_CG_list %in% IAP_all_genomes_list # all are present 
+
+IAP_ALL_XP_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(IAP_all_genomes_list, collapse="|"), i))),]
+IAP_ALL_XP_lookup$Orthogroup
+# 151 orthogroups
+
+## Compare orthogroup lists
+IAP_CVlookup$Orthogroup[!(IAP_CVlookup$Orthogroup %in% IAP_ALL_XP_lookup$Orthogroup)] #0
+IAP_CGlookup$Orthogroup[!(IAP_CGlookup$Orthogroup %in% IAP_ALL_XP_lookup$Orthogroup)] #0
+
+## OUTPUT  LIST OF ALL XPS (REGARDLESS OF ORTHOGROUPS) SO I CAN PULL OUT ALL PROTEIN SEQUENCES IN BLUEWAVES
+# Concatenate all into single vector
+IAP_ALL_XP_lookup_all <- unite(IAP_ALL_XP_lookup, col = "all", sep = ",")
+IAP_ALL_XP_lookup_all_sep <- str_split(IAP_ALL_XP_lookup_all, pattern = ",")
+str(IAP_ALL_XP_lookup_all_sep) #$ list of 1
+IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep)
+colnames(IAP_ALL_XP_lookup_all_sep)[1] <- "list"
+# remove NAs 
+IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep[!grepl("NA", IAP_ALL_XP_lookup_all_sep$list),])
+colnames(IAP_ALL_XP_lookup_all_sep)[1] <- "list"
+# remove row 1
+IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep[-1,1])
+
+# trimws
+IAP_ALL_XP_lookup_all_sep <- trimws(IAP_ALL_XP_lookup_all_sep[,1], which="left")
+length(IAP_ALL_XP_lookup_all_sep) # 18206
+class(IAP_ALL_XP_lookup_all_sep) # character
+
+# write out to file so I can get all of the sequences in bluewaves 
+write.table(IAP_ALL_XP_lookup_all_sep, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/IAP/IAP_ALL_XP_lookup_all_sep.txt",  
+            row.names=FALSE, quote= FALSE, col.names = FALSE)
+
+# transferring file to bluewaves to fetch sequences with `fetch_all_IAP_seq.sh` to get sequences
 
 ## CHECK FOR DUPLICATE PROTEIN HITS IN TWO SEPARATE ORTHOGROUPS TO ASSESS NEED FOR MERGE ##
 # Parse and trimws
@@ -658,7 +716,7 @@ IAPC_parse[duplicated(IAPC_parse),] # 0 duplicated
 IAPG_parse[duplicated(IAPG_parse$protein_id),] # some duplicated NA rows
 # No orthogroups need to be combined
 
-## CHECK FOR NON MAPPED PROTEINS FROM INITIAL CVIR CGIG ####
+## CHECK FOR NON MAPPED PROTEINS FROM INITIAL CVIR CGIG ##
 # Were any C_vir or C_gig TLR annotated proteins NOT mapped to Orthogroups?
 IAP_CV_notmapped <- left_join(IAP_XP_CV, IAPC_parse, by ="protein_id") %>% filter(is.na(Orthogroup)) %>% View() # Two IAP 7's were not mapped, baculoviral IAP repeat-containing protein 7-A-like
 IAP_CG_notmapped <- left_join(IAP_XP_CG, IAPG_parse, by ="protein_id") %>% filter(is.na(Orthogroup)) %>% View() # All were mapped
@@ -689,72 +747,6 @@ IAP_CV_CG_parsed_IAP_only <- IAP_CV_CG_parsed %>% group_by(Orthogroup) %>%
 IAP_ALL_XP_annot <- readGFF(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/IAP/IAP_XP_proteins_all_genomes.txt")
 IAP_ALL_XP_annot <- as.data.frame(IAP_ALL_XP_annot)
 IAP_ALL_XP_annot <- IAP_ALL_XP_annot[!duplicated(IAP_ALL_XP_annot$Name),]
-
-
-
-## GET LIST OF ALL ORTHOGROUPS and sequences TO PERFORM MULTIPLE ALIGNMENT WITH MUSCLE ON BLUEWAVES ## 
-# get full list of TLR orthogroups
-write.table(TLR_Orthogroups$Orthogroup, file= "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/TLR_Orthogroups_list.txt", 
-            row.names=FALSE, quote= FALSE, col.names = FALSE)
-# Export this to bluewaves so I can run MUSCLE on each tree 
-
-### ANNOTATE PROTEINS IN BLUEWAVES ###
-
-# Transfer above files to bluewaves:
-# cd /Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR
-#  scp ./* erin_roberts@bluewaves:/data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/OrthoFinder_2020/OrthoFinder_Data_Analysis/Results_Mar25/TLR
-# $ sbatch Annotate_Gene_Families.sh  to find annotations 
-# $ sbatch TCOFFEE_Gene_Families.sh to run trees
-# scp erin_roberts@bluewaves:/data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/OrthoFinder_2020/OrthoFinder_Data_Analysis/Results_Mar25/TLR/*annotated.txt .
-
-## LOAD AND REVIEW ANNOTATIONS
-# Load and parse annotations 
-combined_OG0000019_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0000019.txt_annotated.txt")
-combined_OG0005331_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0005331.txt_annotated.txt")
-combined_OG0012301_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0012301.txt_annotated.txt")
-combined_OG0012607_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0012607.txt_annotated.txt")
-combined_OG0013333_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0013333.txt_annotated.txt")
-combined_OG0015175_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0015175.txt_annotated.txt")
-combined_OG0018123_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0018123.txt_annotated.txt")
-combined_OG0019699_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0019699.txt_annotated.txt")
-combined_OG0021942_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/combined_OG0021942.txt_annotated.txt")
-TLR_Orthogroup_protein_IDs_ALL_annotated <- readGFF("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/TLR/TLR_Orthogroup_protein_IDs_ALL_annotated.txt")
-combined_OG0000019_annotated <- as.data.frame(combined_OG0000019_annotated)
-combined_OG0005331_annotated <- as.data.frame(combined_OG0005331_annotated)
-combined_OG0012301_annotated <- as.data.frame(combined_OG0012301_annotated)
-combined_OG0012607_annotated <- as.data.frame(combined_OG0012607_annotated)
-combined_OG0013333_annotated <- as.data.frame(combined_OG0013333_annotated)
-combined_OG0015175_annotated <- as.data.frame(combined_OG0015175_annotated)
-combined_OG0018123_annotated <- as.data.frame(combined_OG0018123_annotated)
-combined_OG0019699_annotated <- as.data.frame(combined_OG0019699_annotated)
-combined_OG0021942_annotated <- as.data.frame(combined_OG0021942_annotated)
-TLR_Orthogroup_protein_IDs_ALL_annotated <- as.data.frame(TLR_Orthogroup_protein_IDs_ALL_annotated)
-
-# Review the XPs
-combined_OG0000019_annotated$product
-combined_OG0005331_annotated$product 
-combined_OG0012301_annotated$product 
-combined_OG0012607_annotated$product 
-combined_OG0013333_annotated$product 
-combined_OG0015175_annotated$product 
-combined_OG0018123_annotated$product 
-combined_OG0019699_annotated$product 
-combined_OG0021942_annotated$product 
-TLR_Orthogroup_protein_IDs_ALL_annotated$product
-
-# Join full annotation with the species names
-TLRO_parsed_annot <- left_join(TLR_Orthogroup_protein_IDs_ALL_annotated, TLRO_parsed[,c("species_name","protein_id")])
-## COUNT NUMBER OF GENES ACROSS ALL ORTHOGROUPS IN EACH SPECIES
-# Several species have NAs in the gene tag but not for the locus tag (which is similar), and vice versa
-
-TLRO_parsed_annot_uniq_locus <- TLRO_parsed_annot %>% filter(is.na(gene)) 
-TLRO_parsed_annot_uniq_locus <- TLRO_parsed_annot_uniq_locus[!duplicated(TLRO_parsed_annot_uniq_locus$locus_tag),]
-TLRO_parsed_annot_uniq_gene <- TLRO_parsed_annot_uniq_gene %>% filter(!is.na(gene))
-TLRO_parsed_annot_uniq_gene <-  TLRO_parsed_annot_uniq_gene[!duplicated(TLRO_parsed_annot_uniq_gene$gene),]
-TLRO_parsed_annot_uniq_join <- rbind(TLRO_parsed_annot_uniq_locus, TLRO_parsed_annot_uniq_gene)
-TLRO_parsed_annot_uniq_count <- TLRO_parsed_annot_uniq_join %>% group_by(species_name) %>% summarize(gene_count = n())
-
-##### My approach is missing TLRs...meaning that there were TLRs in other trees that were not put into the same orthogroups by OrthoFinder
 
 
 #### Plot Species Tree  ####

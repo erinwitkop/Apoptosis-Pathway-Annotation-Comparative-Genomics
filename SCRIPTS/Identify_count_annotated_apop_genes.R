@@ -468,6 +468,9 @@ C_vir_genes_transcripts_per_gene_family <- full_join(C_vir_rtracklayer_apop_prod
 C_vir_genes_transcripts_per_gene_family_transcripts_per_gene <- full_join(C_vir_genes_transcripts_per_gene_family, C_vir_rtracklayer_apop_product_final_product_joined_avg_transcripts_per_gene_family)
 View(C_vir_genes_transcripts_per_gene_family_transcripts_per_gene)
 
+# Save output to file
+save(C_vir_rtracklayer_apop_product_final_product_joined_by_gene_duplicates, C_vir_genes_transcripts_per_gene_family, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_vir_annotation_gene_family_info.RData")
+
 #### Repeat Analysis using Crassostrea gigas ####
 
 # Apoptosis names in C. gigas genome are lowercase like C.virginica
@@ -921,7 +924,7 @@ View(C_gig_rtracklayer_apop_product_final_product_joined_by_gene_name_final_fami
 
 ## Number of genes with same gene name
 C_gig_rtracklayer_apop_product_final_product_joined_by_gene_duplicates <- C_gig_rtracklayer_apop_product_final_product_joined_by_gene_name_final %>% group_by(gene_name) %>% summarize(gene_duplicates = n())
-#View(C_gig_rtracklayer_apop_product_final_product_joined_by_gene_duplicates)
+View(C_gig_rtracklayer_apop_product_final_product_joined_by_gene_duplicates)
 
 # avg transcripts per gene family
 C_gig_rtracklayer_apop_product_final_product_joined_avg_transcripts_per_gene_family <- C_gig_rtracklayer_apop_product_final_product_joined_by_gene_name_final %>% group_by(apoptosis_names_query) %>%
@@ -931,6 +934,9 @@ C_gig_rtracklayer_apop_product_final_product_joined_avg_transcripts_per_gene_fam
 C_gig_genes_transcripts_per_gene_family <- full_join(C_gig_rtracklayer_apop_product_final_product_joined_by_gene_name_final_families,  C_gig_rtracklayer_apop_product_final_product_joined_by_gene_family)
 C_gig_genes_transcripts_per_gene_family_transcripts_per_gene <- full_join(C_gig_genes_transcripts_per_gene_family, C_gig_rtracklayer_apop_product_final_product_joined_avg_transcripts_per_gene_family)
 View(C_gig_genes_transcripts_per_gene_family_transcripts_per_gene)
+
+# Save output to file
+save(C_gig_rtracklayer_apop_product_final_product_joined_by_gene_duplicates, C_gig_genes_transcripts_per_gene_family, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_annotation_gene_family_info.RData")
 
 #### Combine C_vir and C_gig tables ######
 
