@@ -590,6 +590,14 @@ TLRO_parsed_annot_uniq_count <- TLRO_parsed_annot_uniq_join %>% group_by(species
 
 
 #### IAP ANALYSIS ####
+
+## Load XPs from all genomes that were found in both HMM and Interproscan on bluewaves 
+BIR_XP_list <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_hmmsearch_XP_seq.fa_BIR_repeat_sort_unique.tsv")
+BIR_XP_list <- as.data.frame(BIR_XP_list)
+AIG1_XP_gff <- readGFF(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_hmmsearch_XP_seq_AIG_coil.gff3")
+AIG1_XP_gff <- as.data.frame(AIG1_XP_gff)
+
+
 ## USE CVIR AND CGIG GENOME ANNOTATIONS TO LOOKUP LINES WITH MATCHES TO PROTEINS ##
 length(IAP_XP_CV_list) # 54
 length(IAP_XP_CG_list) # 439
