@@ -3,14 +3,14 @@
 #SBATCH --nodes=1
 #SBATCH --export=NONE
 #SBATCH --exclusive
-#SBATCH -o /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/HMMER_out_5_13_2020
-#SBATCH -e /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/HMMER_error_5_13_2020
+#SBATCH -o /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/HMMER_out_5_15_2020
+#SBATCH -e /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/HMMER_error_5_15_2020
 
 echo "START $(date)"
 
 # Set paths needed
 H=/data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/HMMER
-O=/data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/OrthoFinder_2020
+O=/data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/OrthoFinder_2020/GFFs_All_genomes_comb
 
 # Load HMMER
 module load HMMER/3.2.1-foss-2018b
@@ -28,8 +28,8 @@ hmmbuild --informat afa $H/AIG1.hmm $H/PF04548_full_AIG1_alignment.fa
 #hmmsearch accepts any FASTA file as input. It also accepts EMBL/Uniprot text format.
 #It will automatically determine what format your file is in; you don’t have to say.
 
-hmmsearch -E 0.00001 --tblout $H/BIR_hmmsearch_tbl.out --domtblout $H/BIR_hmmsearch_domtbl.out $H/BIR.hmm $O/All_genomes_prot.faa
-hmmsearch -E 0.00001 --tblout $H/AIG1_hmmsearch_tbl.out --domtblout $H/AIG1_hmmsearch_domtbl.out $H/AIG1.hmm $O/All_genomes_prot.faa
+hmmsearch -E 0.00001 --tblout $H/BIR_hmmsearch_tbl.out --domtblout $H/BIR_hmmsearch_domtbl.out $H/BIR.hmm $O/All_mollusc_prot.faa
+hmmsearch -E 0.00001 --tblout $H/AIG1_hmmsearch_tbl.out --domtblout $H/AIG1_hmmsearch_domtbl.out $H/AIG1.hmm $O/All_mollusc_prot.faa
 
 # -E sets the evalue cutoff , selecting E value cutoff of 10^-5 as my cutoff
 
