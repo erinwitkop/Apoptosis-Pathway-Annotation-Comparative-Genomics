@@ -3,8 +3,8 @@
 #SBATCH --nodes=1
 #SBATCH --export=NONE
 #SBATCH --exclusive
-#SBATCH -o /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/Interproscan_out_5_14_2020
-#SBATCH -e /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/Interproscan_error_5_14_2020
+#SBATCH -o /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/Interproscan_out_5_15_2020
+#SBATCH -e /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/Interproscan_error_5_15_2020
 
 echo "START $(date)"
 
