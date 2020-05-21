@@ -16,210 +16,387 @@ library(tidytext)
 library(rtracklayer)
 library(rentrez)
 library(data.table)
+library(chopper)
 
 #### Import Genomes and Annotations for each species in order to facilitate loookup #####
 #load(file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_annotations.RData")
 #load(file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_apoptosis_products.RData")
+# Load the gff file for all mollusc genomes
+All_molluscs_CDS_gff <- readGFF(file="/Volumes/My Passport for Mac/OrthoFinder_Genomes_Mar_2020_Paper1/GFF3/All_molluscs_CDS.gff")
+All_molluscs_CDS_gff <- as.data.frame(All_molluscs_CDS_gff)
 
-#### Load March_25th Orthogroup Analysis of 31 species from Orthogroup.tsv file ####
+### MANUAL SEARCH OF IAPS AND GIMAPS IN REFERENCE ANNOTATION ####
+Cvir_gff_IAP_family <- C_vir_rtracklayer[grepl("inhibitor of apoptosis", C_vir_rtracklayer$product, ignore.case=TRUE) | grepl("XIAP", C_vir_rtracklayer$product, ignore.case=TRUE) |
+                                            grepl("baculoviral", C_vir_rtracklayer$product, ignore.case=TRUE),]
+Cvir_gff_IAP_family_XP <- Cvir_gff_IAP_family[!duplicated(Cvir_gff_IAP_family$protein_id),]
+Cvir_gff_IAP_family_XP <- Cvir_gff_IAP_family_XP[!is.na(Cvir_gff_IAP_family_XP$protein_id),]
+Cgig_gff_IAP_family <- C_gig_rtracklayer[grepl("inhibitor of apoptosis", C_gig_rtracklayer$product, ignore.case=TRUE) | grepl("XIAP", C_gig_rtracklayer$product, ignore.case=TRUE)|
+                                           grepl("baculoviral", C_gig_rtracklayer$product, ignore.case=TRUE),]
+Cgig_gff_IAP_family_XP <- Cgig_gff_IAP_family[!duplicated(Cgig_gff_IAP_family$protein_id),]
+Cgig_gff_IAP_family_XP <- Cgig_gff_IAP_family_XP[!is.na(Cgig_gff_IAP_family_XP$protein_id),]
+
+Cvir_gff_GIMAP_family <- C_vir_rtracklayer[grepl("IMAP", C_vir_rtracklayer$product, ignore.case=TRUE) | grepl("immune-associated nucleotide-binding protein", C_vir_rtracklayer$product, ignore.case=TRUE),]
+Cvir_gff_GIMAP_family_XP <- Cvir_gff_GIMAP_family[!duplicated(Cvir_gff_GIMAP_family$protein_id),]
+Cvir_gff_GIMAP_family_XP <- Cvir_gff_GIMAP_family_XP[!is.na(Cvir_gff_GIMAP_family_XP$protein_id),]
+
+Cgig_gff_GIMAP_family <- C_gig_rtracklayer[grepl("IMAP", C_gig_rtracklayer$product, ignore.case=TRUE) | grepl("immune-associated nucleotide-binding protein", C_gig_rtracklayer$product, ignore.case=TRUE),]
+Cgig_gff_GIMAP_family_XP <- Cgig_gff_GIMAP_family[!duplicated(Cgig_gff_GIMAP_family$protein_id),]
+Cgig_gff_GIMAP_family_XP <- Cgig_gff_GIMAP_family_XP[!is.na(Cgig_gff_GIMAP_family_XP$protein_id),]
+
+CV_CG_IAP <- c(Cvir_gff_IAP_family_XP$protein_id, Cgig_gff_IAP_family_XP$protein_id)
+CV_CG_GIMAP <- c(Cvir_gff_GIMAP_family_XP$protein_id, Cgig_gff_GIMAP_family_XP$protein_id)
+
+#### Load May15th Orthogroup Analysis of 10 Mollusc species from Orthogroup.tsv file ####
 # Load tsv
+Orthogroups <- read_tsv("/Volumes/My Passport for Mac/OrthoFinder_3_25_2020_Bluewaves_Backup/Results_May15/Orthogroups/Orthogroups.tsv",
+                        col_names = c("Orthogroup","Elysia_chlorotica", "Aplysia_californica", "Crassostrea_gigas", "Lottia_gigantea", 
+                                      "Biomphalaria_glabrata", "Octopus_bimaculoides",
+                                      "C_virginica", "Mizuhopecten_yessoensis",	"Pomacea_canaliculata",	"Octopus_sinensis"))
 
-Orthogroups <- read_tsv("/Volumes/My Passport for Mac/OrthoFinder_3_25_2020_Bluewaves_Backup/Results_Mar25/Orthogroups/Orthogroups.tsv",
-                        col_names = c("Orthogroup","Elysia_chlorotica",	"Amphibalanus_amphitrite","Drosophila_melanogaster",
-                                      "Homo_sapiens",	"Mus_musculus",	"Danio_rerio", "Aplysia_californica",	"Strongylocentrotus_purpuratus","Caenorhabditis_elegans",
-                                      "Saccoglossus_kowalevskii",	"Branchiostoma_floridae",	"Ciona_intestinalis",	"Crassostrea_gigas",	"Lottia_gigantea",
-                                      "Biomphalaria_glabrata", "Priapulus_caudatus","Lingula_anatina","Octopus_bimaculoides",	"Exaiptasia_pallida",	"Branchiostoma_belcheri",
-                                      "Acanthaster_planci",	"Crassostrea_virginica", "Orbicella_faveolata", "Mizuhopecten_yessoensis",
-                                      "Pomacea_canaliculata",	"Pocillopora_damicornis",	"Penaeus_vannamei",	"Daphnia_magna","Acropora_millepora","Octopus_sinensis",	"Actinia_tenebrosa"))
+#### ASSESS ORTHOGROUPS USING ONLY THE CV AND CG REFERENCE ANNOTATIONS ####
+CV_CG_IAP_list <- as.list(CV_CG_IAP)
+CV_CG_GIMAP_list <- as.list(CV_CG_GIMAP)
 
-#### IAP ANALYSIS ####
+CV_CG_IAP_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(CV_CG_IAP_list, collapse="|"), i))),]
+length(CV_CG_IAP_list_lookup$Orthogroup)
+# 27 orthogroups
 
-## Load XPs from all genomes that were found in both HMM and Interproscan on bluewaves 
-BIR_XP_list <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_hmmsearch_XP_seq.fa_1_BIR_repeat_sort_unique.tsv")
-BIR_XP_list <- as.data.frame(BIR_XP_list)
-AIG1_XP_gff <- readGFF(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_hmmsearch_XP_seq.fa_1_AIG_Coil.gff3")
-AIG1_XP_gff <- as.data.frame(AIG1_XP_gff)
+CV_CG_GIMAP_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(CV_CG_GIMAP_list, collapse="|"), i))),]
+length(CV_CG_GIMAP_list_lookup$Orthogroup)
+#9
 
-## Filter out AIG Interproscan results for proteins that have a line with coil and a line with AIG domain and are GIMAP
-AIG1_XP_gff_coil <- AIG1_XP_gff %>% filter(source=="Coils")
-AIG1_XP_gff_coil <- AIG1_XP_gff_coil[!duplicated(AIG1_XP_gff_coil$seqid),]
-AIG1_XP_gff_AIG1 <- AIG1_XP_gff %>% filter(source=="Pfam")
-AIG1_XP_gff_AIG1 <- AIG1_XP_gff_AIG1[!duplicated(AIG1_XP_gff_AIG1$seqid),]
+#### IAP and GIMAP HMMER and INTERPROSCAN ANALYSIS ####
+## LOAD HMM and Interproscan XPS ##
+BIR_XP_gff <- readGFF(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_hmmsearch_eval3_XP_list.fa.gff3")
+BIR_XP_gff <- as.data.frame(BIR_XP_gff)
+length(unique(BIR_XP_gff$seqid)) # 800
 
-# merge the two to get matches in both
-AIG1_XP_gff_GIMAP <- inner_join(AIG1_XP_gff_coil,AIG1_XP_gff_AIG1, by = "seqid")
+AIG1_XP_ALL_gff <- readGFF(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_hmmsearch_eval3_XP_list.fa.gff3")
+AIG1_XP_ALL_gff <- as.data.frame(AIG1_XP_ALL_gff)
+length(unique(AIG1_XP_ALL_gff$seqid)) # 1410 unique proteins 
 
-### GET LIST OF JUST CV AND CGIG HITS FOR IAP AND GIMAP ###
+## Filter out IAP proteins that don't have a BIR repeat domain
+BIR_XP_gff <- BIR_XP_gff %>% group_by(seqid) %>% filter(any(grepl("BIR", signature_desc)))
+length(unique(BIR_XP_gff$seqid)) # 674 if you only include BIR from the CDD search, but 791 if you include all BIR repeat profiles from any source
+colnames(BIR_XP_gff)[1] <- "protein_id"
+
+## Filter out AIG Interproscan results for proteins that have a line with coil and a line with AIG1 from CDD and from Coils
+AIG1_XP_ALL_gff_GIMAP <- AIG1_XP_ALL_gff %>% group_by(seqid) %>% filter(any(source == "CDD" & signature_desc == "AIG1") | any(source == "Pfam" & signature_desc == "AIG1 family"))
+AIG1_XP_ALL_gff_GIMAP <- AIG1_XP_ALL_gff_GIMAP %>% group_by(seqid) %>% filter(any(source == "Coils" & Name == "Coil"))
+length(unique(AIG1_XP_ALL_gff_GIMAP$seqid)) # 403
+
+# Check annotations
+colnames(AIG1_XP_ALL_gff_GIMAP)[1] <- "protein_id"
+class(All_molluscs_CDS_gff$protein_id) # character
+AIG1_XP_ALL_gff_GIMAP$protein_id <- as.character(AIG1_XP_ALL_gff_GIMAP$protein_id)
+AIG1_XP_ALL_gff_GIMAP_annot <- left_join(AIG1_XP_ALL_gff_GIMAP[,c("protein_id")], All_molluscs_CDS_gff[,c("protein_id","product","gene")])
+AIG1_XP_ALL_gff_GIMAP_annot <- AIG1_XP_ALL_gff_GIMAP_annot[!duplicated(AIG1_XP_ALL_gff_GIMAP_annot$protein_id),]
+
+class(BIR_XP_gff$protein_id) # factor
+BIR_XP_gff$protein_id <- as.character(BIR_XP_gff$protein_id)
+BIR_XP_gff_annot <- left_join(BIR_XP_gff[,c("protein_id")], All_molluscs_CDS_gff[,c("protein_id","product","gene")])
+BIR_XP_gff_annot <- BIR_XP_gff_annot[!duplicated(BIR_XP_gff_annot$protein_id),]
+
+## Get the species name for each sequence
+# Get species names using seqid (assembly ID)
+BIR_XP_gff_seqid <- left_join(BIR_XP_gff, unique(All_molluscs_CDS_gff[,c("protein_id","seqid")]))
+AIG1_XP_ALL_gff_GIMAP_seqid <- left_join(AIG1_XP_ALL_gff_GIMAP, unique(All_molluscs_CDS_gff[,c("protein_id","seqid")]))
+length(unique(BIR_XP_gff_seqid$seqid)) # 194
+length(unique(AIG1_XP_ALL_gff_GIMAP_seqid$seqid)) # 119
+
+write.table(unique(BIR_XP_gff_seqid$seqid), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_seqid.txt",
+            quote=FALSE, row.names=FALSE, col.names = FALSE)
+write.table(unique(AIG1_XP_ALL_gff_GIMAP_seqid$seqid), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_seqid.txt",
+            quote=FALSE, row.names=FALSE, col.names = FALSE)
+# In batch entrez load file and search Nucleotide database, export summary to file
+# edit
+#$ sed '/^$/d' BIR_species_list.txt > BIR_species_list_blanks_rm.txt
+#$ sed '/^$/d' GIMAP_species_list.txt > GIMAP_species_list_blanks_rm.txt
+## paste every three lines together
+#$ paste -d ", "  - - - < GIMAP_species_list_blanks_rm.txt > GIMAP_species_list_blanks_rm_paste.txt
+#$ paste -d ", "  - - - < BIR_species_list_blanks_rm.txt > BIR_species_list_blanks_rm_paste.txt
+# edited in excel
+
+# Load into R
+GIMAP_seqid <- read.csv(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_species_list_Acc.csv")
+IAP_seqid <- read.csv(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_species_list_Acc.csv")
+
+# Combine lists
+Species_seqid <- rbind(GIMAP_seqid,IAP_seqid)
+
+# combine with genome to add on species ID
+All_molluscs_CDS_gff <- left_join(All_molluscs_CDS_gff, unique(Species_seqid))
+
+# Join species ID with proteins and gene info
+BIR_XP_gff_species <- left_join(BIR_XP_gff, unique(All_molluscs_CDS_gff[,c("protein_id","Species","product","gene","locus_tag")]))
+length(unique(BIR_XP_gff_species$protein_id)) # 791
+BIR_XP_gff_species %>% filter(is.na(Species)) #0
+AIG1_XP_ALL_gff_GIMAP_species <- left_join(AIG1_XP_ALL_gff_GIMAP, unique(All_molluscs_CDS_gff[,c("protein_id","Species","product","gene","locus_tag")]))
+length(unique(AIG1_XP_ALL_gff_GIMAP_species$protein_id)) # 403
+AIG1_XP_ALL_gff_GIMAP_species %>% filter(is.na(Species)) #0
+
+## Were any proteins added or missing with HMMER/Interproscan compare to genome? 
+BIR_XP_gff_CG <- BIR_XP_gff_species %>% filter(Species=="Crassostrea_gigas")
+CG_IAP_Hmmer_added <- BIR_XP_gff_CG[!(BIR_XP_gff_CG$protein_id %in% Cgig_gff_IAP_family_XP$protein_id),] # 15 proteins added by HMMER/interproscan that were not annotated in genome
+CG_IAP_Hmmer_added[!duplicated(CG_IAP_Hmmer_added$protein_id),] # 15
+CG_IAP_Hmmer_missing <- Cgig_gff_IAP_family_XP[!(Cgig_gff_IAP_family_XP$protein_id %in% BIR_XP_gff_CG$protein_id),] # 5 proteins from original list not found
+nrow(CG_IAP_Hmmer_missing[!duplicated(CG_IAP_Hmmer_missing$protein_id),]) # 5
+
+BIR_XP_gff_CV <- BIR_XP_gff_species %>% filter(Species=="Crassostrea_virginica")
+CV_IAP_Hmmer_added <- BIR_XP_gff_CV[!(BIR_XP_gff_CV$protein_id %in% Cvir_gff_IAP_family_XP$protein_id),] # 39 proteins added by HMMER/interproscan that were not annotated in genome
+CV_IAP_Hmmer_added[!duplicated(CV_IAP_Hmmer_added$protein_id),] # 39
+CV_IAP_Hmmer_missing <- Cvir_gff_IAP_family_XP[!(Cvir_gff_IAP_family_XP$protein_id %in% BIR_XP_gff_CV$protein_id),] # 11 proteins from original list not found
+nrow(CV_IAP_Hmmer_missing[!duplicated(CV_IAP_Hmmer_missing$protein_id),]) # 11
+
+AIG1_XP_ALL_gff_GIMAP_CG <- AIG1_XP_ALL_gff_GIMAP_species %>% filter(Species=="Crassostrea_gigas")
+CG_GIMAP_Hmmer_added <- AIG1_XP_ALL_gff_GIMAP_CG[!(AIG1_XP_ALL_gff_GIMAP_CG$protein_id %in% Cgig_gff_GIMAP_family_XP$protein_id),] # 4 proteins added by HMMER/interproscan that were not annotated in genome
+CG_GIMAP_Hmmer_added[!duplicated(CG_GIMAP_Hmmer_added$protein_id),] # 4
+CG_GIMAP_Hmmer_missing <- Cgig_gff_GIMAP_family_XP[!(Cgig_gff_GIMAP_family_XP$protein_id %in% AIG1_XP_ALL_gff_GIMAP_CG$protein_id),] #  proteins from original list not found
+nrow(CG_GIMAP_Hmmer_missing[!duplicated(CG_GIMAP_Hmmer_missing$protein_id),]) # 12 proteins not found from original list
+
+#Count IAP genes across species to compare with Lu et al. 2020 paper
+AIG1_XP_ALL_gff_GIMAP_species_gene_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>%  distinct(gene) %>% summarise(gene_count = n())
+AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>%  distinct(locus_tag) %>% summarise(locus_tag_count = n())
+AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count <- left_join(AIG1_XP_ALL_gff_GIMAP_species_gene_count, AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count)
+AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count_total <- AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count %>% mutate(total = (gene_count + locus_tag_count))
+
+#Count GIMAP and IAN genes across species to compare with Lu et al. 2020 paper
+AIG1_XP_ALL_gff_GIMAP_species_gene_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>%  distinct(gene) %>% summarise(gene_count = n())
+AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>%  distinct(locus_tag) %>% summarise(locus_tag_count = n())
+AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count <- left_join(AIG1_XP_ALL_gff_GIMAP_species_gene_count, AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count)
+AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count_total <- AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count %>% mutate(total = (gene_count + locus_tag_count))
+# There are a few extra in my groups as compare to the Lu et al. paper, hopefully the trees help this 
+
+
+## Review Matches
+BIR_XP_gff_species 
+AIG1_XP_ALL_gff_GIMAP_species
+View(unique(BIR_XP_gff_species$product)) # has one phosphatase and actin regulator 4-B-like but does have the IAP repeats 
+View(unique(AIG1_XP_ALL_gff_GIMAP_species$product))
+# Potentially erroneous proteins in GIMAP:
+# calponin homology domain-containing protein DDB_G0272472-like
+# myb-like protein X
+# PREDICTED: dentin sialophosphoprotein-like
+# PREDICTED: GTPase Era, mitochondrial-like
+# PREDICTED: mitochondrial ribosome-associated GTPase 1-like
+# PREDICTED: reticulocyte-binding protein 2 homolog a isoform X2
+# PREDICTED: putative protein PHLOEM PROTEIN 2-LIKE A3
+# PREDICTED: rho-associated protein kinase let-502-like
+# reticulocyte-binding protein 2 homolog a-like
+# transmembrane GTPase fzo-like
+# trichohyalin-like
+# vicilin-like seed storage protein At2g18540 isoform X1
+# Reviewing Domains and comparing list to Lu et al., 2020
+# Lu et al. 2020 counted rho-associated protein kinase let-502-like , putative protein PHLOEM PROTEIN 2-LIKE A3 as a GIMAP, 
+# Lu et al. 2020 called PREDICTED: dentin sialophosphoprotein-like
+# the P-loop_NTPase Superfamily seems to be what is brining up these extra hits
+# Are there other domains that are specific to the erroneous proteins 
+
+# Examine domains from these proteins
+AIG1_CDD_GIMAP_questioned_hits <- AIG1_XP_ALL_gff_GIMAP_species[grepl("calponin",AIG1_XP_ALL_gff_GIMAP_species$product, ignore.case = TRUE) | grepl("myb", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) |
+                                                   grepl("dentin sialophosphoprotein", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("GTPase Era", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | 
+                                                   grepl("mitochondrial", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("trichohyalin", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE)|
+                                                   grepl("reticulocyte", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("PHLOEM", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) |
+                                                   grepl("rho", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("fzo", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("vicilin", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE),]
+
+# What domains do the GIMAPs have?
+AIG1_CDD_GIMAP_only <- AIG1_XP_ALL_gff_GIMAP_species[grepl("IMAP",AIG1_XP_ALL_gff_GIMAP_species$product) | grepl("immune", AIG1_XP_ALL_gff_GIMAP_species$product),]
+AIG1_CDD_GIMAP_only_domains <- AIG1_CDD_GIMAP_only %>% group_by(signature_desc) %>% summarise(count = n())
+length(unique(AIG1_CDD_GIMAP_only$protein_id)) # 242 proteins 
+AIG1_CDD_GIMAP_only_domains$type <-"GIMAP"
+
+# What domains are in non GIMAPs?
+AIG1_CDD_GIMAP_non_gimap <- AIG1_XP_ALL_gff_GIMAP_species[!grepl("IMAP", AIG1_XP_ALL_gff_GIMAP_species$product) | !grepl("uncharacterized",AIG1_XP_ALL_gff_GIMAP_species$product) | !grepl("immune", AIG1_XP_ALL_gff_GIMAP_species$product),]
+AIG1_CDD_GIMAP_non_gimap_domains <- AIG1_CDD_GIMAP_non_gimap  %>% group_by(Short.name) %>% summarise(count = n())
+AIG1_CDD_GIMAP_non_gimap_domains$type <-"non-GIMAP"
+
+# What domains are unique to the non-GIMAPS?
+AIG1_CDD_GIMAP_non_gimap_domains_NOT_SHARED <-AIG1_CDD_GIMAP_non_gimap_domains[!(AIG1_CDD_GIMAP_non_gimap_domains$Short.name %in%AIG1_CDD_GIMAP_only_domains$Short.name),]
+# Pkc domains, STKc, FN3
+
+# try removing the Pkc and STK containing domain proteins to see if this removes erroneous non GIMAP hits
+AIG1_CDD_GIMAP_no_Pkc_STK <- AIG1_CDD_GIMAP %>% group_by(protein_id) %>% filter(all(!grepl("PKc",ignore.case = TRUE, Short.name) | !grepl("PKc",ignore.case = TRUE, Short.name))) 
+View(unique(AIG1_CDD_GIMAP_no_Pkc_STK$product))
+
+# compare to both gimap and non gimap lists
+setdiff(AIG1_CDD_GIMAP_only$protein_id, AIG1_CDD_GIMAP_no_Pkc_STK$protein_id) #0 none we wanted were remove
+setdiff(AIG1_CDD_GIMAP_no_Pkc_STK$protein_id, AIG1_CDD_GIMAP_only$protein_id) # 184 remain that weren't removed
+
+### FOR GIMAP GENES, PROCEEDING FORWARD WITH USING THE ORTHOGROUPS TO FIND MISSED PROTEINS 
+
+### GET LIST OF JUST CV AND CGIG HMMER HITS FOR IAP AND GIMAP ###
 #IAP
 colnames(BIR_XP_list)[1] <- "protein_id"
 BIR_XP_list_CV <- left_join(BIR_XP_list, C_vir_rtracklayer[,c("protein_id","product","gene")])
 BIR_XP_list_CV <- drop_na(BIR_XP_list_CV)
 BIR_XP_list_CV <- unique(BIR_XP_list_CV)
 nrow(BIR_XP_list_CV) # 164 unique proteins after the HMM and Interproscan
+# how many are uncharacterized proteins
+BIR_XP_list_CV_uncharacterized <- BIR_XP_list_CV[grepl("uncharacterized", BIR_XP_list_CV$product),]
+nrow(BIR_XP_list_CV_uncharacterized) # 39
 BIR_XP_list_CV %>% group_by(gene) %>% dplyr::summarise(gene_count=n()) # 75 genes
+BIR_XP_list_CV$species <- "C_vir"
 
 BIR_XP_list_CG <- left_join(BIR_XP_list, C_gig_rtracklayer[,c("protein_id","product","gene")])
 BIR_XP_list_CG <- drop_na(BIR_XP_list_CG)
 BIR_XP_list_CG <- unique(BIR_XP_list_CG)
 BIR_XP_list_CG %>% group_by(gene) %>% dplyr::summarise(gene_count=n()) # 39 genes
+# how many are uncharacterized proteins
+BIR_XP_list_CG_uncharacterized <- BIR_XP_list_CG[grepl("uncharacterized", BIR_XP_list_CG$product),]
+nrow(BIR_XP_list_CG_uncharacterized) # 14
 nrow(BIR_XP_list_CG) # 73 unique proteins after the HMM and Interproscan
+BIR_XP_list_CG$species <- "C_gig"
 BIR_XP_combined <- rbind(BIR_XP_list_CV, BIR_XP_list_CG)
 
-#GIMAP
-AIG1_XP_gff_GIMAP <- as.data.frame(AIG1_XP_gff_GIMAP$seqid)
-colnames(AIG1_XP_gff_GIMAP)[1] <- "protein_id"
-AIG1_XP_gff_GIMAP_CV <- left_join(AIG1_XP_gff_GIMAP, C_vir_rtracklayer[,c("protein_id","product","gene")])
-AIG1_XP_gff_GIMAP_CV <- drop_na(AIG1_XP_gff_GIMAP_CV)
-AIG1_XP_gff_GIMAP_CV <- unique(AIG1_XP_gff_GIMAP_CV)
-nrow(AIG1_XP_gff_GIMAP_CV) # 109 unique proteins after the HMM and Interproscan
-AIG1_XP_gff_GIMAP_CV %>% group_by(gene) %>% dplyr::summarise(gene_count=n()) # 59 genes
+#### USE FULL IAP AND GIMAP LISTS TO PULL OUT ALL MOLLUSC ORTHOGROUPS ####
+BIR_CDD_BIR_list <- as.list(unique(BIR_CDD_BIR$protein_id))
+BIR_CDD_BIR_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(BIR_CDD_BIR_list, collapse="|"), i))),]
+length(BIR_CDD_BIR_list_lookup$Orthogroup)
+# 34 orthogroups
 
-AIG1_XP_gff_GIMAP_CG <- left_join(AIG1_XP_gff_GIMAP, C_gig_rtracklayer[,c("protein_id","product","gene")])
-AIG1_XP_gff_GIMAP_CG <- drop_na(AIG1_XP_gff_GIMAP_CG)
-AIG1_XP_gff_GIMAP_CG <- unique(AIG1_XP_gff_GIMAP_CG)
-AIG1_XP_gff_GIMAP_CG %>% group_by(gene) %>% dplyr::summarise(gene_count=n()) # 39 genes
-nrow(AIG1_XP_gff_GIMAP_CG) # 30 unique proteins after the HMM and Interproscan
+#Compare to list from original orthogroup search using only proteins in annotation
+setdiff(CV_CG_IAP_list_lookup$Orthogroup, BIR_CDD_BIR_list_lookup$Orthogroup) # "OG0003807" "OG0015932" "OG0016100" "OG0018222" "OG0020281"
+setdiff(BIR_CDD_BIR_list_lookup$Orthogroup, CV_CG_IAP_list_lookup$Orthogroup) # "OG0001642" "OG0002611" "OG0004344" "OG0007118" "OG0011865" "OG0011926" "OG0012919" "OG0014276" "OG0016483" "OG0017158" "OG0017983" "OG0018491"
 
-# combine lists
-AIG1_XP_gff_GIMAP_combined <- rbind(AIG1_XP_gff_GIMAP_CV, AIG1_XP_gff_GIMAP_CG)
+AIG1_CDD_GIMAP_only_list <- as.list(unique(AIG1_CDD_GIMAP_only$protein_id))
+length(AIG1_CDD_GIMAP_only_list)
+AIG1_CDD_GIMAP_only_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(AIG1_CDD_GIMAP_only_list, collapse="|"), i))),]
+length(AIG1_CDD_GIMAP_only_list_lookup$Orthogroup)
+#9
 
-### USE FULL IAP AND GIMAP LISTS TO PULL OUT ORTHOGROUPS ###
-BIR_XP_list <- as.list(BIR_XP_list$V1)
-BIR_XP_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(BIR_XP_list, collapse="|"), i))),]
-BIR_XP_list_lookup$Orthogroup
-# 148 orthogroups
+setdiff(CV_CG_GIMAP_list_lookup$Orthogroup,AIG1_CDD_GIMAP_only_list_lookup$Orthogroup) # "OG0013109" "OG0016155"
+setdiff(AIG1_CDD_GIMAP_only_list_lookup$Orthogroup, CV_CG_GIMAP_list_lookup$Orthogroup) # "OG0000075" "OG0002413"
 
-AIG1_XP_gff_GIMAP <- as.list(AIG1_XP_gff_GIMAP$seqid)
-length(AIG1_XP_gff_GIMAP)
-AIG1_XP_gff_GIMAP_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(AIG1_XP_gff_GIMAP, collapse="|"), i))),]
-AIG1_XP_gff_GIMAP_list_lookup$Orthogroup
-
-### USE CG AND CV SPECIFIC IAP AND GIMAP LISTS TO PULL OUT ORTHOGROUPS ###
+#### USE CG AND CV SPECIFIC IAP AND GIMAP HMMER/INTERPROSCAN LISTS TO PULL OUT ORTHOGROUPS ###
 # Use CV and CG only lists to pull out orthogroups
 BIR_XP_combined_list <- as.list(BIR_XP_combined$protein_id)
 BIR_XP_list_lookup_CV_CG <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(BIR_XP_combined_list, collapse="|"), i))),]
-BIR_XP_list_lookup$Orthogroup
-# 15 orthogroups
+length(BIR_XP_list_lookup_CV_CG$Orthogroup)
+# 25 orthogroups, 11 are added when you include all the mollusc proteins
 
-AIG1_XP_gff_GIMAP_list <- as.list(AIG1_XP_gff_GIMAP_combined$protein_id)
-length(AIG1_XP_gff_GIMAP_list)
-AIG1_XP_gff_GIMAP_list_lookup_CV_CG <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(AIG1_XP_gff_GIMAP_list, collapse="|"), i))),]
-AIG1_XP_gff_GIMAP_list_lookup_CV_CG$Orthogroup
-#
+#Compare to list from original orthogroup search using only proteins in annotation
+setdiff(CV_CG_IAP_list_lookup$Orthogroup, BIR_XP_list_lookup_CV_CG$Orthogroup) # "OG0003807" "OG0006831" "OG0015932" "OG0016100" "OG0018222" "OG0020281"
+setdiff(BIR_XP_list_lookup_CV_CG$Orthogroup, CV_CG_IAP_list_lookup$Orthogroup) # "OG0004344" "OG0011865" "OG0012919" "OG0017983"
 
+## GIMAP: FOR GIMAP STARTING WITH THE GIMAP AND IAN ONLY TO SEE IF I CAN GET ANY MISSED UNCHARACTERIZED FROM THE ORTHORGOUPS 
+AIG1_CDD_GIMAP_only_CV_CG <- AIG1_CDD_GIMAP_only %>% filter(species=="Crassostrea virginia" | species == "Crassostrea gigas")
+AIG1_CDD_GIMAP_only_CV_CG_list <- unique(AIG1_CDD_GIMAP_only_CV_CG$protein_id)
 
-## EXAMINE FULL ORTHOGROUP HITS THAT ARE NOT NA FOR C. VIR AND C. GIG ###
-BIR_XP_list_lookup_CV <- BIR_XP_list_lookup %>% filter(!is.na(Crassostrea_virginica))
-length(BIR_XP_list_lookup_CV$Orthogroup) # 85
+AIG1_CDD_GIMAP_only_CV_CG_list <- as.list(AIG1_CDD_GIMAP_only_CV_CG_list)
+length(AIG1_CDD_GIMAP_only_CV_CG_list)
+AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(AIG1_CDD_GIMAP_only_CV_CG_list, collapse="|"), i))),]
+AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG$Orthogroup
+#4 orthogroups, 5  are added when you look at all molluscs 
+AIG1_CDD_GIMAP_only_list_lookup
 
-BIR_XP_list_lookup_CG <- BIR_XP_list_lookup %>% filter(!is.na(Crassostrea_gigas))
-length(BIR_XP_list_lookup_CG$Orthogroup) # 86
+#Compare to list from original orthogroup search using only proteins in annotation
+setdiff(CV_CG_GIMAP_list_lookup$Orthogroup,AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG$Orthogroup) # "OG0013109" "OG0014769" "OG0014770" "OG0016155" "OG0018033"
+setdiff(AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG$Orthogroup, CV_CG_GIMAP_list_lookup$Orthogroup) # 0
 
-AIG1_XP_gff_GIMAP_list_lookup
+#### EXAMINE ALL MOLLUSCS IAP ORTHOGROUP HITS #####
 
-## EXAMINE CV AND CG ORTHOGROUP HITS ####
+# Get full list of proteins for each species by transposing and uniting
+# Transpose the rows and column 
+BIR_CDD_BIR_list_lookup_transpose <- t(BIR_CDD_BIR_list_lookup)
+class(BIR_CDD_BIR_list_lookup_transpose) # matrix
+BIR_CDD_BIR_list_lookup_transpose <- as.data.frame(BIR_CDD_BIR_list_lookup_transpose)
+# unite all columns into one column 
+BIR_CDD_BIR_list_lookup_transpose_united <- unite(BIR_CDD_BIR_list_lookup_transpose[,c(1:34)], full_protein_list, sep=",")
+# remove NAs
+BIR_CDD_BIR_list_lookup_transpose_united$full_protein_list <- gsub("NA,", "", BIR_CDD_BIR_list_lookup_transpose_united$full_protein_list)
+BIR_CDD_BIR_list_lookup_transpose_united$full_protein_list <- gsub(",NA", "", BIR_CDD_BIR_list_lookup_transpose_united$full_protein_list)
+BIR_CDD_BIR_list_lookup_transpose_united$full_protein_list <- gsub("NA", "",  BIR_CDD_BIR_list_lookup_transpose_united$full_protein_list)
+# Put all into single vector for annot and export to make tree
+# Concatenate each into single vector
+BIR_CDD_BIR_list_lookup_transpose_united_all <- 
+  BIR_CDD_BIR_list_lookup_transpose_united %>% summarise(combined =paste(full_protein_list, collapse=","))
+BIR_CDD_BIR_list_lookup_transpose_united_all_col <- data.frame(protein_id = unlist(strsplit(as.character(BIR_CDD_BIR_list_lookup_transpose_united_all$combined), ",")))
+# trimws and remove orthogroups
+BIR_CDD_BIR_list_lookup_transpose_united_all_col <- BIR_CDD_BIR_list_lookup_transpose_united_all_col[-c(1:34),]
+BIR_CDD_BIR_list_lookup_transpose_united_all_col <- trimws(BIR_CDD_BIR_list_lookup_transpose_united_all_col, which="left")
 
-## OUTPUT  LIST OF ALL XPS (REGARDLESS OF ORTHOGROUPS) SO I CAN PULL OUT ALL PROTEIN SEQUENCES IN BLUEWAVES
-# Concatenate all into single vector
-IAP_ALL_XP_lookup_all <- unite(IAP_ALL_XP_lookup, col = "all", sep = ",")
-IAP_ALL_XP_lookup_all_sep <- str_split(IAP_ALL_XP_lookup_all, pattern = ",")
-str(IAP_ALL_XP_lookup_all_sep) #$ list of 1
-IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep)
-colnames(IAP_ALL_XP_lookup_all_sep)[1] <- "list"
-# remove NAs 
-IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep[!grepl("NA", IAP_ALL_XP_lookup_all_sep$list),])
-colnames(IAP_ALL_XP_lookup_all_sep)[1] <- "list"
-# remove row 1
-IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep[-1,1])
+# How many XPs identified?
+length(BIR_CDD_BIR_list_lookup_transpose_united_all_col) # 595
+length(BIR_CDD_BIR_list) # 787
 
-# trimws
-IAP_ALL_XP_lookup_all_sep <- trimws(IAP_ALL_XP_lookup_all_sep[,1], which="left")
-length(IAP_ALL_XP_lookup_all_sep) # 18206
-class(IAP_ALL_XP_lookup_all_sep) # character
+# Are there any duplicated proteins found in orthogroups?
+BIR_CDD_BIR_list_lookup_transpose_united_all_col[duplicated(BIR_CDD_BIR_list_lookup_transpose_united_all_col)] # 0 duplicated
 
-# write out to file so I can get all of the sequences in bluewaves 
-write.table(IAP_ALL_XP_lookup_all_sep, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/IAP/IAP_ALL_XP_lookup_all_sep.txt",  
-            row.names=FALSE, quote= FALSE, col.names = FALSE)
+# Were all the original proteins found? - NO
+setdiff(BIR_CDD_BIR_list,  BIR_CDD_BIR_list_lookup_transpose_united_all_col) # 269 proteins are present in original list that are not in the Orthogroup list
+setdiff(BIR_CDD_BIR_list_lookup_transpose_united_all_col, BIR_CDD_BIR_list) # 77 are added in that are not in the original orthogroup list
 
-# transferring file to bluewaves to fetch sequences with `fetch_all_IAP_seq.sh` to get sequences
+## Find genes in original HMMER list for each protein NOTE THAT Elysia chlorotica, Lottia gigantea ONLY HAVE LOCUS TAGS AND NOT GENES
+BIR_CDD_BIR_genes <- left_join(unique(BIR_CDD_BIR[,c("protein_id","product","species")]), All_molluscs_CDS_gff[,c("protein_id","gene")])
+BIR_CDD_BIR_genes <- left_join(BIR_CDD_BIR_genes[,c("protein_id","product","gene","species")], All_molluscs_CDS_gff[,c("protein_id","locus_tag","gene")])
+  # are any still unfilled?
+#BIR_CDD_BIR_genes %>% filter(is.na(gene) & is.na(locus_tag)) %>% View() # none
+# remove duplicates
+BIR_CDD_BIR_genes <- BIR_CDD_BIR_genes[!duplicated(BIR_CDD_BIR_genes[,c("gene","locus_tag")]),]
 
-#### RUN MAFFT ALIGNMENT AND MAKE TREES IN BLUEWAVES ####
-#Mafft chosen because of multi-threading capabilities
+# How many total genes or locus tags?
+nrow(BIR_CDD_BIR_genes) # 377
 
+## Find genes in full Orthogroup list and compare
+BIR_CDD_BIR_list_lookup_transpose_united_all_col_df <- as.data.frame(BIR_CDD_BIR_list_lookup_transpose_united_all_col)
+colnames(BIR_CDD_BIR_list_lookup_transpose_united_all_col_df)[1]<-"protein_id"
+BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes <- left_join(BIR_CDD_BIR_list_lookup_transpose_united_all_col_df, All_molluscs_CDS_gff[,c("protein_id","gene","product")])
+BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes <- left_join(BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes, All_molluscs_CDS_gff[,c("protein_id","locus_tag","gene","product")])
+# are any still unfilled?
+BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes %>% filter(is.na(gene) & is.na(locus_tag)) %>% View() # none
+# remove duplicates
+BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes <- BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes[!duplicated(BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes[,c("gene","locus_tag")]),]
+# how many genes
+nrow(BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes ) # 304
 
-## OUTPUT  LIST OF ALL XPS (REGARDLESS OF ORTHOGROUPS) SO I CAN PULL OUT ALL PROTEIN SEQUENCES IN BLUEWAVES
-# Concatenate all into single vector
-IAP_ALL_XP_lookup_all <- unite(IAP_ALL_XP_lookup, col = "all", sep = ",")
-IAP_ALL_XP_lookup_all_sep <- str_split(IAP_ALL_XP_lookup_all, pattern = ",")
-str(IAP_ALL_XP_lookup_all_sep) #$ list of 1
-IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep)
-colnames(IAP_ALL_XP_lookup_all_sep)[1] <- "list"
-# remove NAs 
-IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep[!grepl("NA", IAP_ALL_XP_lookup_all_sep$list),])
-colnames(IAP_ALL_XP_lookup_all_sep)[1] <- "list"
-# remove row 1
-IAP_ALL_XP_lookup_all_sep <- as.data.frame(IAP_ALL_XP_lookup_all_sep[-1,1])
+## Write out to table the gene list to use for gathering sequences for MAFFT 
+# Collapse the locus tag and gene columns into one
+BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes <- BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes %>% 
+        unite(gene_locus_tag, c("gene","locus_tag"))
+BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$gene_locus_tag <- str_remove(BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$gene_locus_tag, "NA_")
+BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$gene_locus_tag <- str_remove(BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$gene_locus_tag, "_NA")
 
-# trimws
-IAP_ALL_XP_lookup_all_sep <- trimws(IAP_ALL_XP_lookup_all_sep[,1], which="left")
-length(IAP_ALL_XP_lookup_all_sep) # 18206
-class(IAP_ALL_XP_lookup_all_sep) # character
+write.table(BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$gene_locus_tag, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_mollusc_orthogroups_gene_locus_tag_list.txt",
+            row.names = FALSE, col.names = FALSE, quote=FALSE)
 
-# write out to file so I can get all of the sequences in bluewaves 
-write.table(IAP_ALL_XP_lookup_all_sep, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/IAP/IAP_ALL_XP_lookup_all_sep.txt",  
-            row.names=FALSE, quote= FALSE, col.names = FALSE)
+## Were all the original HMMER/Interproscan genes found in the Orthofinder results?
+IAP_Orthogroup_missing_genes <- BIR_CDD_BIR_genes[!(BIR_CDD_BIR_genes$gene %in% BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$gene),]
+setdiff(BIR_CDD_BIR_genes$locus_tag,  BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$locus_tag) # 1  locus tag added
+# 108 genes are missing what are the missing genes?
+  # Mostly missing PREDICTED genes, partial genes, and uncharacterized protein genes. Perhaps Orthofinder was too stringent?
 
-# transferring file to bluewaves to fetch sequences with `fetch_all_IAP_seq.sh` to get sequences
+## Were any genes added that weren't in HMMER?
+IAP_Orthogroup_added_genes <- BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes[!(BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$gene %in% BIR_CDD_BIR_genes$gene),]
+setdiff(BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$locus_tag,  BIR_CDD_BIR_genes$locus_tag) # two new locus tags added
 
-## CHECK FOR DUPLICATE PROTEIN HITS IN TWO SEPARATE ORTHOGROUPS TO ASSESS NEED FOR MERGE ##
-# Parse and trimws
-IAPC <- strsplit(IAP_ALL_XP_lookup$Crassostrea_virginica, split = ",")
-IAPC_parse <-data.frame(Orthogroup = rep(IAP_ALL_XP_lookup$Orthogroup, sapply(IAPC, length)), protein_id = unlist(IAPC))
-# trimws for checking list later 
+## Are all the CV and CG IAP genes found from the genome in the Orthogroup search ?
+Cgig_gff_IAP_family_XP[!(Cgig_gff_IAP_family_XP$gene %in% BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$gene),] # 10 CG genes were missed by Orthofinder that were annotated in genome
+Cvir_gff_IAP_family_XP[!(Cvir_gff_IAP_family_XP$gene %in% BIR_CDD_BIR_list_lookup_transpose_united_all_col_df_genes$gene),] # 14 CV genes were missed by Orthofinder that were annotated in genome
 
-IAPC_parse$protein_id <- trimws(IAPC_parse$protein_id, which=c("left"))
+## Were any genes added by HMMER that were not in the genome? 
+BIR_CDD_BIR_genes_CG <- BIR_CDD_BIR_genes %>% filter(species=="Crassostrea gigas")
+BIR_CDD_BIR_genes_CG[!(BIR_CDD_BIR_genes_CG$gene %in% Cgig_gff_IAP_family_XP$gene),] # 8 uncharacterized Loci genes were added by HMMER that were not annotated in genome
 
-IAPG <- strsplit(IAP_ALL_XP_lookup$Crassostrea_gigas, split = ",")
-IAPG_parse <-data.frame(Orthogroup = rep(IAP_ALL_XP_lookup$Orthogroup, sapply(IAPG, length)), protein_id  = unlist(IAPG))
-# trimws for checking list later 
-IAPG_parse$protein_id <- trimws(IAPG_parse$protein_id, which=c("left"))
+BIR_CDD_BIR_genes_CV <- BIR_CDD_BIR_genes %>% filter(species=="Crassostrea virginica")
+BIR_CDD_BIR_genes_CV[!(BIR_CDD_BIR_genes_CV$gene %in% Cvir_gff_IAP_family_XP$gene),] # 14 uncharacterized Loci genes were added by HMMER that were not annotated in genome
 
-# check for duplicated protein names
-IAPC_parse[duplicated(IAPC_parse),] # 0 duplicated
-IAPG_parse[duplicated(IAPG_parse$protein_id),] # some duplicated NA rows
-# No orthogroups need to be combined
+## Are all the CV and CG IAP genes found from the genome in the HMMER/Interproscan search ?
+Cgig_gff_IAP_family_XP[!(Cgig_gff_IAP_family_XP$gene %in% BIR_CDD_BIR_genes$gene),] # 4 CG genes were missed by HMMER that were annotated in genome
+    #LOC105333301 # only the zinc finger domain
+    #LOC105336740 # only the RingUbox domain 
+    #LOC105338773 # only has the UBCc no BIR
+    #LOC105338774 # only has UBCc domains no BIR
+Cvir_gff_IAP_family_XP[!(Cvir_gff_IAP_family_XP$gene %in% BIR_CDD_BIR_genes$gene),] # 6 CV genes were missed by HMMER that were annotated in genome
+    #LOC111136287 # only the pfam zinc ring finger domain        
+    #LOC111101682 # only the RingUbox domain no BIR repeat           
+    #LOC111100802 # has the RING-HC_BIRC2_3_7; RING finger, HC subclass, found in apoptosis protein c-IAP1, c-IAP2, livin, and similar proteins but not the BIR repeat        
+    #LOC111104430 # no BIR repeat only RingUbox in the NCBI domains            
+    #LOC111109770 # no BIR repeat only RingUbox in the NCBI domains            
+    #LOC111106726 # only has the RINGUbox           
 
-## CHECK FOR NON MAPPED PROTEINS FROM INITIAL CVIR CGIG ##
-# Were any C_vir or C_gig TLR annotated proteins NOT mapped to Orthogroups?
-IAP_CV_notmapped <- left_join(IAP_XP_CV, IAPC_parse, by ="protein_id") %>% filter(is.na(Orthogroup)) %>% View() # Two IAP 7's were not mapped, baculoviral IAP repeat-containing protein 7-A-like
-IAP_CG_notmapped <- left_join(IAP_XP_CG, IAPG_parse, by ="protein_id") %>% filter(is.na(Orthogroup)) %>% View() # All were mapped
+### RUN GENE SEQUENCES IN MAFFT AND RAXML ####
+#convert fasta file format to phylip format
 
-## ANNOTATE PROTEINS IN ALL C. VIR AND C. GIG ORTHOGROUPS
-
-# Rbind the parsed files for each species by Orthogroup
-IAPC_parse$species <- "C_virginica"
-IAPG_parse$species <- "C_gigas"
-
-IAP_CV_parsed_annot <- left_join(IAPC_parse, C_vir_rtracklayer[,c("gene","product","protein_id")])
-IAP_CV_parsed_annot <- IAP_CV_parsed_annot[!duplicated(IAP_CV_parsed_annot$protein_id),]
-
-IAP_CG_parsed_annot <- left_join(IAPG_parse, C_gig_rtracklayer[,c("gene","product","protein_id")])
-IAP_CG_parsed_annot <- IAP_CG_parsed_annot[!duplicated(IAP_CG_parsed_annot$protein_id),]
-
-# bind together the datatables 
-IAP_CV_CG_parsed <- rbind(IAP_CV_parsed_annot, IAP_CG_parsed_annot)
-
-# Remove orthogroups without any IAP proteins
-IAP_CV_CG_parsed_IAP_only <- IAP_CV_CG_parsed %>% group_by(Orthogroup) %>% 
-  
-  
-  ## WHAT ARE THE ANNOTATIONS FOR THE PROTEINS IN EACH ORTHOGROUP?
-  
-  # LOAD ALL XP ANNOTATIONS FROM BLUEWAVES FOR JOINING
-  # Load annotations from bluewaves
-  IAP_ALL_XP_annot <- readGFF(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/OrthoFinder_DATA/OrthoFinder_Analysis/Results_Mar25/IAP/IAP_XP_proteins_all_genomes.txt")
-IAP_ALL_XP_annot <- as.data.frame(IAP_ALL_XP_annot)
-IAP_ALL_XP_annot <- IAP_ALL_XP_annot[!duplicated(IAP_ALL_XP_annot$Name),]
 
 #### PLOT DOMAIN STRUCTURE ####
 
@@ -279,4 +456,7 @@ ggtree(Species_Tree, branch.length = "none") %<+% d + #%<+% g + # make it a clad
 lb = get.tree(Species_Tree)$tip.label
 d = data.frame(label=lb, label2 = paste(lb))
 ggtree(Species_Tree) %<+% d + geom_tiplab(aes(label=label2))
+
+
+#### SCRAP CODE ####
 
