@@ -154,19 +154,25 @@ CG_GIMAP_Hmmer_added[!duplicated(CG_GIMAP_Hmmer_added$protein_id),] # 4
 CG_GIMAP_Hmmer_missing <- Cgig_gff_GIMAP_family_XP[!(Cgig_gff_GIMAP_family_XP$protein_id %in% AIG1_XP_ALL_gff_GIMAP_CG$protein_id),] #  proteins from original list not found
 nrow(CG_GIMAP_Hmmer_missing[!duplicated(CG_GIMAP_Hmmer_missing$protein_id),]) # 12 proteins not found from original list
 
+AIG1_XP_ALL_gff_GIMAP_CV <- AIG1_XP_ALL_gff_GIMAP_species %>% filter(Species=="Crassostrea_virginica")
+CV_GIMAP_Hmmer_added <- AIG1_XP_ALL_gff_GIMAP_CV[!(AIG1_XP_ALL_gff_GIMAP_CV$protein_id %in% Cvir_gff_GIMAP_family_XP$protein_id),] # 23 proteins added by HMMER/interproscan that were not annotated in genome
+CV_GIMAP_Hmmer_added[!duplicated(CV_GIMAP_Hmmer_added$protein_id),] # 23
+CV_GIMAP_Hmmer_missing <- Cvir_gff_GIMAP_family_XP[!(Cvir_gff_GIMAP_family_XP$protein_id %in% AIG1_XP_ALL_gff_GIMAP_CV$protein_id),] # 35 proteins from original list not found
+nrow(CV_GIMAP_Hmmer_missing[!duplicated(CV_GIMAP_Hmmer_missing$gene),]) # 35 proteins not found from original list, 18 genes
+  # checking these genes in NCBI to look for the presence of the AIG1 domain, they seem to just have the Ploop NTPase superfamily domain and not AIG1
+
 #Count IAP genes across species to compare with Lu et al. 2020 paper
-AIG1_XP_ALL_gff_GIMAP_species_gene_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>%  distinct(gene) %>% summarise(gene_count = n())
-AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>%  distinct(locus_tag) %>% summarise(locus_tag_count = n())
-AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count <- left_join(AIG1_XP_ALL_gff_GIMAP_species_gene_count, AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count)
-AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count_total <- AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count %>% mutate(total = (gene_count + locus_tag_count))
+BIR_XP_gff_species_gene_count <- BIR_XP_gff_species %>% group_by(Species) %>% filter(is.na(locus_tag)) %>% distinct(gene)  %>% summarise(gene_count = n())
+BIR_XP_gff_species_locus_tag_count <- BIR_XP_gff_species %>% group_by(Species) %>% filter(is.na(gene)) %>%  distinct(locus_tag) %>% summarise(locus_tag_count = n())
+colnames(BIR_XP_gff_species_locus_tag_count)[2] <- "gene_count"
+BIR_XP_gff_species_gene_locus_tag_count <- rbind(BIR_XP_gff_species_gene_count, BIR_XP_gff_species_locus_tag_count)
 
 #Count GIMAP and IAN genes across species to compare with Lu et al. 2020 paper
-AIG1_XP_ALL_gff_GIMAP_species_gene_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>%  distinct(gene) %>% summarise(gene_count = n())
-AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>%  distinct(locus_tag) %>% summarise(locus_tag_count = n())
-AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count <- left_join(AIG1_XP_ALL_gff_GIMAP_species_gene_count, AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count)
-AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count_total <- AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count %>% mutate(total = (gene_count + locus_tag_count))
-# There are a few extra in my groups as compare to the Lu et al. paper, hopefully the trees help this 
-
+AIG1_XP_ALL_gff_GIMAP_species_gene_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>% filter(is.na(locus_tag)) %>% distinct(gene)  %>% summarise(gene_count = n())
+AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>% filter(is.na(gene)) %>%  distinct(locus_tag) %>% summarise(locus_tag_count = n())
+colnames(AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count)[2] <- "gene_count"
+AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count <- rbind(AIG1_XP_ALL_gff_GIMAP_species_gene_count, AIG1_XP_ALL_gff_GIMAP_species_locus_tag_count)
+# All are between five and 1 over
 
 ## Review Matches
 BIR_XP_gff_species 
@@ -226,27 +232,10 @@ setdiff(AIG1_CDD_GIMAP_no_Pkc_STK$protein_id, AIG1_CDD_GIMAP_only$protein_id) # 
 
 ### GET LIST OF JUST CV AND CGIG HMMER HITS FOR IAP AND GIMAP ###
 #IAP
-colnames(BIR_XP_list)[1] <- "protein_id"
-BIR_XP_list_CV <- left_join(BIR_XP_list, C_vir_rtracklayer[,c("protein_id","product","gene")])
-BIR_XP_list_CV <- drop_na(BIR_XP_list_CV)
-BIR_XP_list_CV <- unique(BIR_XP_list_CV)
-nrow(BIR_XP_list_CV) # 164 unique proteins after the HMM and Interproscan
-# how many are uncharacterized proteins
-BIR_XP_list_CV_uncharacterized <- BIR_XP_list_CV[grepl("uncharacterized", BIR_XP_list_CV$product),]
-nrow(BIR_XP_list_CV_uncharacterized) # 39
-BIR_XP_list_CV %>% group_by(gene) %>% dplyr::summarise(gene_count=n()) # 75 genes
-BIR_XP_list_CV$species <- "C_vir"
-
-BIR_XP_list_CG <- left_join(BIR_XP_list, C_gig_rtracklayer[,c("protein_id","product","gene")])
-BIR_XP_list_CG <- drop_na(BIR_XP_list_CG)
-BIR_XP_list_CG <- unique(BIR_XP_list_CG)
-BIR_XP_list_CG %>% group_by(gene) %>% dplyr::summarise(gene_count=n()) # 39 genes
-# how many are uncharacterized proteins
-BIR_XP_list_CG_uncharacterized <- BIR_XP_list_CG[grepl("uncharacterized", BIR_XP_list_CG$product),]
-nrow(BIR_XP_list_CG_uncharacterized) # 14
-nrow(BIR_XP_list_CG) # 73 unique proteins after the HMM and Interproscan
-BIR_XP_list_CG$species <- "C_gig"
-BIR_XP_combined <- rbind(BIR_XP_list_CV, BIR_XP_list_CG)
+BIR_XP_gff_CG <- BIR_XP_gff_species %>% filter(Species=="Crassostrea_gigas")
+BIR_XP_gff_CV <- BIR_XP_gff_species %>% filter(Species=="Crassostrea_virginica")
+AIG1_XP_ALL_gff_GIMAP_CG <- AIG1_XP_ALL_gff_GIMAP_species %>% filter(Species=="Crassostrea_gigas")
+AIG1_XP_ALL_gff_GIMAP_CV <- AIG1_XP_ALL_gff_GIMAP_species %>% filter(Species=="Crassostrea_virginica")
 
 #### USE FULL IAP AND GIMAP LISTS TO PULL OUT ALL MOLLUSC ORTHOGROUPS ####
 BIR_CDD_BIR_list <- as.list(unique(BIR_CDD_BIR$protein_id))
