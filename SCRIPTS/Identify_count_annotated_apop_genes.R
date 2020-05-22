@@ -180,7 +180,8 @@ Apoptosis_names_list <- c('bcl-2-related protein A1',
 'leukocyte elastase inhibitor',
 'protein patched homolog 1',
 'cyclic AMP-dependent transcription factor ATF-4',
-'Siva')
+'Siva',
+'immune-associated nucleotide-binding protein')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated with bcl-2 'bcl-2-related protein A1',
@@ -315,7 +316,8 @@ Apoptosis_names_df <- data.frame(product=c(# removing this because duplicated wi
 'dual specificity mitogen-activated protein kinase kinase 1',
 'mitogen-activated protein kinase 1',
 'mitochondrial Rho GTPase 1',
-'Siva'))
+'Siva',
+'immune-associated nucleotide-binding protein'))
 
 #### Grep Apoptosis protein names in genome files ####
 
@@ -638,7 +640,8 @@ Apoptosis_names_list_CG <- c('bcl-2-related protein A1',
 'leukocyte elastase inhibitor',
 'protein patched homolog 1',
 'cyclic AMP-dependent transcription factor ATF-4',
-'Siva')
+'Siva',
+'immune-associated nucleotide-binding protein')
 
 # Make this list more generic so it hits the previous ones subset and can be used to count genes in gene families
 Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because duplicated with bcl-2 'bcl-2-related protein A1',
@@ -776,7 +779,8 @@ Apoptosis_names_df_CG <- data.frame(product=c(     # removing this because dupli
                                            'dual specificity mitogen-activated protein kinase kinase 1',
                                            'mitogen-activated protein kinase 1',
                                            'mitochondrial Rho GTPase 1',
-                                           'Siva'))
+                                           'Siva',
+                                           'immune-associated nucleotide-binding protein'))
 
 
 # Import gff file, using new version of genome annotation
