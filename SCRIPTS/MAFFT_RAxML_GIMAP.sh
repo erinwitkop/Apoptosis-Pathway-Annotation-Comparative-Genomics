@@ -3,8 +3,8 @@
 #SBATCH --nodes=1
 #SBATCH --export=NONE
 #SBATCH --exclusive
-#SBATCH -o /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/MAFFT_RAxML_GIMAP_5_22_2020
-#SBATCH -e /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/MAFFT_RAxML_GIMAP_error_5_22_2020
+#SBATCH -o /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/MAFFT_RAxML_GIMAP_5_24_2020
+#SBATCH -e /data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_files/2020_Scripts/Script_out_error_files/MAFFT_RAxML_GIMAP_error_5_24_2020
 
 echo "START $(date)"
 
@@ -17,34 +17,34 @@ F=/data3/marine_diseases_lab/erin/2017_2020_Transcriptome_Analysis/pipeline_file
 # Fetch protein sequences using list output from HMMER and Interproscan
 # script grab sequences of HMMER output from $O/All_mollusc_prot.faa to run through Inteproscan
 
-array1=($(cat $F/AIG_GIMAP_HMMER_Interpro_XP_list_all.txt))
-for i in ${array1[@]}; do
-	sed -n "/${i}/,/^>/p" $O/All_mollusc_prot.faa | sed '$d' >> $F/AIG_GIMAP_HMMER_Interpro_XP_list_all.fa
-	echo "done"
-done
+#array1=($(cat $F/AIG_GIMAP_HMMER_Interpro_XP_list_all.txt))
+#for i in ${array1[@]}; do
+#	sed -n "/${i}/,/^>/p" $O/All_mollusc_prot.faa | sed '$d' >> $F/AIG_GIMAP_HMMER_Interpro_XP_list_all.fa
+#	echo "done"
+#done
 
-echo "fetch sequences done $(date)"
+#echo "fetch sequences done $(date)"
 
 ## Remove duplicates sequences that are identical and keep longest
-module load CD-HIT/4.8.1-foss-2018b
-cd-hit -G 1 -c 1.0 -t 1 -i $F/AIG_GIMAP_HMMER_Interpro_XP_list_all.fa -o $F/AIG_GIMAP_HMMER_Interpro_XP_list_all_rm_dup.fa
-echo "done rm dup $(date)"
+#module load CD-HIT/4.8.1-foss-2018b
+#cd-hit -G 1 -c 1.0 -t 1 -i $F/AIG_GIMAP_HMMER_Interpro_XP_list_all.fa -o $F/AIG_GIMAP_HMMER_Interpro_XP_list_all_rm_dup.fa
+#echo "done rm dup $(date)"
 
 # Load MAFFT first
-module purge
-module load MAFFT/7.453-GCC-8.3.0-with-extensions
+#module purge
+#module load MAFFT/7.453-GCC-8.3.0-with-extensions
 
 ### Generate alignments of all protein sequences using MAFFT ###
-echo "Start MAFFT all mollusc GIMAP"
-cd $M/
-mafft --auto --thread 20 $F/AIG_GIMAP_HMMER_Interpro_XP_list_all_rm_dup.fa > $M/AIG_GIMAP_HMMER_Interpro_XP_list_all_MSA.fa
-echo "done MAFFT all mollusc GIMAP"
+#echo "Start MAFFT all mollusc GIMAP"
+#cd $M/
+#mafft --auto --thread 20 $F/AIG_GIMAP_HMMER_Interpro_XP_list_all_rm_dup.fa > $M/AIG_GIMAP_HMMER_Interpro_XP_list_all_MSA.fa
+#echo "done MAFFT all mollusc GIMAP"
 
 # --auto selects an appropriate algorithm strategy option based on the size of the data
 # don-t use phyllip out because I want the full fasta output. This can be used in RAxML
 #  --thread each node on the cluster has 20 threads
 
-echo "MAFFT done $(date)"
+#echo "MAFFT done $(date)"
 
 # Unload MAFFT and load RAxML
 module purge
