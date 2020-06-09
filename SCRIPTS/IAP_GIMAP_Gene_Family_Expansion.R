@@ -269,11 +269,17 @@ write.table(GIMAP_BED, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1
 IAP_BED_name  <- BIR_XP_gff_species_gene_locus_tag_Cvir_BED[,c(3:5,1)]
 GIMAP_BED_name <- AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_C_vir_BED[,c(3:5,1)]
 
+
+
 # Write out table
 write.table(IAP_BED_name, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Cvir_IAP_EMR_Name.bed",
             quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
 write.table(GIMAP_BED_name, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Cvir_GIMAP_EMR_Name.bed",
             quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+
+save(IAP_BED_name, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Cvir_IAP_EMR_Name.Rdata")
+save(GIMAP_BED_name, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Cvir_GIMAP_EMR_Name.Rdata")
+
 
 
 ## Review Matches
@@ -766,6 +772,11 @@ BIR_seq_rm_dup_clstr6_dup_diff_gene_95 <- BIR_seq_rm_dup_clstr6_dup_95 %>% disti
 BIR_seq_rm_dup_clstr6_dup_diff_gene_lookup_95 <- unique(BIR_seq_rm_dup_clstr6_dup_diff_gene_95$cluster)
 BIR_seq_rm_dup_clstr6_dup_diff_gene_product_95 <- BIR_seq_rm_dup_clstr6_95[BIR_seq_rm_dup_clstr6_95$cluster %in% BIR_seq_rm_dup_clstr6_dup_diff_gene_lookup_95,]
 
+# export to file for use in markdown for jon and marta
+save(AIG_seq_rm_dup_clstr6_dup_diff_gene_95_product_95, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG_seq_rm_dup_clstr6_dup_diff_gene_95_product_95.Rdata")
+save(BIR_seq_rm_dup_clstr6_dup_diff_gene_product_95, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_seq_rm_dup_clstr6_dup_diff_gene_product_95.Rdata")
+
+
 #### IDENTIFY 95-100% IDENTICAL NUCLEOTIDE GENE SEQUENCES CD-HIT ####
 ## Parse the CD-HIT cluster file
 # Followed code from this site: https://rpubs.com/rmurdoch/cdhit_to_mapping_file
@@ -824,6 +835,10 @@ head(BIR_seq_rm_dup_clstr6_NUC_95)
 AIG_seq_rm_dup_clstr6_NUC_95 <- left_join(AIG_seq_rm_dup_clstr6_NUC_95, unique(AIG1_XP_ALL_gff_GIMAP_species_join[,c("gene","locus_tag","Species")]), by = "gene")
 BIR_seq_rm_dup_clstr6_NUC_95 <- left_join(BIR_seq_rm_dup_clstr6_NUC_95, unique(BIR_XP_gff_species_join[,c("gene","locus_tag","Species")]), by = "gene")
 
+# save to Rdata
+save(AIG_seq_rm_dup_clstr6_NUC_95, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG_seq_rm_dup_clstr6_NUC_95.Rdata")
+save(BIR_seq_rm_dup_clstr6_NUC_95, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_seq_rm_dup_clstr6_NUC_95.Rdata")
+
 # Check if any proteins collapsed came from different genes 
 # look at duplicated clusters and keep all rows 
 AIG_seq_rm_dup_clstr6_dup_NUC_95 <- AIG_seq_rm_dup_clstr6_NUC_95 %>% group_by(cluster) %>% filter(n() > 1)
@@ -872,6 +887,9 @@ GIMAP_raxml_tibble$gene_locus_tag <- coalesce(GIMAP_raxml_tibble$gene, GIMAP_rax
 
 # Convert to treedata object to store tree plus outside data
 GIMAP_raxml_treedata <- as.treedata(GIMAP_raxml_tibble)
+
+# save treedata
+save(GIMAP_raxml_treedata, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_raxml_treedata.Rdata")
 
 # Plot circular tree
 GIMAP_raxml_treedata_circular_product <- ggtree(GIMAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
@@ -973,7 +991,7 @@ dat2fasta(GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list_seq, "/Users/
 #### INVESTIGATE POTENTIAL GENE ARTIFACTS ####
 
 # LOAD BED FILES AND HAPLOTIG FILES FROM JON PURITZ
-  ## Notes: I created BED files for the locations of all Cvirginica genes run with RAxML in my tree for both IAP and GIMAP. Jon used those coordinates to pull out 
+  ## Notes: I created BED files for the locations of all Cvirginica IAP and GIMAP genes. Jon used those coordinates to pull out 
       # the mean coverage values at each gene location. He also provided the file he created by running HaploMerger to identify haplotigs across the genome. I am going to compare 
       # my results with his in a short report after this. 
       # Exported data frames used: IAP_BED_nams, GIMAP_BED_name
@@ -1008,6 +1026,10 @@ Cvir_GIMAP_meanCov_CD_Hit_95_length <- left_join(Cvir_GIMAP_meanCov_CD_Hit_95, G
 Cvir_IAP_meanCov_CD_Hit_95_length <- left_join(Cvir_IAP_meanCov_CD_Hit_95 , IAP_gene_length_aa)
 Cvir_IAP_meanCov_CD_Hit_95_length <- unique(Cvir_IAP_meanCov_CD_Hit_95_length)
 
+# Make unique for each gene
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique <- Cvir_GIMAP_meanCov_CD_Hit_95_length %>% distinct(gene, .keep_all = TRUE)
+Cvir_IAP_meanCov_CD_Hit_95_length_unique <-  Cvir_IAP_meanCov_CD_Hit_95_length %>% distinct(gene, .keep_all = TRUE)
+
 # Is their overlap with the haplotigs file?
 Cvir_GIMAP_haplomerger_haplotigs <- Cvir_GIMAP_meanCov_CD_Hit_95_length[Cvir_GIMAP_meanCov_CD_Hit_95_length$start %in% Cvir_haplotigs,]
   # 0 in the overlap
@@ -1015,7 +1037,55 @@ Cvir_IAP_haplomerger_haplotigs <- Cvir_IAP_meanCov_CD_Hit_95_length[Cvir_IAP_mea
   # 0 exact gene overlaps, need to check if my genes hit to any of these ranges 
 
 # No exact overlaps with gene coordinates, check if it is within range
-Cvir_IAP_meanCov_CD_Hit_95_length[inrange(start, Cvir_haplotigs$start, Cvir_haplotigs$end)]
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$HM_found_start <- ifelse(sapply(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$start, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$HM_found_end <- ifelse(sapply(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$end, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+
+Cvir_IAP_meanCov_CD_Hit_95_length_unique$HM_found_start <- ifelse(sapply(Cvir_IAP_meanCov_CD_Hit_95_length_unique$start, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+Cvir_IAP_meanCov_CD_Hit_95_length_unique$HM_found_end <- ifelse(sapply(Cvir_IAP_meanCov_CD_Hit_95_length_unique$end, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+
+## Calculate mean coverage within gene clusters
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique_mean <- Cvir_GIMAP_meanCov_CD_Hit_95_length_unique %>% group_by(cluster) %>% mutate(mean_Cov_clstr = mean(meanCov))
+Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean <- Cvir_IAP_meanCov_CD_Hit_95_length_unique %>% group_by(cluster) %>% mutate(mean_Cov_clstr = mean(meanCov)) 
+
+#GIMAP results:
+#  - Cluster 291: Mean coverage of 436. Look at the nucleotide sequences of these genes LOC111110115, LOC111106081
+
+#IAP results:
+#  - Cluster 62: mean coverage of 444. Includes LOC111100470 and LOC111101689
+#- Cluster 328: mean coverage across cluster of 280. Includes LOC111132301 LOC111114013, LOC111103682, LOC111132489, LOC111132589, LOC111102106, LOC111114070
+#- Cluster 344: mean coverage across cluster 484. Includes LOC111117856, LOC111116826, LOC111111659
+
+# Make files with list of IDs to export to bluewaves to extract nucleotide sequences 
+GIMAP_cluster_219_gene <- Cvir_GIMAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 219")
+IAP_cluster_62_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 62") 
+IAP_cluster_328_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 328")
+IAP_cluster_344_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 344") 
+
+write.table(GIMAP_cluster_219_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_cluster_219_gene.txt",
+            quote=FALSE, row.names=FALSE, col.names = FALSE)
+write.table(IAP_cluster_62_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_62_gene.txt",
+            quote=FALSE, row.names=FALSE, col.names = FALSE)
+write.table(IAP_cluster_328_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_328_gene.txt",
+            quote=FALSE, row.names=FALSE, col.names = FALSE)
+write.table(IAP_cluster_344_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_344_gene.txt",
+            quote=FALSE, row.names=FALSE, col.names = FALSE)
+
+## Export the coordinates of clusters of interest as BED files so I can show in my IGV track session
+write.table(GIMAP_cluster_219_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_cluster_219_gene.bed",
+              quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
+write.table(IAP_cluster_62_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_62_gene.bed",
+            quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
+write.table(IAP_cluster_328_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_328_gene.bed",
+            quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
+write.table(IAP_cluster_344_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_344_gene.bed",
+            quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
+
+## Extract nucleotide sequences of interesting clusters on bluewaves (see code in notes file)
+## Align nucleotide sequences in bluewaves and view in IGV tracks 
 
 
 #### PLOT DOMAIN STRUCTURE ####

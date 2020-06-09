@@ -1,0 +1,282 @@
+---
+title: "GIMAP IAP Haplotig Search Report"
+author: "Erin Roberts"
+date: "6/5/2020"
+output: pdf_document
+classoption: landscape
+fontsize: 12pt
+---
+
+# **Investigation of Potential *C. virginica* Gene Artifacts**
+
+Goal: Investigate presence of haplotigs in the genome annotation of *C. virginica* IAP and GIMAP gene families. 
+
+## **Methods**
+1. Compare sequence identity of all protein hits using CD-Hit at a level of 95% sequence identity
+    - "global sequence identity" calculated as: number of identical amino acids or bases in alignment, divided by the full length of the shorter sequence
+    - Code used in bluewaves:
+      `module load CD-HIT/4.8.1-foss-2018b
+cd-hit -G 1 -c 1.0 -t 1 -i $F/BIR_IAP_HMMER_Interpro_XP_list_all.fa -o $F/BIR_IAP_HMMER_Interpro_XP_list_all_rm_dup.fa
+echo "done rm dup $(date)`
+2. Merge CD-Hit protein sequence identity data with Jon Puritz data of mean coverage across all individuals.
+3. Compare with Haplotig finder output (need to get software info from Jon) of genomic locations with haplotigs.
+4. Identify clusters potentially containing haplotigs by comparing average coverage within clusters.
+5. Identify protein clusters with average coverage < 500 (about half of the coverage across most clusters).
+6. Align nucleotide sequences from clusters and view alignments with CDS and haplotig information. 
+
+```{r lib, include=FALSE}
+library(ape)
+library(Biostrings)
+library(ggplot2)
+library(ggtree) # install the dev version to get the get.tree function
+library(ggrepel)
+library(phylotools)
+library(treeio)
+library(tidytree)
+library(ggimage)
+library(plyr)
+library(tidyverse)
+#library(tidytext)
+library(rtracklayer)
+library(data.table)
+library(chopper)
+library(alakazam)
+library(phylotools)
+
+```
+
+### Load BED files from Jon 
+
+JP provided BED files for each of the two gene families, with mean coverage values averaged across all 90 individuals. Each gene has a value (see below),
+
+```{r loadBED, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Cvir_GIMAP_meanCov <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Jon_Puritz_6_4_2020_regenefamilybedfiles/Cvir_GIMAP.meanCov.bed",
+                                 sep="\t", col.names = c("seqid","start","end","gene","meanCov"))
+head(Cvir_GIMAP_meanCov)
+```
+
+```{r loadBED2, include=TRUE}
+Cvir_IAP_meanCov <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Jon_Puritz_6_4_2020_regenefamilybedfiles/Cvir_IAP.meanCov.bed",
+                                 sep="\t", col.names = c("seqid","start","end","gene","meanCov"))
+```
+
+The data format for haplotigs file lists large regions in the genome where haplotigs were identified. All the counts are 0 (not sure what this means). Each identified haplotig encompasses many genes, not just a single gene.
+
+```{r loadBED3, include=TRUE}
+Cvir_haplotigs <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Jon_Puritz_6_4_2020_regenefamilybedfiles/haplotigs.bed",
+                               sep="\t", skip= 1, col.names = c("seqid","start","end","counts","dataset"))
+head(Cvir_haplotigs)
+```
+
+```{r load, include=FALSE}
+# Load data generated in longer `IAP_GIMAP_Gene_Family_Expansion.R` script 
+
+load("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG_seq_rm_dup_clstr6_dup_diff_gene_95_product_95.Rdata")
+load("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_seq_rm_dup_clstr6_dup_diff_gene_product_95.Rdata")
+
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Cvir_IAP_EMR_Name.Rdata")
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Cvir_GIMAP_EMR_Name.Rdata")
+
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG_seq_rm_dup_clstr6_NUC_95.Rdata")
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_seq_rm_dup_clstr6_NUC_95.Rdata")
+
+```    
+
+### Investigate CD-hit results
+
+Let's now review the results from CD-Hit and join the mean coverage information. CD-Hit software works by first clustering sequences by sequence similarity. Proteins in the cluster denoted by a `*` are the longest sequence in the cluster and are used as the reference sequence in the cluster. Sequences in the cluster denoted with a similarity percentage are that percentage identical to the sequence denoted with `*`. 
+
+#### Join the CD-Hit results for each family with mean coverage
+
+In order to narrow down the CD-Hit clusters to view, we are only investigating the clusters where proteins were clustered across two different genes.  
+
+```{r mergeBED, include=TRUE}
+Cvir_GIMAP_meanCov_CD_Hit_95 <- left_join(AIG_seq_rm_dup_clstr6_dup_diff_gene_95_product_95 , Cvir_GIMAP_meanCov) %>% 
+  filter(Species =="Crassostrea_virginica")
+Cvir_IAP_meanCov_CD_Hit_95 <- left_join(BIR_seq_rm_dup_clstr6_dup_diff_gene_product_95 , Cvir_IAP_meanCov) %>% 
+  filter(Species =="Crassostrea_virginica")
+```
+
+### Join Gene Length with CD-Hit and Mean Coverage results 
+
+Ximing pointed out that haplotigs are likely 1 or more MB in length and are large sequences. Joining the nucleotide length of each to see if this is informative.  
+
+```{r genelength, include=TRUE}
+# Join full gene length since Ximing mentioned that haplotigs are pretty long 
+Cvir_GIMAP_meanCov_CD_Hit_95 <- left_join(Cvir_GIMAP_meanCov_CD_Hit_95, GIMAP_BED_name)
+Cvir_IAP_meanCov_CD_Hit_95 <- left_join(Cvir_IAP_meanCov_CD_Hit_95, IAP_BED_name)
+
+GIMAP_gene_length_aa <- AIG_seq_rm_dup_clstr6_NUC_95[,c("aa","gene")]
+IAP_gene_length_aa   <- BIR_seq_rm_dup_clstr6_NUC_95[,c("aa","gene")]
+colnames(GIMAP_gene_length_aa)[1] <- "gene_length"
+colnames(IAP_gene_length_aa  )[1] <- "gene_length"
+
+Cvir_GIMAP_meanCov_CD_Hit_95_length <- left_join(Cvir_GIMAP_meanCov_CD_Hit_95, GIMAP_gene_length_aa)
+Cvir_IAP_meanCov_CD_Hit_95_length <- left_join(Cvir_IAP_meanCov_CD_Hit_95 , IAP_gene_length_aa)
+Cvir_IAP_meanCov_CD_Hit_95_length <- unique(Cvir_IAP_meanCov_CD_Hit_95_length)
+
+# Make unique for each gene
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique <- Cvir_GIMAP_meanCov_CD_Hit_95_length %>% distinct(gene, .keep_all = TRUE)
+Cvir_IAP_meanCov_CD_Hit_95_length_unique <-  Cvir_IAP_meanCov_CD_Hit_95_length %>% distinct(gene, .keep_all = TRUE)
+```
+
+### View GIMAP combined CD-Hit, gene length, mean coverage results
+
+Lets first view the GIMAP gene family results. 
+
+```{r genelengthGIMAP, include=TRUE}
+print(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique[,-c(7:9)])
+```
+
+**Do any clusters with two genes with high protein simarilty have a large difference in coverage?**
+
+1. CLUSTER 65 genes LOC111110237, LOC111110097 have the largest difference in coverage
+2. CLUSTER 219 gene LOC111110115, LOC111106081 has almost twice the coverage - only one where the average cluster coverage is half of others
+
+Let's plot where these genes are on the gene tree
+```{r gene_biom_down, include=TRUE}
+#Subset tree after biomphalaria to zoom in on C. vir and C.gig
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_raxml_treedata.Rdata")
+
+GIMAP_raxml_treedata_pomacea_down_subset <- tree_subset(GIMAP_raxml_treedata, 60, levels_back = 7)
+ ggtree(GIMAP_raxml_treedata_pomacea_down_subset, layout="circular", aes(color=Species), branch.length = "none") + 
+  geom_tiplab2(aes(label=gene_locus_tag,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-70,70)  
+
+```
+
+
+### View IAP combined CD-Hit, gene length, mean coverage results
+
+Lets view the IAP gene family results. 
+
+```{r genelengthIAP, include=TRUE}
+print(Cvir_IAP_meanCov_CD_Hit_95_length_unique[,-c(7:9)])
+```
+
+**Do any clusters with two genes with high protein simarilty have a large difference in coverage?**
+
+  1. CLUSTER 17 LOC111100400 or LOC111100443 Cluster 17 appears to be an artifact..One has about half coverage and LOC111100400 is very long
+  2. CLUSTER 282, LOC111104229 has half coverage as compared to the other gene in the cluster and very high sequence similarity
+  3. CLUSTER 280, LOC111103392 has about half coverage compared to other gene
+  4. CLUSTER 328 - coverage is all over the place. LOC111132489 has around ~900 coverage, some have only 100 like LOC111132301
+  5. CLUSTER 338, two have high coverage around 1500 and LOC111116378 has 189 coverage
+  6. CLUSTER 344 , LOC111111659 and LOC111116826 both have very low coverage compared to LOC111117856 
+  
+Still waiting for the RAxML tree to finish on bluewaves so I can compare clustering.  
+  
+### Compare with Haplomerger results 
+
+Lets now investigate if these interesting gene clusters overlap with regions identified as haplotigs using JP software. Because the haplotig tool identified large regions, I am going to search for whether my cluster genes of interest within these regions. If both the gene start and gene end of my genes are inside the haplotig tool identified range, both of these columns are denoted with a "YES".  
+
+```{r haplorange, include=TRUE}
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$HM_found_start <- ifelse(sapply(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$start, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$HM_found_end <- ifelse(sapply(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$end, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+
+Cvir_IAP_meanCov_CD_Hit_95_length_unique$HM_found_start <- ifelse(sapply(Cvir_IAP_meanCov_CD_Hit_95_length_unique$start, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+Cvir_IAP_meanCov_CD_Hit_95_length_unique$HM_found_end <- ifelse(sapply(Cvir_IAP_meanCov_CD_Hit_95_length_unique$end, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+```
+
+### View GIMAP cluster overlap with haplotig results
+
+```{r haplorangeGIMAP, include=TRUE}
+print(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique[,-c(7,8)])
+```
+
+### View IAP cluster overlap with haplotig results
+
+```{r haplorangeIAP, include=TRUE}
+print(Cvir_IAP_meanCov_CD_Hit_95_length_unique[,-c(7,8)])
+```
+
+### Questions and Observations:
+
+1. What is the expected coverage for each gene? We estimated from these results the average coverage for genes within clusters is around 1000. 
+2. Using the expectation that haplotigs should have about half as much coverage, we calculated the mean coverage across genes in each cluster to identify clusters containing haplotig pairs. 
+
+# Review Average Gene Mean coverage within cluster 
+
+### Calculate mean coverage within gene clusters
+
+Coverage across all the genes in each cluster was averaged.  
+
+```{r meanCov_clstr, include=TRUE}
+# Calculate mean coverage within gene clusters
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique_mean <- Cvir_GIMAP_meanCov_CD_Hit_95_length_unique %>% group_by(cluster) %>% mutate(mean_Cov_clstr = mean(meanCov))
+Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean <- Cvir_IAP_meanCov_CD_Hit_95_length_unique %>% group_by(cluster) %>% mutate(mean_Cov_clstr = mean(meanCov)) 
+
+```
+
+### View GIMAP mean coverage results
+
+```{r meanCov_clstrGIMAP, include=TRUE}
+#print the GIMAP mean coverage results 
+print(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique_mean[,-c(5,6,7,8)])
+```
+
+**GIMAP results**:
+
+- Cluster 291: Mean coverage of 436. Look at the nucleotide sequences of these genes LOC111110115, LOC111106081
+
+```{r meanCov_clstrIAP, include=TRUE}
+# print the IAP mean coverage results 
+print(Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean[,-c(5,6,7,8)])
+```
+
+**IAP results:**
+- Cluster 62: mean coverage of 444. Includes LOC111100470 and LOC111101689
+- Cluster 328: mean coverage across cluster of 280. Includes LOC111132301 LOC111114013, LOC111103682, LOC111132489, LOC111132589, LOC111102106, LOC111114070
+- Cluster 344: mean coverage across cluster 484. Includes LOC111117856, LOC111116826, LOC111111659
+
+Nucleotides extracted in bluewaves, MAFFT ran with auto settings to create multiple sequence alignment. 
+
+### Inspect these clusters closer 
+
+Now let's investigate these clusters more closely. 
+
+```{r cluster, include=TRUE}
+GIMAP_cluster_219_gene <- Cvir_GIMAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 219")
+IAP_cluster_62_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 62") 
+IAP_cluster_328_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 328")
+IAP_cluster_344_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 344") 
+
+```
+
+Zooming in on GIMAP cluster 219
+```{r 219, include =FALSE}
+print(GIMAP_cluster_219_gene[,c("seqid","start","end","cluster")])
+```
+
+Zooming in on IAP cluster 62
+```{r 62, include =FALSE}
+print(IAP_cluster_62_gene[,c("seqid","start","end","cluster")])
+```
+
+Zooming in on IAP cluster 328
+```{r 328, include =FALSE}
+print(IAP_cluster_328_gene[,c("seqid","start","end","cluster")])
+```
+
+Zooming in on IAP cluster 344
+```{r 328, include =FALSE}
+print(IAP_cluster_344_gene[,c("seqid","start","end","cluster")])
+```
+
+
+### Viewing alignments 
+Alignments viewed in Unipro UGENE, pictures below 
+
+1. GIMAP Cluster 219 Results: One large section between 1996-2014 with poor alignment, and inserted sequence in LOC111110115. A few other sections with extra sequences in this gene that aren't present in the other gene. Overall very high nucleotide level agreement and protein agreement.  "ATA" repeat section in LOC111110115 at 4271-4325 
+
+2. IAP Cluster 62: Genes do not appear to be artifacts dexpite low coverage because of lack of large inserted regions 
+
+3. IAP Cluster 328: Clear clustering of LOC111132489, and LOC111114013, extremely high nucleotide identity (as measured by CD-Hit), while the other four genes in the cluster also have very high nucleotide and protein identity (as measured by CD-Hit). Perhaps these are just very recent duplications? There do not appear to be large indels or inserted regions when comparing the genes to one another in their clusters. 
+
+4. IAP Cluster 344: LOC111111659 appears to be "missing" several large regions that are present in LOC111116826 and LOC111117856. These are not large repeat regions however 
+
