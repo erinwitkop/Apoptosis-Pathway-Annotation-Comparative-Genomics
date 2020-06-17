@@ -20,8 +20,9 @@ library(data.table)
 library(chopper)
 library(alakazam)
 library(phylotools)
+library(viridis)
 
-#### Import Genomes and Annotations for each species in order to facilitate loookup #####
+#### IMPORT GENOMES AND ANNOTATIONS #####
 #load(file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_annotations.RData")
 #load(file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_apoptosis_products.RData")
 # Load the gff file for all mollusc genomes
@@ -59,25 +60,6 @@ length(unique(Cgig_gff_GIMAP_family_XP$gene)) # 35
 
 CV_CG_IAP <- c(Cvir_gff_IAP_family_XP$protein_id, Cgig_gff_IAP_family_XP$protein_id)
 CV_CG_GIMAP <- c(Cvir_gff_GIMAP_family_XP$protein_id, Cgig_gff_GIMAP_family_XP$protein_id)
-
-#### Load May15th Orthogroup Analysis of 10 Mollusc species from Orthogroup.tsv file ####
-# Load tsv
-Orthogroups <- read_tsv("/Volumes/My Passport for Mac/OrthoFinder_3_25_2020_Bluewaves_Backup/Results_May15/Orthogroups/Orthogroups.tsv",
-                        col_names = c("Orthogroup","Elysia_chlorotica", "Aplysia_californica", "Crassostrea_gigas", "Lottia_gigantea", 
-                                      "Biomphalaria_glabrata", "Octopus_bimaculoides",
-                                      "C_virginica", "Mizuhopecten_yessoensis",	"Pomacea_canaliculata",	"Octopus_sinensis"))
-
-#### ASSESS ORTHOGROUPS USING ONLY THE CV AND CG REFERENCE ANNOTATIONS ####
-CV_CG_IAP_list <- as.list(CV_CG_IAP)
-CV_CG_GIMAP_list <- as.list(CV_CG_GIMAP)
-
-#CV_CG_IAP_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(CV_CG_IAP_list, collapse="|"), i))),]
-length(CV_CG_IAP_list_lookup$Orthogroup)
-# 27 orthogroups
-
-#CV_CG_GIMAP_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(CV_CG_GIMAP_list, collapse="|"), i))),]
-length(CV_CG_GIMAP_list_lookup$Orthogroup)
-#9
 
 #### IAP and GIMAP HMMER and INTERPROSCAN ANALYSIS ####
 ## LOAD HMM and Interproscan XPS ##
@@ -338,6 +320,25 @@ setdiff(AIG1_CDD_GIMAP_no_Pkc_STK$protein_id, AIG1_CDD_GIMAP_only$protein_id) # 
 
 ##################### ORTHOGROUP ANALYSIS ###############################
 
+### Load May15th Orthogroup Analysis of 10 Mollusc species from Orthogroup.tsv file ###
+# Load tsv
+Orthogroups <- read_tsv("/Volumes/My Passport for Mac/OrthoFinder_3_25_2020_Bluewaves_Backup/Results_May15/Orthogroups/Orthogroups.tsv",
+                        col_names = c("Orthogroup","Elysia_chlorotica", "Aplysia_californica", "Crassostrea_gigas", "Lottia_gigantea", 
+                                      "Biomphalaria_glabrata", "Octopus_bimaculoides",
+                                      "C_virginica", "Mizuhopecten_yessoensis",	"Pomacea_canaliculata",	"Octopus_sinensis"))
+
+#### ASSESS ORTHOGROUPS USING ONLY THE CV AND CG REFERENCE ANNOTATIONS ####
+CV_CG_IAP_list <- as.list(CV_CG_IAP)
+CV_CG_GIMAP_list <- as.list(CV_CG_GIMAP)
+
+#CV_CG_IAP_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(CV_CG_IAP_list, collapse="|"), i))),]
+length(CV_CG_IAP_list_lookup$Orthogroup)
+# 27 orthogroups
+
+#CV_CG_GIMAP_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(CV_CG_GIMAP_list, collapse="|"), i))),]
+length(CV_CG_GIMAP_list_lookup$Orthogroup)
+#9
+
 #### USE FULL IAP AND GIMAP LISTS TO PULL OUT ALL MOLLUSC ORTHOGROUPS ####
 BIR_XP_gff_species_list <- as.list(unique(BIR_XP_gff_species$protein_id))
 #BIR_XP_gff_species_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(BIR_XP_gff_species_list, collapse="|"), i))),]
@@ -587,10 +588,10 @@ length(unique(GIMAP_annot_v_HMMER_CG$gene))
 GIMAP_annot_v_HMMER_CV <- Cvir_gff_GIMAP_family_XP[!(Cvir_gff_GIMAP_family_XP$gene %in% AIG1_XP_ALL_gff_GIMAP_species_genes$gene),] # 6 CV genes were not in by HMMER that were annotated in genome
 length(unique(GIMAP_annot_v_HMMER_CV$gene))
 
-### RUN PROTEIN SEQUENCES IN MAFFT AND RAXML ####
+### RUN PROTEIN SEQUENCES IN MAFFT AND RAXML ###
  # RAxML and HMMER full results used
 
-### IDENTICAL PROTEINS REMOVED BY CD-HIT ###
+#### IDENTICAL PROTEINS REMOVED BY CD-HIT ####
 # Remember from investigation of CD-HITs behavior that sequences that are shorter but exactly the same are still removed as well. This could be explaining the discrepancy in the numbers below in the software 
 # Load removed duplicates file
 # phylotools reads the sequences in as a dataframe, treeio reads in as vectors
@@ -598,7 +599,6 @@ AIG_seq_rm_dup <- treeio::read.fasta("/Users/erinroberts/Documents/PhD_Research/
 BIR_seq_rm_dup <- treeio:::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_HMMER_Interpro_XP_list_all_rm_dup.fa")
 AIG_seq_rm_dup_phylo <- phylotools::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG_GIMAP_HMMER_Interpro_XP_list_all_rm_dup.fa")
 BIR_seq_rm_dup_phylo <- phylotools::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_HMMER_Interpro_XP_list_all_rm_dup.fa")
-
 
 length(names(AIG_seq_rm_dup)) # 313
 length(names(BIR_seq_rm_dup)) # 499
@@ -617,6 +617,9 @@ colnames(BIR_seq_rm_dup_headers)[1] <- "protein_id"
 AIG1_dup_seq_rm <- AIG1_XP_ALL_gff_GIMAP_species_join[!(AIG1_XP_ALL_gff_GIMAP_species_join$protein_id %in% AIG_seq_rm_dup_headers$protein_id),] # 90 proteins removed for being duplicated
 BIR_dup_seq_rm <- BIR_XP_gff_species_join[!(BIR_XP_gff_species_join$protein_id %in% BIR_seq_rm_dup_headers$protein_id),] # 20 removed
 
+# Protein IDs that were kept 
+AIG1_dup_seq_rm_kept <- AIG1_XP_ALL_gff_GIMAP_species_join[AIG1_XP_ALL_gff_GIMAP_species_join$protein_id %in% AIG_seq_rm_dup_headers$protein_id,] # 90 proteins removed for being duplicated
+BIR_dup_seq_rm_kept <- BIR_XP_gff_species_join[BIR_XP_gff_species_join$protein_id %in% BIR_seq_rm_dup_headers$protein_id,] # 20 removed
 
 ## Parse the CD-HIT cluster file
 # Followed code from this site: https://rpubs.com/rmurdoch/cdhit_to_mapping_file
@@ -677,7 +680,7 @@ head(BIR_seq_rm_dup_clstr6)
 # The representative sequence is indicated by a "*"
 
 # Join with information about product and gene
-AIG_seq_rm_dup_clstr6 <- left_join(AIG_seq_rm_dup_clstr6, AIG1_XP_ALL_gff_GIMAP_species_join[,c("protein_id","gene","product","locus_tag","Species")], by = "protein_id")
+c <- left_join(AIG_seq_rm_dup_clstr6, AIG1_XP_ALL_gff_GIMAP_species_join[,c("protein_id","gene","product","locus_tag","Species")], by = "protein_id")
 BIR_seq_rm_dup_clstr6 <- left_join(BIR_seq_rm_dup_clstr6, BIR_XP_gff_species_join[,c("protein_id","gene","product","locus_tag","Species")], by = "protein_id")
 
 # Check if any proteins collapsed came from different genes 
@@ -861,7 +864,175 @@ BIR_NUC_95_prot_95[unique(BIR_NUC_95_prot_95$gene),]
 # why is there not total overlap between protein and nucleotide file..because the clustering is different. I guess because I used the global identity to identity similarity 
 AIG_seq_rm_dup_clstr6_95[grepl("LOC111105333", AIG_seq_rm_dup_clstr6_95$gene) | grepl("LOC111105339", AIG_seq_rm_dup_clstr6_95$gene),]
 
-#### PLOT IAP TREE ####
+
+#### INVESTIGATE POTENTIAL GENE ARTIFACTS ####
+
+# LOAD BED FILES AND HAPLOTIG FILES FROM JON PURITZ
+## Notes: I created BED files for the locations of all Cvirginica IAP and GIMAP genes. Jon used those coordinates to pull out 
+# the mean coverage values at each gene location. He also provided the file he created by running HaploMerger to identify haplotigs across the genome. I am going to compare 
+# my results with his in a short report after this. 
+# Exported data frames used: IAP_BED_nams, GIMAP_BED_name
+
+# Load BED files 
+Cvir_GIMAP_meanCov <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Jon_Puritz_6_4_2020_regenefamilybedfiles/Cvir_GIMAP.meanCov.bed",
+                                 sep="\t", col.names = c("seqid","start","end","gene","meanCov"))
+
+Cvir_IAP_meanCov <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Jon_Puritz_6_4_2020_regenefamilybedfiles/Cvir_IAP.meanCov.bed",
+                               sep="\t", col.names = c("seqid","start","end","gene","meanCov"))
+
+Cvir_haplotigs <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Jon_Puritz_6_4_2020_regenefamilybedfiles/haplotigs.bed",
+                             sep="\t", skip= 1, col.names = c("seqid","start","end","counts","dataset"))
+
+# Join BED files coverage to the protein sequences file where more than two genes are in a cluster
+AIG_seq_rm_dup_clstr6_dup_diff_gene_95_product_95 
+BIR_seq_rm_dup_clstr6_dup_diff_gene_product_95 
+
+Cvir_GIMAP_meanCov_CD_Hit_95 <- left_join(AIG_seq_rm_dup_clstr6_dup_diff_gene_95_product_95 , Cvir_GIMAP_meanCov) %>% filter(Species =="Crassostrea_virginica")
+Cvir_IAP_meanCov_CD_Hit_95 <- left_join(BIR_seq_rm_dup_clstr6_dup_diff_gene_product_95 , Cvir_IAP_meanCov) %>% filter(Species =="Crassostrea_virginica")
+
+# Join full gene length since Ximing mentioned that haplotigs are pretty long 
+Cvir_GIMAP_meanCov_CD_Hit_95 <- left_join(Cvir_GIMAP_meanCov_CD_Hit_95, GIMAP_BED_name)
+Cvir_IAP_meanCov_CD_Hit_95 <- left_join(Cvir_IAP_meanCov_CD_Hit_95, IAP_BED_name)
+
+GIMAP_gene_length_aa <- AIG_seq_rm_dup_clstr6_NUC_95[,c("aa","gene")]
+IAP_gene_length_aa   <- BIR_seq_rm_dup_clstr6_NUC_95[,c("aa","gene")]
+colnames(GIMAP_gene_length_aa)[1] <- "gene_length"
+colnames(IAP_gene_length_aa  )[1] <- "gene_length"
+
+Cvir_GIMAP_meanCov_CD_Hit_95_length <- left_join(Cvir_GIMAP_meanCov_CD_Hit_95, GIMAP_gene_length_aa)
+Cvir_IAP_meanCov_CD_Hit_95_length <- left_join(Cvir_IAP_meanCov_CD_Hit_95 , IAP_gene_length_aa)
+Cvir_IAP_meanCov_CD_Hit_95_length <- unique(Cvir_IAP_meanCov_CD_Hit_95_length)
+
+# Make unique for each gene
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique <- Cvir_GIMAP_meanCov_CD_Hit_95_length %>% distinct(gene, .keep_all = TRUE)
+Cvir_IAP_meanCov_CD_Hit_95_length_unique <-  Cvir_IAP_meanCov_CD_Hit_95_length %>% distinct(gene, .keep_all = TRUE)
+
+# Is their overlap with the haplotigs file?
+Cvir_GIMAP_haplomerger_haplotigs <- Cvir_GIMAP_meanCov_CD_Hit_95_length[Cvir_GIMAP_meanCov_CD_Hit_95_length$start %in% Cvir_haplotigs,]
+# 0 in the overlap
+Cvir_IAP_haplomerger_haplotigs <- Cvir_IAP_meanCov_CD_Hit_95_length[Cvir_IAP_meanCov_CD_Hit_95_length$start %in% Cvir_haplotigs,]
+# 0 exact gene overlaps, need to check if my genes hit to any of these ranges 
+
+# No exact overlaps with gene coordinates, check if it is within range
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$HM_found_start <- ifelse(sapply(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$start, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$HM_found_end <- ifelse(sapply(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$end, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+
+Cvir_IAP_meanCov_CD_Hit_95_length_unique$HM_found_start <- ifelse(sapply(Cvir_IAP_meanCov_CD_Hit_95_length_unique$start, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+Cvir_IAP_meanCov_CD_Hit_95_length_unique$HM_found_end <- ifelse(sapply(Cvir_IAP_meanCov_CD_Hit_95_length_unique$end, function(p) 
+  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
+
+## Calculate mean coverage within gene clusters
+Cvir_GIMAP_meanCov_CD_Hit_95_length_unique_mean <- Cvir_GIMAP_meanCov_CD_Hit_95_length_unique %>% group_by(cluster) %>% mutate(mean_Cov_clstr = mean(meanCov))
+Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean <- Cvir_IAP_meanCov_CD_Hit_95_length_unique %>% group_by(cluster) %>% mutate(mean_Cov_clstr = mean(meanCov)) 
+
+#GIMAP results:
+#  - Cluster 291: Mean coverage of 436. Look at the nucleotide sequences of these genes LOC111110115, LOC111106081
+
+#IAP results:
+#  - Cluster 62: mean coverage of 444. Includes LOC111100470 and LOC111101689
+#- Cluster 328: mean coverage across cluster of 280. Includes LOC111132301 LOC111114013, LOC111103682, LOC111132489, LOC111132589, LOC111102106, LOC111114070
+#- Cluster 344: mean coverage across cluster 484. Includes LOC111117856, LOC111116826, LOC111111659
+
+# Make files with list of IDs to export to bluewaves to extract nucleotide sequences 
+GIMAP_cluster_219_gene <- Cvir_GIMAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 219")
+IAP_cluster_62_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 62") 
+IAP_cluster_328_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 328")
+IAP_cluster_344_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 344") 
+
+write.table(GIMAP_cluster_219_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_cluster_219_gene.txt",
+            quote=FALSE, row.names=FALSE, col.names = FALSE)
+write.table(IAP_cluster_62_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_62_gene.txt",
+            quote=FALSE, row.names=FALSE, col.names = FALSE)
+write.table(IAP_cluster_328_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_328_gene.txt",
+            quote=FALSE, row.names=FALSE, col.names = FALSE)
+write.table(IAP_cluster_344_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_344_gene.txt",
+            quote=FALSE, row.names=FALSE, col.names = FALSE)
+
+## Export the coordinates of clusters of interest as BED files so I can show in my IGV track session
+write.table(GIMAP_cluster_219_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_cluster_219_gene.bed",
+            quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
+write.table(IAP_cluster_62_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_62_gene.bed",
+            quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
+write.table(IAP_cluster_328_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_328_gene.bed",
+            quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
+write.table(IAP_cluster_344_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_344_gene.bed",
+            quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
+
+## Extract nucleotide sequences of interesting clusters on bluewaves (see code in notes file)
+## Align nucleotide sequences in bluewaves and view in IGV tracks 
+## Put results into report compiled by Jon 
+
+#### COLLAPSE GIMAP AND IAP GENES AND PROTEINS BASED ON HAPLOTIG RESULTS ####
+
+## Conclusions and Collapsing the GIMAP Cluster analysis
+
+#1. GIMAP Cluster 219: two genes need to be collapsed into  1. gene LOC111106081 is shorter and has lower coverage, this one should be removed 
+# LOC111106081 protein XP_022296317.1 should be combined with XP_022302183.1
+# Does LOC111106081 have other proteins?
+AIG1_XP_ALL_gff_GIMAP_species_join %>% filter(gene=="LOC111106081") # No just this one! 
+
+# First create for reference a data frame with all species and the haplotig collapsed
+AIG1_XP_ALL_gff_GIMAP_species_join_haplotig_collapsed <- AIG1_XP_ALL_gff_GIMAP_species_join %>% filter(gene !="LOC111106081")
+
+# Create collapsed data frame from the original MAFFT list where all the exact identical protein sequences from genes were removed (when CD-Hit was run only removing 100% identical sequences)
+AIG1_dup_seq_rm_kept_haplotig_collapsed <- AIG1_dup_seq_rm_kept %>% filter(gene !="LOC111106081")
+
+# Subset for only Mizuhopecten yessoensis (outgroup) and Crassostrea virginica and Crassostrea gigas sequences will be used to generate smaller tree for just these species 
+AIG1_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG <- AIG1_dup_seq_rm_kept_haplotig_collapsed %>% filter(Species == "Mizuhopecten_yessoensis" | Species == "Crassostrea_virginica" |
+                                                                                                         Species == "Crassostrea_gigas"  )
+
+# Export MY, CV, CG Sequence list for MAFFT and RAxML 
+write.table(unique(AIG1_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG$protein_id), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG.txt",
+            quote=FALSE, row.names=FALSE, col.names=FALSE)
+
+## Conclusions and Collapsing the IAP Cluster analysis
+# Remember that for the IAP analysis, the original tree had collapsed different genes with exact protein sequences. Which genes were collapsed? 
+
+#1. IAP Cluster 62 should NOT be collapsed
+
+#2. IAP Cluster 328 The two genes on top of the alignment (LOC111132489 and LOC111114013) form a cluster together and are most similar and should be collapsed into one gene. 
+# gene LOC111132489 has much higher coverage and is likely the "real" gene. Going to remove gene LOC111114013 and it's protein XP_022308010.1 should be collapsed with 
+# gene LOC111132489 protein XP_022336007.1 
+# Does LOC111114013 have multiple proteins 
+BIR_XP_gff_species_join %>% filter(gene=="LOC111114013")  # Has only 1 protein, XP_022308010.1
+
+# IAP Cluster 328 other five genes should be collapsed together: LOC111132301 has the highest relative coverage, meaning LOC111103682, LOC111132589,LOC111102106,LOC111114070 should be collapsed into this one gene
+# Do any of these gene have multiple proteins? 
+BIR_XP_gff_species_join %>% filter(gene=="LOC111103682") # only 1 protein XP_022292821.1
+BIR_XP_gff_species_join %>% filter(gene=="LOC111132589") # only 1 protein XP_022336127.1
+BIR_XP_gff_species_join %>% filter(gene=="LOC111102106") # only 1 protein XP_022290466.1
+BIR_XP_gff_species_join %>% filter(gene=="LOC111114070") # only 1 protein XP_022308067.1
+
+#3. IAP Cluster 344: The two sequences with the greatest similarity in gene sequence, LOC111116826 and LOC111111659, should be collapsed. LOC111111659 has extremely low coverage and its protein XP_022304464.1
+# should be collapsed into LOC111116826
+# Does LOC111111659 have more proteins 
+BIR_XP_gff_species_join %>% filter(gene=="LOC111111659")  # Has only 1 protein, XP_022304464.1
+
+# First create for reference a data frame with all species and the 6 haplotigs collapsed
+IAP_gene_remove <- c("LOC111111659", 
+                     "LOC111114013" ,
+                     "LOC111103682" ,
+                     "LOC111132589" ,
+                     "LOC111102106" ,
+                     "LOC111114070")
+BIR_XP_gff_species_join_haplotig_collapsed <- BIR_XP_gff_species_join[(!BIR_XP_gff_species_join$gene %in%  IAP_gene_remove),]
+
+# Create collapsed data frame from the original MAFFT list where all the exact identical protein sequences from genes were removed (when CD-Hit was run only removing 100% identical sequences)
+BIR_dup_seq_rm_kept_haplotig_collapsed <- BIR_dup_seq_rm_kept[(! BIR_dup_seq_rm_kept$gene %in%  IAP_gene_remove),]
+
+# Subset for only Mizuhopecten yessoensis (outgroup) and Crassostrea virginica and Crassostrea gigas sequences will be used to generate smaller tree for just these species 
+BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG <- BIR_dup_seq_rm_kept_haplotig_collapsed%>% filter(Species == "Mizuhopecten_yessoensis" | Species == "Crassostrea_virginica" |
+                                                                                                      Species == "Crassostrea_gigas"  )
+
+# Export MY, CV, CG Sequence list for MAFFT and RAxML 
+write.table(unique(BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG$protein_id), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG.txt",
+            quote=FALSE, row.names=FALSE, col.names=FALSE)
+
+
+#### PLOT FULL IAP PROTEIN TREE ####
 # Helpful online tutorial regarding tool: https://www.molecularecologist.com/2017/02/phylogenetic-trees-in-r-using-ggtree/
 # Tree data vignette https://yulab-smu.github.io/treedata-book/faq.html#different-x-labels-for-different-facet-panels
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
@@ -869,126 +1040,114 @@ IAP_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_
 IAP_raxml
 
 # Get information in the features/attributes of the tree (the XP labels) with get_data
-get.fields(GIMAP_raxml)
-get.data(GIMAP_raxml)
+get.fields(IAP_raxml)
+get.data(IAP_raxml)
 
 # Convert to tibble tree dataframe object with tidytree to add external data
-GIMAP_raxml_tibble <- as_tibble(GIMAP_raxml)
+IAP_raxml_tibble <- as_tibble(IAP_raxml)
 
 # Join protein product name,gene or locus, and species
-colnames(GIMAP_raxml_tibble)[4] <- "protein_id"
-GIMAP_raxml_tibble <- left_join(GIMAP_raxml_tibble, AIG1_XP_ALL_gff_GIMAP_species_join, by = "protein_id")
-colnames(GIMAP_raxml_tibble)[4] <- "label"
+colnames(IAP_raxml_tibble)[4] <- "protein_id"
+IAP_raxml_tibble <- left_join(IAP_raxml_tibble, BIR_XP_gff_species_join, by = "protein_id")
+colnames(IAP_raxml_tibble)[4] <- "label"
 
 # Add combined gene and locus name column 
-GIMAP_raxml_tibble$gene_locus_tag <- coalesce(GIMAP_raxml_tibble$gene, GIMAP_raxml_tibble$locus_tag)
+IAP_raxml_tibble$gene_locus_tag <- coalesce(IAP_raxml_tibble$gene, IAP_raxml_tibble$locus_tag)
 
 # Convert to treedata object to store tree plus outside data
-GIMAP_raxml_treedata <- as.treedata(GIMAP_raxml_tibble)
+IAP_raxml_treedata <- as.treedata(IAP_raxml_tibble)
 
 # save treedata
-save(GIMAP_raxml_treedata, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_raxml_treedata.Rdata")
+save(IAP_raxml_treedata, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_raxml_treedata.Rdata")
 
 # Plot circular tree
-GIMAP_raxml_treedata_circular_product <- ggtree(GIMAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
+IAP_raxml_treedata_circular_product <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
   geom_tiplab2(aes(label=product,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
   theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-130,130)  
 
-GIMAP_raxml_treedata_circular_product + scale_color_discrete(name = "Species", labels = c("Aplysia californica", 
-                                                                                          "Biomphalaria glabrata", "Crassostrea gigas", "Crassostrea virginica","Elysia chlorotica","Lottia gigantea","Mizuhopecten yessoensis",
-                                                                                          "Pomacea canaliculata","NA"))
+IAP_raxml_treedata_circular_product + scale_color_discrete(name = "Species", labels = c("Aplysia californica", 
+"Biomphalaria glabrata", "Crassostrea gigas", "Crassostrea virginica","Elysia chlorotica","Lottia gigantea","Mizuhopecten yessoensis","Octopus bimaculoides",
+"Octopus vulgaris", "Pomacea canaliculata","NA"))
+
 #Figure out how to change the colors later
 
 # Plot normal tree to use with heatmap
-GIMAP_raxml_treedata_tree_product <- ggtree(GIMAP_raxml_treedata, aes(color=Species)) + 
+IAP_raxml_treedata_tree_product <- ggtree(IAP_raxml_treedata, aes(color=Species)) + 
   geom_tiplab(aes(label=product)) + 
   theme(legend.position = "right", legend.text = element_text(face = "italic"))  
 
-#Subset tree after biomphalaria to zoom in on C. vir and C.gig
-GIMAP_raxml_treedata_pomacea_down_subset <- tree_subset(GIMAP_raxml_treedata, 60, levels_back = 7)
-ggtree(GIMAP_raxml_treedata_pomacea_down_subset, layout="circular", aes(color=Species), branch.length = "none") + 
-  geom_tiplab2(aes(label=product,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-70,70)  
+# Plot normal tree with gene labels
+ggtree(IAP_raxml_treedata, aes(color=Species)) + 
+  geom_tiplab(aes(label=gene_locus_tag)) + 
+  theme(legend.position = "right", legend.text = element_text(face = "italic"))  
 
 # PLOT AS GENE TREES TO SEARCH FOR POTENTIAL ARTIFACTS
-GIMAP_raxml_treedata_circular_gene <- ggtree(GIMAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
+IAP_raxml_treedata_circular_gene <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
   geom_tiplab2(aes(label=gene_locus_tag,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
   theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-80,80)  
 
-GIMAP_raxml_treedata_circular_gene + scale_color_discrete(name = "Species", labels = c("Aplysia californica", 
-                                                                                       "Biomphalaria glabrata", "Crassostrea gigas", "Crassostrea virginica","Elysia chlorotica","Lottia gigantea","Mizuhopecten yessoensis",
-                                                                                       "Pomacea canaliculata","NA"))
+IAP_raxml_treedata_circular_gene + scale_color_discrete(name = "Species", labels = c("Aplysia californica", 
+"Biomphalaria glabrata", "Crassostrea gigas", "Crassostrea virginica","Elysia chlorotica","Lottia gigantea","Mizuhopecten yessoensis","Octopus bimaculoides",
+"Octopus vulgaris", "Pomacea canaliculata","NA"))
 
-#Subset tree after biomphalaria to zoom in on C. vir and C.gig
-GIMAP_raxml_treedata_pomacea_down_subset_genes <- ggtree(GIMAP_raxml_treedata_pomacea_down_subset, layout="circular", aes(color=Species), branch.length = "none") + 
-  geom_tiplab2(aes(label=gene_locus_tag,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-70,70)  
+# Where are the potential gene artifacts located?
+# list of IAP potential gene artifacts 
+#"LOC111111659", 
+#"LOC111114013" ,
+#"LOC111103682" ,
+#"LOC111132589" , # node 454
+#"LOC111102106" ,
+#"LOC111114070"
 
-## PLOT GENE TREE OF ONLY THE THREE INTERESTING CVIR CGIG BRANCHES
-GIMAP_raxml_treedata_CV_CG_mixed_branches <- tree_subset(GIMAP_raxml_treedata, "XP_021367963.1", levels_back = 3)
-GIMAP_raxml_treedata_CV_CG_mixed_branches_tibble <- as.tibble(GIMAP_raxml_treedata_CV_CG_mixed_branches)
-GIMAP_raxml_treedata_CV_CG_mixed_branches_tree <- ggtree(GIMAP_raxml_treedata_CV_CG_mixed_branches, aes(color=Species), branch.length = "none") + 
+IAP_raxml_treedata_artifact <- tree_subset(IAP_raxml_treedata, "XP_022336127.1", levels_back = 8)
+IAP_raxml_treedata_artifact_tibble <- as.tibble(IAP_raxml_treedata_artifact)
+IAP_raxml_treedata_artifact_tree <- ggtree(IAP_raxml_treedata_artifact, aes(color=Species), branch.length = "none") + 
   geom_tiplab(aes(label=gene_locus_tag), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
   theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-40,40)  
 
-# Susbet for individual clusters
-GIMAP_raxml_treedata_CV_CG_mixed_branch_B <- tree_subset(GIMAP_raxml_treedata, "XP_021367963.1", levels_back = 2)
-GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble <- as.tibble(GIMAP_raxml_treedata_CV_CG_mixed_branch_B)
-GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tree <- ggtree(GIMAP_raxml_treedata_CV_CG_mixed_branch_B, aes(color=Species), branch.length = "none") + 
-  geom_tiplab(aes(label=gene_locus_tag), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-40,40)  
 
-ggtree(GIMAP_raxml_treedata_CV_CG_mixed_branch_B, aes(color=Species), branch.length = "none") + 
-  geom_tiplab(aes(label=label), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-40,40)  
+#### PLOT IAP MY, CV, CG PROTEIN TREE ####
 
-GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble_XP_list <- GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble %>% filter(Species=="Crassostrea_virginica") %>% select(label)
+# Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
+IAP_MY_CV_CG_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG_MSA_RAxML")
+IAP_MY_CV_CG_raxml
 
-GIMAP_raxml_treedata_CV_CG_mixed_branch_C <- tree_subset(GIMAP_raxml_treedata, "XP_009059109.1", levels_back = 2)
-GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble <- as.tibble(GIMAP_raxml_treedata_CV_CG_mixed_branch_C)
-GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tree <- ggtree(GIMAP_raxml_treedata_CV_CG_mixed_branch_C, aes(color=Species), branch.length = "none") + 
-  geom_tiplab(aes(label=gene_locus_tag), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-40,40)  
+# Convert to tibble tree dataframe object with tidytree to add external data
+IAP_MY_CV_CG_raxml_tibble <- as_tibble(IAP_MY_CV_CG_raxml)
 
-GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble_XP_list <- GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble %>% filter(Species=="Crassostrea_virginica") %>% select(label)
+# Join protein product name,gene or locus, and species
+colnames(IAP_MY_CV_CG_raxml_tibble)[4] <- "protein_id"
+IAP_MY_CV_CG_raxml_tibble <- left_join(IAP_MY_CV_CG_raxml_tibble, BIR_XP_gff_species_join, by = "protein_id")
+colnames(IAP_MY_CV_CG_raxml_tibble)[4] <- "label"
 
-GIMAP_raxml_treedata_CV_CG_mixed_branch_D <- tree_subset(GIMAP_raxml_treedata, "XP_021353565.1", levels_back = 2)
-GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble <- as.tibble(GIMAP_raxml_treedata_CV_CG_mixed_branch_D)
-GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tree <- ggtree(GIMAP_raxml_treedata_CV_CG_mixed_branch_D, aes(color=Species), branch.length = "none") + 
-  geom_tiplab(aes(label=gene_locus_tag), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-40,40)  
+# Add combined gene and locus name column 
+IAP_MY_CV_CG_raxml_tibble$gene_locus_tag <- coalesce(IAP_MY_CV_CG_raxml_tibble$gene, IAP_MY_CV_CG_raxml_tibble$locus_tag)
 
-GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list <- GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble %>% filter(Species=="Crassostrea_virginica") %>% select(label)
+# Remove text after isoform so I can collapse protein names into shorter list
+IAP_MY_CV_CG_raxml_tibble$product <- gsub("isoform.*", "", IAP_MY_CV_CG_raxml_tibble$product)
+IAP_MY_CV_CG_raxml_tibble$product <- trimws(IAP_MY_CV_CG_raxml_tibble$product , which = "both")
 
-# Pull out sequences for each branch 
-# split seq name and product so I can look up 
-AIG_seq_rm_dup_phylo_split <- separate(AIG_seq_rm_dup_phylo, seq.name, into = c("protein_id", "product"), sep = "\\s",
-                                       extra = "merge")
+# Join with alias info
+IAP_alias <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_shortened_product.csv")
+IAP_MY_CV_CG_raxml_tibble <- left_join(IAP_MY_CV_CG_raxml_tibble, IAP_alias)
 
-colnames(GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble_XP_list)[1] <- "protein_id" 
-colnames(GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble_XP_list)[1] <- "protein_id"
-colnames(GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list)[1] <- "protein_id"
+# Fill in blanks with uncharacterized locus name
+IAP_MY_CV_CG_raxml_tibble$alias[is.na(IAP_MY_CV_CG_raxml_tibble$alias)] <- IAP_MY_CV_CG_raxml_tibble$product[is.na(IAP_MY_CV_CG_raxml_tibble$alias)]
 
-GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble_XP_list_seq <- left_join(GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble_XP_list, AIG_seq_rm_dup_phylo_split)
-GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble_XP_list_seq <- left_join(GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble_XP_list, AIG_seq_rm_dup_phylo_split)
-GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list_seq <- left_join(GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list, AIG_seq_rm_dup_phylo_split)
+# Remove uncharacterized protein and just keep gene name for those uncharacterized
+IAP_MY_CV_CG_raxml_tibble$alias <- gsub("uncharacterized protein", "",IAP_MY_CV_CG_raxml_tibble$alias)
 
-# column names must be seq.name and seq.text, combining back columns
-GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble_XP_list_seq <- unite(GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble_XP_list_seq, seq.name, sep =" ", 1,2)  
-GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble_XP_list_seq <- unite(GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble_XP_list_seq, seq.name, sep =" ", 1,2) 
-GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list_seq <- unite(GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list_seq, seq.name, sep =" ", 1,2) 
+# Convert to treedata object to store tree plus outside data
+IAP_MY_CV_CG_raxml_treedata <- as.treedata(IAP_MY_CV_CG_raxml_tibble)
 
-# Export fasta to bluewaves to align with MAFFT (haven't done that yet)
-dat2fasta(GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble_XP_list_seq, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_Artifact_Investigation/GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble_XP_list_seq.fa")
-dat2fasta(GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble_XP_list_seq, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_Artifact_Investigation/GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble_XP_list_seq.fa")
-dat2fasta(GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list_seq, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_Artifact_Investigation/GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list_seq.fa")
-
-### Export GIMAP Protein Domains as BED file ###
+# Plot fan tree
+ggtree(IAP_MY_CV_CG_raxml_treedata, layout="fan", aes(color=Species),  branch.length = "none") + 
+  geom_tiplab2(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
+  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
 
 
-
-
-#### PLOT GIMAP TREE ####
+#### PLOT FULL GIMAP PROTEIN TREE ####
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
 GIMAP_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.AIG_GIMAP_HMMER_Interpro_XP_list_all_MSA_RaxML")
 GIMAP_raxml
@@ -1108,112 +1267,230 @@ dat2fasta(GIMAP_raxml_treedata_CV_CG_mixed_branch_B_tibble_XP_list_seq, "/Users/
 dat2fasta(GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble_XP_list_seq, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_Artifact_Investigation/GIMAP_raxml_treedata_CV_CG_mixed_branch_C_tibble_XP_list_seq.fa")
 dat2fasta(GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list_seq, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_Artifact_Investigation/GIMAP_raxml_treedata_CV_CG_mixed_branch_D_tibble_XP_list_seq.fa")
 
-### Export GIMAP Protein Domains as BED file ###
+### PLOT FULL MOLLUSC GIMAP TREE WITH THE 1 GENE ARTIFACT REMOVED ###
+
+# Drop tip to remove specific haplotig tip
+GIMAP_drop <- c("XP_022296317.1") 
+GIMAP_raxml_haplotig_rm_treedata  <- drop.tip(GIMAP_raxml_treedata ,GIMAP_drop)
+
+#Convert to tibble 
+GIMAP_raxml_haplotig_rm_tibble <- as_tibble(GIMAP_raxml_haplotig_rm_treedata )
+
+# Remove text after isoform so I can collapse protein names into shorter list
+GIMAP_raxml_haplotig_rm_tibble$product <- gsub("isoform.*", "", GIMAP_raxml_haplotig_rm_tibble$product)
+GIMAP_raxml_haplotig_rm_tibble$product <- trimws(GIMAP_raxml_haplotig_rm_tibble$product , which = "both")
+
+# Shorten product names by joinined edited excel spreadsheet
+#View(unique(GIMAP_raxml_haplotig_rm_tibble$product))
+GIMAP_alias <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_shortened_product.csv")
+
+GIMAP_raxml_haplotig_rm_tibble <- left_join(GIMAP_raxml_haplotig_rm_tibble, GIMAP_alias)
+
+# Fill in blanks with uncharacterized locus name
+GIMAP_raxml_haplotig_rm_tibble$alias[is.na(GIMAP_raxml_haplotig_rm_tibble$alias)] <- GIMAP_raxml_haplotig_rm_tibble$product[is.na(GIMAP_raxml_haplotig_rm_tibble$alias)]
+
+# Remove uncharacterized protein and just keep gene name for those uncharacterized
+GIMAP_raxml_haplotig_rm_tibble$alias <- gsub("uncharacterized protein", "",GIMAP_raxml_haplotig_rm_tibble$alias)
+
+# Convert back to treedata object 
+GIMAP_raxml_haplotig_rm_treedata <- as.treedata(GIMAP_raxml_haplotig_rm_tibble)
+
+# plot with bootstrap values
+ggtree(GIMAP_raxml_haplotig_rm_treedata, layout="fan", aes(color=Species),  branch.length = "none") + 
+  geom_tiplab2(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
+  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
+
+## NOTE: Collapse expanded clades is not valid to do on this protein tree, would be valid on the gene tree (which I can run too)
+
+## Calculate total gene counts across all species for each protein name
+# Are there genes with two different protein names? find non-matching alias rows in each gene group
+GIMAP_raxml_haplotig_rm_tibble_gene_dup <- GIMAP_raxml_haplotig_rm_tibble %>% group_by(gene) %>% filter(n()>1) %>% filter(!is.na(product)) %>% 
+  distinct(gene,alias, .keep_all = TRUE) %>% ungroup() %>% group_by(gene) %>% filter(n()>1) # YES there are seven genes across all species (1 in C. gigas, 2 in C. virginica)
+# where the different protein isoforms have different product annotations (Weird!)
+
+# remove "-like" to facilitate collapsing protein names
+GIMAP_raxml_haplotig_rm_tibble$alias_likerm <- str_remove(GIMAP_raxml_haplotig_rm_tibble$alias, "-like") 
+
+# Keep in the ones that have two different named proteins for a single gene by adding distinct with gene and alias
+GIMAP_raxml_haplotig_rm_tibble_gene_type_count <- GIMAP_raxml_haplotig_rm_tibble %>% 
+  distinct(gene,alias_likerm, .keep_all = TRUE) %>% # because some dupcliated gene names still 
+  group_by(Species, alias_likerm) %>%  
+  summarize(gene_count_alias = n())%>% 
+  ungroup() %>% #ungroup
+  filter(!grepl("LOC",alias_likerm)) 
+
+# Keep in the ones that have two different named proteins for a single gene by adding distinct with gene and alias
+GIMAP_raxml_haplotig_rm_tibble_gene_type_count_spread <- GIMAP_raxml_haplotig_rm_tibble %>% 
+  distinct(gene,alias_likerm, .keep_all = TRUE) %>% # because some dupcliated gene names still 
+  group_by(Species, alias_likerm) %>%  
+  summarize(gene_count_alias = n()) %>% 
+  ungroup() %>% #ungroup
+  filter(!grepl("LOC",alias_likerm)) %>% # remove rows with LOC
+  spread(Species, gene_count_alias) # spread by species 
+
+# replace_nas 
+GIMAP_raxml_haplotig_rm_tibble_gene_type_count_spread_na <- GIMAP_raxml_haplotig_rm_tibble_gene_type_count_spread %>%
+  replace(is.na(.), 0)
+
+# plot as heatmap
+ggplot(GIMAP_raxml_haplotig_rm_tibble_gene_type_count, aes(x=Species,y=alias_likerm, fill=gene_count_alias)) + 
+  geom_tile() + scale_fill_viridis(discrete=FALSE)
+
+# plot as columns
+ggplot(GIMAP_raxml_haplotig_rm_tibble_gene_type_count, aes(x=Species,y=gene_count_alias, fill=alias_likerm)) + 
+  geom_col(position="dodge")
+
+# plot only GIMAP columns
+GIMAP_raxml_haplotig_rm_tibble_gene_type_count %>% filter(grepl("GIMAP",alias_likerm)) %>% 
+  ggplot(aes(x=Species,y=gene_count_alias, fill=alias)) + 
+  geom_col(position="dodge")
+
+GIMAP_raxml_haplotig_rm_prot_collapse_tibble_gene_type_count %>% filter(grepl("GIMAP",alias)) %>% 
+  ggplot(aes(x=Species,y=gene_count_alias, fill=alias)) + 
+  geom_col(position="fill")
+
+# Calculate frequency of genes with particular protein annotations
+GIMAP_raxml_haplotig_rm_tibble_gene_type_count_perspecies_freq <- GIMAP_raxml_haplotig_rm_tibble_gene_type_count %>%
+  group_by(Species) %>% mutate(gene_in_species_total = sum(gene_count_alias)) %>% mutate(gene_prot_percent = (gene_count_alias / gene_in_species_total)*100) %>%
+  filter(!is.na(Species))
+
+# Plot percent (remember this still includes 7 genes with double hits in the list)
+GIMAP_raxml_haplotig_rm_tibble_gene_type_count_perspecies_freq %>% 
+  ggplot(aes(x=alias_likerm,y=gene_prot_percent, fill=Species)) + 
+  geom_col(position="dodge") + coord_flip()
+
+# Find protein with highest percent in each organism 
+GIMAP_raxml_haplotig_rm_tibble_gene_type_count_perspecies_freq %>% 
+  group_by(Species) %>% top_n(n=1, wt = gene_prot_percent) %>%
+  ggplot(aes(x=alias_likerm,y=gene_prot_percent, fill=Species)) + 
+  geom_col(position="dodge")
+
+### PLOT FULL MOLLUSC GIMAP TREE WITH THE 1 GENE ARTIFACT REMOVED AND GENE COUNTS COLLAPSED ###
+# Need to check the code below.. doing this is problematic because some of the genes have two differently annotated proteins 
+# Identify protein isoforms from the same gene within a parent branch to be dropped with droptip 
+GIMAP_raxml_tibble_haplotig_rm_prot_to_keep <- distinct_at(GIMAP_raxml_tibble, vars("parent","gene"), .keep_all = TRUE) 
+GIMAP_raxml_tibble_haplotig_rm_prot_to_keep %>% group_by(gene_locus_tag) %>% filter(n()>1) %>% filter(!is.na(gene_locus_tag)) %>% View()
+GIMAP_raxml_tibble_haplotig_rm_prot_to_keep_label <- GIMAP_raxml_tibble_haplotig_rm_prot_to_keep %>% filter(!is.na(label)) %>% select(label)
+GIMAP_raxml_tibble_label <- GIMAP_raxml_tibble %>% filter(!is.na(label)) %>% select(label) 
+GIMAP_raxml_tibble_haplotig_rm_prot_to_drop <- setdiff(GIMAP_raxml_tibble_label$label, GIMAP_raxml_tibble_haplotig_rm_prot_to_keep_label$label)
+
+# Drop extra protein isoforms in parent branches and haplotig from the original GIMAP tree_data
+GIMAP_raxml_haplotig_rm_prot_collapse_treedata <- drop.tip(GIMAP_raxml_treedata, GIMAP_raxml_tibble_haplotig_rm_prot_to_drop)
+
+# Drop tip to remove specific haplotig tip
+GIMAP_drop <- c("XP_022296317.1") 
+GIMAP_raxml_haplotig_rm_prot_collapse_treedata  <- drop.tip(GIMAP_raxml_haplotig_rm_prot_collapse_treedata ,GIMAP_drop)
+
+#Convert to tibble 
+GIMAP_raxml_haplotig_rm_prot_collapse_tibble <- as_tibble(GIMAP_raxml_haplotig_rm_prot_collapse_treedata )
+
+# Remove text after isoform so I can collapse protein names into shorter list
+GIMAP_raxml_haplotig_rm_prot_collapse_tibble$product <- gsub("isoform.*", "", GIMAP_raxml_haplotig_rm_prot_collapse_tibble$product)
+GIMAP_raxml_haplotig_rm_prot_collapse_tibble$product <- trimws(GIMAP_raxml_haplotig_rm_prot_collapse_tibble$product , which = "both")
+
+# Shorten product names by joinined edited excel spreadsheet
+#View(unique(GIMAP_raxml_haplotig_rm_prot_collapse_tibble$product))
+GIMAP_alias <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_shortened_product.csv")
+
+GIMAP_raxml_haplotig_rm_prot_collapse_tibble <- left_join(GIMAP_raxml_haplotig_rm_prot_collapse_tibble, GIMAP_alias)
+
+# Fill in blanks with uncharacterized locus name
+GIMAP_raxml_haplotig_rm_prot_collapse_tibble$alias[is.na(GIMAP_raxml_haplotig_rm_prot_collapse_tibble$alias)] <- GIMAP_raxml_haplotig_rm_prot_collapse_tibble$product[is.na(GIMAP_raxml_haplotig_rm_prot_collapse_tibble$alias)]
+
+# Remove uncharacterized protein and just keep gene name for those uncharacterized
+GIMAP_raxml_haplotig_rm_prot_collapse_tibble$alias <- gsub("uncharacterized protein", "",GIMAP_raxml_haplotig_rm_prot_collapse_tibble$alias)
+
+# Convert back to treedata object 
+GIMAP_raxml_haplotig_rm_prot_collapse_treedata <- as.treedata(GIMAP_raxml_haplotig_rm_prot_collapse_tibble)
+
+# Plot circular tree with protein list collapsed by shared genes
+ggtree(GIMAP_raxml_haplotig_rm_prot_collapse_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
+  geom_tiplab2(aes(label=label,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-70,70)  
+
+# Plot circular tree with protein name aliases
+ggtree(GIMAP_raxml_haplotig_rm_prot_collapse_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
+  geom_tiplab2(aes(label=alias,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-70,70) +
+  geom_text(aes(label = bootstrap), hjust = 2, vjust= -3, size = 2)
+
+# Plot as vertical tree with protein name aliases and bootstrap values 
+ggtree(GIMAP_raxml_haplotig_rm_prot_collapse_treedata, aes(color=Species), branch.length = "none") + 
+  geom_tiplab(aes(label=alias), size =2.0, offset=.5) + # geom_tiplab1 for vertical trees
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-70,70) +
+  geom_text(aes(label = bootstrap), hjust = 3, vjust = -0.2, size = 2)
+
+# Plot fan tree with protein name aliases
+GIMAP_protein_haplotig_rm_fantree <- ggtree(GIMAP_raxml_haplotig_rm_prot_collapse_treedata, layout="fan", aes(color=Species),  branch.length = "none") + 
+  geom_tiplab2(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
+ geom_text(aes(label = bootstrap), hjust = 1, vjust = -0.2, size = 3, fontface="bold")  
+
+GIMAP_protein_haplotig_rm_fantree_subset_boot_50 <- ggtree(GIMAP_raxml_haplotig_rm_prot_collapse_treedata, layout="fan", aes(color=Species),  branch.length = "none") + 
+  geom_tiplab2(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
+  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
+
+ggtree(GIMAP_raxml_haplotig_rm_prot_collapse_treedata, layout="fan", aes(color=Species),  branch.length = "none") + 
+  geom_tiplab2(aes(label=gene_locus_tag), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
+  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold")
+
+#### PLOT GIMAP MY, CV, CG PROTEIN TREE ####
+
+# Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
+GIMAP_MY_CV_CG_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.AIG1_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG_MSA_RaxML")
+GIMAP_MY_CV_CG_raxml
+
+# Convert to tibble tree dataframe object with tidytree to add external data
+GIMAP_MY_CV_CG_raxml_tibble <- as_tibble(GIMAP_MY_CV_CG_raxml)
+
+# Join protein product name,gene or locus, and species
+colnames(GIMAP_MY_CV_CG_raxml_tibble)[4] <- "protein_id"
+GIMAP_MY_CV_CG_raxml_tibble <- left_join(GIMAP_MY_CV_CG_raxml_tibble, AIG1_XP_ALL_gff_GIMAP_species_join, by = "protein_id")
+colnames(GIMAP_MY_CV_CG_raxml_tibble)[4] <- "label"
+
+# Add combined gene and locus name column 
+GIMAP_MY_CV_CG_raxml_tibble$gene_locus_tag <- coalesce(GIMAP_MY_CV_CG_raxml_tibble$gene, GIMAP_MY_CV_CG_raxml_tibble$locus_tag)
+
+# Remove text after isoform so I can collapse protein names into shorter list
+GIMAP_MY_CV_CG_raxml_tibble$product <- gsub("isoform.*", "", GIMAP_MY_CV_CG_raxml_tibble$product)
+GIMAP_MY_CV_CG_raxml_tibble$product <- trimws(GIMAP_MY_CV_CG_raxml_tibble$product , which = "both")
+
+# Join with alias info
+GIMAP_MY_CV_CG_raxml_tibble <- left_join(GIMAP_MY_CV_CG_raxml_tibble, GIMAP_alias)
+
+# Fill in blanks with uncharacterized locus name
+GIMAP_MY_CV_CG_raxml_tibble$alias[is.na(GIMAP_MY_CV_CG_raxml_tibble$alias)] <- GIMAP_MY_CV_CG_raxml_tibble$product[is.na(GIMAP_MY_CV_CG_raxml_tibble$alias)]
+
+# Remove uncharacterized protein and just keep gene name for those uncharacterized
+GIMAP_MY_CV_CG_raxml_tibble$alias <- gsub("uncharacterized protein ", "",GIMAP_MY_CV_CG_raxml_tibble$alias)
+
+# Convert to treedata object to store tree plus outside data
+GIMAP_MY_CV_CG_raxml_treedata <- as.treedata(GIMAP_MY_CV_CG_raxml_tibble)
+
+# Plot fan tree
+ggtree(GIMAP_MY_CV_CG_raxml_treedata, aes(color=Species),  branch.length = "none") + 
+  geom_tiplab2(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
+  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
+
+# Plot vertical tree
+ggtree(GIMAP_MY_CV_CG_raxml_treedata, aes(color=Species),  branch.length = "none") + 
+  geom_tiplab(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
+  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
 
 
-#### INVESTIGATE POTENTIAL GENE ARTIFACTS ####
-
-# LOAD BED FILES AND HAPLOTIG FILES FROM JON PURITZ
-  ## Notes: I created BED files for the locations of all Cvirginica IAP and GIMAP genes. Jon used those coordinates to pull out 
-      # the mean coverage values at each gene location. He also provided the file he created by running HaploMerger to identify haplotigs across the genome. I am going to compare 
-      # my results with his in a short report after this. 
-      # Exported data frames used: IAP_BED_nams, GIMAP_BED_name
-
-# Load BED files 
-Cvir_GIMAP_meanCov <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Jon_Puritz_6_4_2020_regenefamilybedfiles/Cvir_GIMAP.meanCov.bed",
-                                 sep="\t", col.names = c("seqid","start","end","gene","meanCov"))
-
-Cvir_IAP_meanCov <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Jon_Puritz_6_4_2020_regenefamilybedfiles/Cvir_IAP.meanCov.bed",
-                                 sep="\t", col.names = c("seqid","start","end","gene","meanCov"))
-
-Cvir_haplotigs <- read.table(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Jon_Puritz_6_4_2020_regenefamilybedfiles/haplotigs.bed",
-                               sep="\t", skip= 1, col.names = c("seqid","start","end","counts","dataset"))
-
-# Join BED files coverage to the protein sequences file where more than two genes are in a cluster
-AIG_seq_rm_dup_clstr6_dup_diff_gene_95_product_95 
-BIR_seq_rm_dup_clstr6_dup_diff_gene_product_95 
-
-Cvir_GIMAP_meanCov_CD_Hit_95 <- left_join(AIG_seq_rm_dup_clstr6_dup_diff_gene_95_product_95 , Cvir_GIMAP_meanCov) %>% filter(Species =="Crassostrea_virginica")
-Cvir_IAP_meanCov_CD_Hit_95 <- left_join(BIR_seq_rm_dup_clstr6_dup_diff_gene_product_95 , Cvir_IAP_meanCov) %>% filter(Species =="Crassostrea_virginica")
-
-# Join full gene length since Ximing mentioned that haplotigs are pretty long 
-Cvir_GIMAP_meanCov_CD_Hit_95 <- left_join(Cvir_GIMAP_meanCov_CD_Hit_95, GIMAP_BED_name)
-Cvir_IAP_meanCov_CD_Hit_95 <- left_join(Cvir_IAP_meanCov_CD_Hit_95, IAP_BED_name)
-
-GIMAP_gene_length_aa <- AIG_seq_rm_dup_clstr6_NUC_95[,c("aa","gene")]
-IAP_gene_length_aa   <- BIR_seq_rm_dup_clstr6_NUC_95[,c("aa","gene")]
-colnames(GIMAP_gene_length_aa)[1] <- "gene_length"
-colnames(IAP_gene_length_aa  )[1] <- "gene_length"
-
-Cvir_GIMAP_meanCov_CD_Hit_95_length <- left_join(Cvir_GIMAP_meanCov_CD_Hit_95, GIMAP_gene_length_aa)
-Cvir_IAP_meanCov_CD_Hit_95_length <- left_join(Cvir_IAP_meanCov_CD_Hit_95 , IAP_gene_length_aa)
-Cvir_IAP_meanCov_CD_Hit_95_length <- unique(Cvir_IAP_meanCov_CD_Hit_95_length)
-
-# Make unique for each gene
-Cvir_GIMAP_meanCov_CD_Hit_95_length_unique <- Cvir_GIMAP_meanCov_CD_Hit_95_length %>% distinct(gene, .keep_all = TRUE)
-Cvir_IAP_meanCov_CD_Hit_95_length_unique <-  Cvir_IAP_meanCov_CD_Hit_95_length %>% distinct(gene, .keep_all = TRUE)
-
-# Is their overlap with the haplotigs file?
-Cvir_GIMAP_haplomerger_haplotigs <- Cvir_GIMAP_meanCov_CD_Hit_95_length[Cvir_GIMAP_meanCov_CD_Hit_95_length$start %in% Cvir_haplotigs,]
-  # 0 in the overlap
-Cvir_IAP_haplomerger_haplotigs <- Cvir_IAP_meanCov_CD_Hit_95_length[Cvir_IAP_meanCov_CD_Hit_95_length$start %in% Cvir_haplotigs,]
-  # 0 exact gene overlaps, need to check if my genes hit to any of these ranges 
-
-# No exact overlaps with gene coordinates, check if it is within range
-Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$HM_found_start <- ifelse(sapply(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$start, function(p) 
-  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
-Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$HM_found_end <- ifelse(sapply(Cvir_GIMAP_meanCov_CD_Hit_95_length_unique$end, function(p) 
-  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
-
-Cvir_IAP_meanCov_CD_Hit_95_length_unique$HM_found_start <- ifelse(sapply(Cvir_IAP_meanCov_CD_Hit_95_length_unique$start, function(p) 
-  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
-Cvir_IAP_meanCov_CD_Hit_95_length_unique$HM_found_end <- ifelse(sapply(Cvir_IAP_meanCov_CD_Hit_95_length_unique$end, function(p) 
-  any(Cvir_haplotigs$start <= p & Cvir_haplotigs$end >= p)),"YES", NA)
-
-## Calculate mean coverage within gene clusters
-Cvir_GIMAP_meanCov_CD_Hit_95_length_unique_mean <- Cvir_GIMAP_meanCov_CD_Hit_95_length_unique %>% group_by(cluster) %>% mutate(mean_Cov_clstr = mean(meanCov))
-Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean <- Cvir_IAP_meanCov_CD_Hit_95_length_unique %>% group_by(cluster) %>% mutate(mean_Cov_clstr = mean(meanCov)) 
-
-#GIMAP results:
-#  - Cluster 291: Mean coverage of 436. Look at the nucleotide sequences of these genes LOC111110115, LOC111106081
-
-#IAP results:
-#  - Cluster 62: mean coverage of 444. Includes LOC111100470 and LOC111101689
-#- Cluster 328: mean coverage across cluster of 280. Includes LOC111132301 LOC111114013, LOC111103682, LOC111132489, LOC111132589, LOC111102106, LOC111114070
-#- Cluster 344: mean coverage across cluster 484. Includes LOC111117856, LOC111116826, LOC111111659
-
-# Make files with list of IDs to export to bluewaves to extract nucleotide sequences 
-GIMAP_cluster_219_gene <- Cvir_GIMAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 219")
-IAP_cluster_62_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 62") 
-IAP_cluster_328_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 328")
-IAP_cluster_344_gene <- Cvir_IAP_meanCov_CD_Hit_95_length_unique_mean  %>% filter(cluster == "Cluster 344") 
-
-write.table(GIMAP_cluster_219_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_cluster_219_gene.txt",
-            quote=FALSE, row.names=FALSE, col.names = FALSE)
-write.table(IAP_cluster_62_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_62_gene.txt",
-            quote=FALSE, row.names=FALSE, col.names = FALSE)
-write.table(IAP_cluster_328_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_328_gene.txt",
-            quote=FALSE, row.names=FALSE, col.names = FALSE)
-write.table(IAP_cluster_344_gene$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_344_gene.txt",
-            quote=FALSE, row.names=FALSE, col.names = FALSE)
-
-## Export the coordinates of clusters of interest as BED files so I can show in my IGV track session
-write.table(GIMAP_cluster_219_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_cluster_219_gene.bed",
-              quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
-write.table(IAP_cluster_62_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_62_gene.bed",
-            quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
-write.table(IAP_cluster_328_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_328_gene.bed",
-            quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
-write.table(IAP_cluster_344_gene[,c("seqid","start","end","cluster")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_cluster_344_gene.bed",
-            quote=FALSE, row.names=FALSE, col.names = FALSE, sep = "\t")
-
-## Extract nucleotide sequences of interesting clusters on bluewaves (see code in notes file)
-## Align nucleotide sequences in bluewaves and view in IGV tracks 
-
-
-#### PLOT DOMAIN STRUCTURE ####
+#### PLOT GIMAP DOMAIN STRUCTURE AND COMBINE WITH TREE ####
 # trying the package Sushi
 library(Sushi)
+library(drawProteins)
+# see helpful tutorial: https://www.bioconductor.org/packages/devel/bioc/vignettes/drawProteins/inst/doc/drawProteins_BiocStyle.html
+
+# Get protein domain information from Interprosan data 
+GIMAP_MY_CV_CG_raxml_tibble
 
 
 
@@ -1231,7 +1508,7 @@ Mollusc_Species_tibble_GIMAP_genes <- left_join(Mollusc_Species_tibble, AIG1_XP_
 colnames(Mollusc_Species_tibble_GIMAP_genes)[5] <- "GIMAP gene Count"
 colnames(Mollusc_Species_tibble_GIMAP_genes)[4] <- "label"
 
-Mollusc_Species_Treedata <- as.treedata(Mollusc_Species_tibble_GIMAP_genes)
+Mollusc_Species_Treedata <- as.treedata(Mollusc_Species_tibble)
 
 # write out species and genus
 genus <- c('Octopus', 'Octopus','Mizuhopecten','Crassostrea','Crassostrea','Lottia','Pomacea','Elysia','Biomphalaria','Aplysia')
