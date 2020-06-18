@@ -21,6 +21,8 @@ library(chopper)
 library(alakazam)
 library(phylotools)
 library(viridis)
+library(ggpubr)
+library(forcats)
 
 #### IMPORT GENOMES AND ANNOTATIONS #####
 #load(file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_annotations.RData")
@@ -1054,6 +1056,20 @@ colnames(IAP_raxml_tibble)[4] <- "label"
 # Add combined gene and locus name column 
 IAP_raxml_tibble$gene_locus_tag <- coalesce(IAP_raxml_tibble$gene, IAP_raxml_tibble$locus_tag)
 
+# Remove text after isoform so I can collapse protein names into shorter list
+IAP_raxml_tibble$product <- gsub("isoform.*", "", IAP_raxml_tibble$product)
+IAP_raxml_tibble$product <- trimws(IAP_raxml_tibble$product , which = "both")
+
+# Join with alias info
+IAP_alias <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_shortened_product.csv")
+IAP_raxml_tibble <- left_join(IAP_raxml_tibble, IAP_alias)
+
+# Fill in blanks with uncharacterized locus name
+IAP_raxml_tibble$alias[is.na(IAP_raxml_tibble$alias)] <- IAP_raxml_tibble$product[is.na(IAP_raxml_tibble$alias)]
+
+# Remove uncharacterized protein and just keep gene name for those uncharacterized
+IAP_raxml_tibble$alias <- gsub("uncharacterized protein", "",IAP_raxml_tibble$alias)
+
 # Convert to treedata object to store tree plus outside data
 IAP_raxml_treedata <- as.treedata(IAP_raxml_tibble)
 
@@ -1080,6 +1096,11 @@ IAP_raxml_treedata_tree_product <- ggtree(IAP_raxml_treedata, aes(color=Species)
 ggtree(IAP_raxml_treedata, aes(color=Species)) + 
   geom_tiplab(aes(label=gene_locus_tag)) + 
   theme(legend.position = "right", legend.text = element_text(face = "italic"))  
+
+# Plot Protein tree
+ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
+  geom_tiplab2(aes(label=alias,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-80,80)  
 
 # PLOT AS GENE TREES TO SEARCH FOR POTENTIAL ARTIFACTS
 IAP_raxml_treedata_circular_gene <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
@@ -1181,7 +1202,9 @@ GIMAP_raxml_treedata_circular_product <- ggtree(GIMAP_raxml_treedata, layout="ci
 GIMAP_raxml_treedata_circular_product + scale_color_discrete(name = "Species", labels = c("Aplysia californica", 
                              "Biomphalaria glabrata", "Crassostrea gigas", "Crassostrea virginica","Elysia chlorotica","Lottia gigantea","Mizuhopecten yessoensis",
                              "Pomacea canaliculata","NA"))
+
 #Figure out how to change the colors later
+# specific color for each species 
                           
 # Plot normal tree to use with heatmap
 GIMAP_raxml_treedata_tree_product <- ggtree(GIMAP_raxml_treedata, aes(color=Species)) + 
@@ -1335,7 +1358,9 @@ GIMAP_raxml_haplotig_rm_tibble_gene_type_count_spread_na <- GIMAP_raxml_haplotig
 
 # plot as heatmap
 ggplot(GIMAP_raxml_haplotig_rm_tibble_gene_type_count, aes(x=Species,y=alias_likerm, fill=gene_count_alias)) + 
-  geom_tile() + scale_fill_viridis(discrete=FALSE)
+  geom_tile() + scale_fill_viridis(discrete=FALSE) +
+  labs(title="Gene Counts by Product in Each species",
+       y = "Percent of Genes", x="Product")
 
 # plot as columns
 ggplot(GIMAP_raxml_haplotig_rm_tibble_gene_type_count, aes(x=Species,y=gene_count_alias, fill=alias_likerm)) + 
@@ -1353,18 +1378,32 @@ GIMAP_raxml_haplotig_rm_prot_collapse_tibble_gene_type_count %>% filter(grepl("G
 # Calculate frequency of genes with particular protein annotations
 GIMAP_raxml_haplotig_rm_tibble_gene_type_count_perspecies_freq <- GIMAP_raxml_haplotig_rm_tibble_gene_type_count %>%
   group_by(Species) %>% mutate(gene_in_species_total = sum(gene_count_alias)) %>% mutate(gene_prot_percent = (gene_count_alias / gene_in_species_total)*100) %>%
-  filter(!is.na(Species))
+  filter(!is.na(Species)) 
 
 # Plot percent (remember this still includes 7 genes with double hits in the list)
 GIMAP_raxml_haplotig_rm_tibble_gene_type_count_perspecies_freq %>% 
+  # keep only the named ones so I can look at diversity
+  filter(grepl("IAN",alias_likerm) | grepl("GIMAP", alias_likerm)) %>%
   ggplot(aes(x=alias_likerm,y=gene_prot_percent, fill=Species)) + 
-  geom_col(position="dodge") + coord_flip()
+  geom_col(position="dodge") + coord_flip() +
+  labs(title="Gene Frequency by Product in Each species",
+       y = "Percent of Genes", x="Product")
+
+GIMAP_raxml_haplotig_rm_tibble_gene_type_count_perspecies_freq %>% 
+  # keep only the named ones so I can look at diversity
+  filter(grepl("IAN",alias_likerm) | grepl("GIMAP", alias_likerm)) %>%
+  ggplot(aes(x=Species,y=gene_prot_percent, fill=alias_likerm)) + 
+  geom_col(position="dodge")  +
+  labs(title="Gene Frequency by Product in Each species",
+       y = "Percent of Genes", x="Product")
 
 # Find protein with highest percent in each organism 
 GIMAP_raxml_haplotig_rm_tibble_gene_type_count_perspecies_freq %>% 
   group_by(Species) %>% top_n(n=1, wt = gene_prot_percent) %>%
   ggplot(aes(x=alias_likerm,y=gene_prot_percent, fill=Species)) + 
-  geom_col(position="dodge")
+  geom_col(position="dodge") + 
+  labs(title="Most Abundant Product in Each species",
+       y = "Percent of Genes", x="Product")
 
 ### PLOT FULL MOLLUSC GIMAP TREE WITH THE 1 GENE ARTIFACT REMOVED AND GENE COUNTS COLLAPSED ###
 # Need to check the code below.. doing this is problematic because some of the genes have two differently annotated proteins 
@@ -1467,39 +1506,123 @@ GIMAP_MY_CV_CG_raxml_tibble$alias[is.na(GIMAP_MY_CV_CG_raxml_tibble$alias)] <- G
 # Remove uncharacterized protein and just keep gene name for those uncharacterized
 GIMAP_MY_CV_CG_raxml_tibble$alias <- gsub("uncharacterized protein ", "",GIMAP_MY_CV_CG_raxml_tibble$alias)
 
+# fill species NA with a value
+GIMAP_MY_CV_CG_raxml_tibble[is.na(GIMAP_MY_CV_CG_raxml_tibble$Species), ] <- as.character("none")
+
 # Convert to treedata object to store tree plus outside data
 GIMAP_MY_CV_CG_raxml_treedata <- as.treedata(GIMAP_MY_CV_CG_raxml_tibble)
 
 # Plot fan tree
-ggtree(GIMAP_MY_CV_CG_raxml_treedata, aes(color=Species),  branch.length = "none") + 
+ggtree(GIMAP_MY_CV_CG_raxml_treedata, aes(color=Species), layout="fan",  branch.length = "none") + 
   geom_tiplab2(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
   theme(legend.position = "right", legend.text = element_text(face = "italic")) +
   geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
 
-# Plot vertical tree
-ggtree(GIMAP_MY_CV_CG_raxml_treedata, aes(color=Species),  branch.length = "none") + 
-  geom_tiplab(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
-  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
-
+# Plot vertical tree and edit colors
+GIMAP_MY_CV_CG_raxml_treedata_vertical <- 
+  ggtree(GIMAP_MY_CV_CG_raxml_treedata, aes(color=Species, fill=Species), branch.length = "none") + 
+  geom_tiplab(aes(label=node), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = c(0.4,0.5), 
+        legend.text = element_text(face = "italic")) +
+  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 2, fontface="bold") + # allows for subset
+  xlim(-70,70) + #change scaling so branch lengths are smaller 
+  scale_colour_manual(name = "Species", values=c("#cb8130","#45c097", "#6d83da"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
+                    labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis"))
 
 #### PLOT GIMAP DOMAIN STRUCTURE AND COMBINE WITH TREE ####
-# trying the package Sushi
-library(Sushi)
-library(drawProteins)
-# see helpful tutorial: https://www.bioconductor.org/packages/devel/bioc/vignettes/drawProteins/inst/doc/drawProteins_BiocStyle.html
+# Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
+# Get only the Interproscan domains for my proteins of interest
+GIMAP_MY_CV_CG_raxml_tibble_join <- GIMAP_MY_CV_CG_raxml_tibble %>% filter(!is.na(label)) # remove rows with just bootstrap information
+colnames(GIMAP_MY_CV_CG_raxml_tibble_join)[4] <- "protein_id"
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains <-  left_join(GIMAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")], AIG1_XP_ALL_gff_GIMAP)
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains %>% 
+  filter(grepl("InterPro:IPR", Dbxref) | source == "Coils") # keep Interproscan domain lines and coiled coil lines 
 
-# Get protein domain information from Interprosan data 
-GIMAP_MY_CV_CG_raxml_tibble
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains %>% 
+  filter(is.na(source))
+
+nrow(AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot %>% filter(is.na(source))) # 144
+nrow(GIMAP_MY_CV_CG_raxml_tibble %>% filter(!is.na(label))) # 144 - they agree, all proteins were found 
+
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only$Dbxref[AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only$Dbxref =="character(0)"] <- "Coil"
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only  <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only %>% unnest(Dbxref)
+
+# count most common
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only %>% group_by(Dbxref) %>% count() %>% View()
+
+# Get the node order from original GIMAP tree
+GIMAP_MY_CV_CG_raxml_treedata_tip  <- fortify(GIMAP_MY_CV_CG_raxml_treedata)
+GIMAP_MY_CV_CG_raxml_treedata_tip = subset(GIMAP_MY_CV_CG_raxml_treedata_tip, isTip)
+GIMAP_MY_CV_CG_raxml_treedata_tip_order <- GIMAP_MY_CV_CG_raxml_treedata_tip$label[order(GIMAP_MY_CV_CG_raxml_treedata_tip$y, decreasing=TRUE)]
+
+# Reorder the protein and polygon
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot[match(GIMAP_MY_CV_CG_raxml_treedata_tip_order, AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot$protein_id),]
+# have to left join to add back in rows taken out 
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only_match <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only[match(GIMAP_MY_CV_CG_raxml_treedata_tip_order, AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only$protein_id),]
+GIMAP_MY_CV_CG_raxml_treedata_tip_order <- as.data.frame(GIMAP_MY_CV_CG_raxml_treedata_tip_order)
+colnames(GIMAP_MY_CV_CG_raxml_treedata_tip_order)[1] <- "protein_id"
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only <- full_join(GIMAP_MY_CV_CG_raxml_treedata_tip_order, AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only)
+
+# Add polygon height
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only_ID  <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only  %>% distinct(protein_id) 
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only_ID <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only_ID %>% 
+  mutate(height_start = rev(as.numeric(row.names(AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only_ID )) - 0.25)) %>%
+  mutate(height_end = rev(as.numeric(row.names(AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only_ID)) + .5))
+
+# Join back in height
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only <- left_join(AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only , AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only_ID )
+
+# Set factor level order of the nodes set levels in reverse order
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only$node <- factor(AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only$node, levels = unique(AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only$node))
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only$Dbxref <- factor(AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only$Dbxref, levels = unique(AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only$Dbxref))
+AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot$node <- factor(AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot$node, levels = rev(AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot$node))
+
+# Plot the line segments of the NA source lines (which have the full protein start and end)
+GIMAP_Interproscan_domain_plot <- ggplot() + 
+  # plot length of each protein as line
+  geom_segment(data =AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot,
+               aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
+  # add boxes with geom_rect 
+  geom_rect(data=AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only,
+            aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Dbxref)) +
+  #add labels
+  labs(y = NULL, x = "Protein Domain Position (aa)") +
+  # add text labels
+  geom_text(data=AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot,aes(x= end, y = node, label=alias),
+            size=2.2, hjust=-.15, check_overlap = TRUE) + 
+  # text theme
+  theme_bw() + 
+  # plot theme
+  theme(axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black")) +
+  # Change y axis ticks
+  scale_x_continuous(breaks=c(0,500,1000)) + 
+  # Change domain labels 
+  scale_fill_manual(values=c("#62c36f","#49b9d3", "#cb8130","#45c097","#b35535","#568538","#6d83da","#c2464c",
+                             "#57398c","#be6ec6","#d56cad","#bab237","#c24c6e","#a68742","#9bad47","#892863"), 
+                    name="Functional Domains",
+                    breaks=c("\"InterPro:IPR001315\"","Coil","\"InterPro:IPR001660\"","\"InterPro:IPR001876\"", "\"InterPro:IPR003598\"",
+                             "\"InterPro:IPR003599\"","\"InterPro:IPR006703\"", "\"InterPro:IPR007110\"","\"InterPro:IPR011029\"",
+                             "\"InterPro:IPR013151\"", "\"InterPro:IPR013761\"","\"InterPro:IPR013783\"","\"InterPro:IPR027417\"", 
+                             "\"InterPro:IPR029071\"","\"InterPro:IPR036179\"", "\"InterPro:IPR036443\""),
+                    labels=c("CARD","Coil", "SAM","Zinc finger, RanBP2-type","Ig subtype 2",
+                             "Ig subtype","AIG1","Ig-like domain",
+                             "DD","Ig","SAM/PTN",
+                             "Ig-like fold","P-loop NTPase","Ubiquitin-like",
+                             "Ig-like domain superfamily","Zinc finger, RanBP2-type"))
+
+## arrange these two plots side by side in inkscape
 
 
 
 
-
-#### PLOT ORTHOFINDER SPECIES TREE WITH GENE COUNTS ####
+ #### PLOT ORTHOFINDER SPECIES TREE  ####
 Mollusc_Species_Tree_text <-"((Octopus_bimaculoides:0.0710909,Octopus_sinensis:0.056727)N1:0.21781,((Mizuhopecten_yessoensis:0.315015,(Crassostrea_gigas:0.0955031,C_virginica:0.0982277)N5:0.236348)N3:0.0835452,(Lottia_gigantea:0.31253,(Pomacea_canaliculata:0.34807,(Elysia_chlorotica:0.303751,(Biomphalaria_glabrata:0.296022,Aplysia_californica:0.248891)N8:0.0608488)N7:0.129889)N6:0.0520687)N4:0.0492055)N2:0.21781)N0;"
 Mollusc_Species_Tree <- read.newick(text=Mollusc_Species_Tree_text)
-
 Mollusc_Species_tibble <- as.tibble(Mollusc_Species_Tree)
 
 # Join with GIMAP gene counts (in case I want to add to plotting later)
