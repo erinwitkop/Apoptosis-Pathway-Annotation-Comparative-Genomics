@@ -5,7 +5,7 @@
 #### Load packages ####
 library(ape)
 library(Biostrings)
-library(ggplot2)
+BiocManager::install(version='devel')
 library(ggtree) # install the dev version to get the get.tree function
 library(ggrepel)
 library(phylotools)
@@ -164,6 +164,17 @@ write.table(unique(BIR_XP_gff_species$protein_id), file="/Users/erinroberts/Docu
             quote=FALSE, row.names=FALSE, col.names=FALSE)
 write.table(unique(AIG1_XP_ALL_gff_GIMAP_species$protein_id), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG_GIMAP_HMMER_Interpro_XP_list_all.txt",
             quote=FALSE, row.names=FALSE, col.names=FALSE)
+
+# Export protein lists for CV and CG only to use to look up transcripts in the DESeq dataset 
+BIR_XP_gff_CG_uniq_XP <- unique(BIR_XP_gff_CG$protein_id)
+BIR_XP_gff_CV_uniq_XP <- unique(BIR_XP_gff_CV$protein_id)
+AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP <- unique(AIG1_XP_ALL_gff_GIMAP_CG$protein_id)
+AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP <- unique(AIG1_XP_ALL_gff_GIMAP_CV$protein_id)
+
+save(BIR_XP_gff_CG_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_protein_list_CG.Rdata")
+save(BIR_XP_gff_CV_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_protein_list_CV.Rdata")
+save(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_protein_list_CG.Rdata")
+save(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_protein_list_CV.Rdata")
 
 #Count IAP genes across species
 BIR_XP_gff_species_gene_count <- BIR_XP_gff_species %>% group_by(Species) %>% filter(is.na(locus_tag)) %>% distinct(gene)  %>% summarise(gene_count = n())
@@ -682,7 +693,7 @@ head(BIR_seq_rm_dup_clstr6)
 # The representative sequence is indicated by a "*"
 
 # Join with information about product and gene
-c <- left_join(AIG_seq_rm_dup_clstr6, AIG1_XP_ALL_gff_GIMAP_species_join[,c("protein_id","gene","product","locus_tag","Species")], by = "protein_id")
+AIG_seq_rm_dup_clstr6 <- left_join(AIG_seq_rm_dup_clstr6, AIG1_XP_ALL_gff_GIMAP_species_join[,c("protein_id","gene","product","locus_tag","Species")], by = "protein_id")
 BIR_seq_rm_dup_clstr6 <- left_join(BIR_seq_rm_dup_clstr6, BIR_XP_gff_species_join[,c("protein_id","gene","product","locus_tag","Species")], by = "protein_id")
 
 # Check if any proteins collapsed came from different genes 
@@ -971,7 +982,7 @@ write.table(IAP_cluster_344_gene[,c("seqid","start","end","cluster")], file="/Us
 
 ## Conclusions and Collapsing the GIMAP Cluster analysis
 
-#1. GIMAP Cluster 219: two genes need to be collapsed into  1. gene LOC111106081 is shorter and has lower coverage, this one should be removed 
+#1. GIMAP Cluster 219: two genes need to be collapsed into 1 1. gene LOC111106081 is shorter and has lower coverage, this one should be removed 
 # LOC111106081 protein XP_022296317.1 should be combined with XP_022302183.1
 # Does LOC111106081 have other proteins?
 AIG1_XP_ALL_gff_GIMAP_species_join %>% filter(gene=="LOC111106081") # No just this one! 
@@ -998,7 +1009,7 @@ write.table(unique(AIG1_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG$protein_id),
 #2. IAP Cluster 328 The two genes on top of the alignment (LOC111132489 and LOC111114013) form a cluster together and are most similar and should be collapsed into one gene. 
 # gene LOC111132489 has much higher coverage and is likely the "real" gene. Going to remove gene LOC111114013 and it's protein XP_022308010.1 should be collapsed with 
 # gene LOC111132489 protein XP_022336007.1 
-# Does LOC111114013 have multiple proteins 
+# Does LOC111114013 have multiple proteins - NO
 BIR_XP_gff_species_join %>% filter(gene=="LOC111114013")  # Has only 1 protein, XP_022308010.1
 
 # IAP Cluster 328 other five genes should be collapsed together: LOC111132301 has the highest relative coverage, meaning LOC111103682, LOC111132589,LOC111102106,LOC111114070 should be collapsed into this one gene
@@ -1033,6 +1044,9 @@ BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG <- BIR_dup_seq_rm_kept_haplotig_
 write.table(unique(BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG$protein_id), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG.txt",
             quote=FALSE, row.names=FALSE, col.names=FALSE)
 
+#### EXPORT PROTEIN LIST OF IAP AND GIMAP COLLAPSED GENES FOR DESEQ COMPARISON ####
+
+
 
 #### PLOT FULL IAP PROTEIN TREE ####
 # Helpful online tutorial regarding tool: https://www.molecularecologist.com/2017/02/phylogenetic-trees-in-r-using-ggtree/
@@ -1059,6 +1073,8 @@ IAP_raxml_tibble$gene_locus_tag <- coalesce(IAP_raxml_tibble$gene, IAP_raxml_tib
 # Remove text after isoform so I can collapse protein names into shorter list
 IAP_raxml_tibble$product <- gsub("isoform.*", "", IAP_raxml_tibble$product)
 IAP_raxml_tibble$product <- trimws(IAP_raxml_tibble$product , which = "both")
+
+View(IAP_raxml_tibble %>% filter(!grepl("uncharacterized",product)) %>% distinct(product))
 
 # Join with alias info
 IAP_alias <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_shortened_product.csv")
@@ -1167,6 +1183,11 @@ ggtree(IAP_MY_CV_CG_raxml_treedata, layout="fan", aes(color=Species),  branch.le
   theme(legend.position = "right", legend.text = element_text(face = "italic")) +
   geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
 
+#### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
+
+load(C_vir_apop_LFC_IAP,file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_vir_apop_LFC_IAP.Rdata")
+load(C_gig_apop_LFC_IAP,file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_gig_apop_LFC_IAP.Rdata")
+
 
 #### PLOT FULL GIMAP PROTEIN TREE ####
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
@@ -1203,7 +1224,7 @@ GIMAP_raxml_treedata_circular_product + scale_color_discrete(name = "Species", l
                              "Biomphalaria glabrata", "Crassostrea gigas", "Crassostrea virginica","Elysia chlorotica","Lottia gigantea","Mizuhopecten yessoensis",
                              "Pomacea canaliculata","NA"))
 
-#Figure out how to change the colors later
+
 # specific color for each species 
                           
 # Plot normal tree to use with heatmap
@@ -1521,11 +1542,11 @@ ggtree(GIMAP_MY_CV_CG_raxml_treedata, aes(color=Species), layout="fan",  branch.
 # Plot vertical tree and edit colors
 GIMAP_MY_CV_CG_raxml_treedata_vertical <- 
   ggtree(GIMAP_MY_CV_CG_raxml_treedata, aes(color=Species, fill=Species), branch.length = "none") + 
-  geom_tiplab(aes(label=node), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = c(0.4,0.5), 
+  geom_tiplab(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
+  theme(legend.position = c(0.7,0.5), 
         legend.text = element_text(face = "italic")) +
   geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 2, fontface="bold") + # allows for subset
-  xlim(-70,70) + #change scaling so branch lengths are smaller 
+  xlim(-70,NA) + #change scaling so branch lengths are smaller 
   scale_colour_manual(name = "Species", values=c("#cb8130","#45c097", "#6d83da"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
                     labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis"))
 
@@ -1557,8 +1578,6 @@ GIMAP_MY_CV_CG_raxml_treedata_tip_order <- GIMAP_MY_CV_CG_raxml_treedata_tip$lab
 
 # Reorder the protein and polygon
 AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot[match(GIMAP_MY_CV_CG_raxml_treedata_tip_order, AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot$protein_id),]
-# have to left join to add back in rows taken out 
-AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only_match <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only[match(GIMAP_MY_CV_CG_raxml_treedata_tip_order, AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only$protein_id),]
 GIMAP_MY_CV_CG_raxml_treedata_tip_order <- as.data.frame(GIMAP_MY_CV_CG_raxml_treedata_tip_order)
 colnames(GIMAP_MY_CV_CG_raxml_treedata_tip_order)[1] <- "protein_id"
 AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only <- full_join(GIMAP_MY_CV_CG_raxml_treedata_tip_order, AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only)
@@ -1588,8 +1607,290 @@ GIMAP_Interproscan_domain_plot <- ggplot() +
   #add labels
   labs(y = NULL, x = "Protein Domain Position (aa)") +
   # add text labels
-  geom_text(data=AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot,aes(x= end, y = node, label=alias),
-            size=2.2, hjust=-.15, check_overlap = TRUE) + 
+  #geom_text(data=AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot,aes(x= end, y = node, label=alias),
+  #          size=2.2, hjust=-.15, check_overlap = TRUE) + 
+  # text theme
+  theme_bw() + 
+  # plot theme
+  theme(axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black")) +
+  # Change y axis ticks, turn off expand so that extra white space is removed
+  scale_x_continuous(breaks=c(0,500,1000), expand = c(0,0)) + 
+  # Change domain labels 
+  scale_fill_manual(values=c("#6d83da",
+                             "#49b9d3",
+                             "#c24c6e",
+                             "#a68742",
+                             "#bab237",
+                             "#9bad47",
+                             "#c2464c",
+                             "#b35535",
+                             "#be6ec6",
+                             "#568538",
+                             "#45c097",
+                             "#892863",
+                             "#d56cad",
+                             "#cb8130",
+                             "#57398c",
+                             "#62c36f"), 
+                    name="Functional Domains",
+                    breaks=c("\"InterPro:IPR006703\"",
+                             "Coil",
+                             "\"InterPro:IPR027417\"",
+                             "\"InterPro:IPR029071\"",
+                             "\"InterPro:IPR013783\"",
+                             "\"InterPro:IPR036179\"",
+                             "\"InterPro:IPR007110\"",
+                             "\"InterPro:IPR003598\"",
+                             "\"InterPro:IPR013151\"",
+                             "\"InterPro:IPR003599\"",
+                             "\"InterPro:IPR001876\"",
+                             "\"InterPro:IPR036443\"",
+                             "\"InterPro:IPR013761\"",
+                             "\"InterPro:IPR001660\"",
+                             "\"InterPro:IPR011029\"",
+                             "\"InterPro:IPR001315\""),
+                    labels=c("AIG1-type guanine nucleotide-binding (G) domain",
+                             "Coil",
+                             "P-loop containing nucleoside triphosphate hydrolase",
+                             "Ubiquitin-like domain superfamily",
+                             "Immunoglobulin-like fold",
+                             "Immunoglobulin-like domain superfamily",
+                             "Immunoglobulin-like domain",
+                             "Immunoglobulin subtype 2",
+                             "Immunoglobulin",
+                             "Immunoglobulin subtype",
+                             "Zinc finger, RanBP2-type",
+                             "Zinc finger, RanBP2-type superfamily",
+                             "Sterile alpha motif/pointed domain superfamily",
+                             "Sterile alpha motif domain",
+                             "Death-like domain superfamily",
+                             "CARD domain"))
+
+# Plot Tree and domains together
+library(cowplot)
+
+# rescale the ylim of the tree to the ylim of the domain plot 
+p2 <- GIMAP_MY_CV_CG_raxml_treedata_vertical +ylim2(GIMAP_Interproscan_domain_plot)
+
+# Use cowplot to align the plots
+cowplot::plot_grid(p2, GIMAP_Interproscan_domain_plot, ncol = 2,
+                   align = "h", axis="b")
+
+#### PLOT GIMAP TREES WITH DESEQ2 AND DOMAIN INFORMATION ####
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_vir_apop_LFC_GIMAP.Rdata")
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_gig_apop_LFC_GIMAP.Rdata")
+
+# Keep tables separate for plotting 
+C_vir_apop_LFC_GIMAP$Species <- "Crassostrea_virginica"
+C_gig_apop_LFC_GIMAP$Species <- "Crassostrea_gigas"
+
+# Full Join the list of transcripts so the missing labels are in there and can be ordered for plotting 
+C_gig_apop_LFC_GIMAP_full_XP <- full_join(C_gig_apop_LFC_GIMAP, GIMAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
+# No sig GIMAPs have an NA in the tibble tree meaning that none of those proteins were ones that were collapsed as duplicates in CD-Hit
+
+C_vir_apop_LFC_GIMAP_full_XP <- full_join(C_vir_apop_LFC_GIMAP, GIMAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
+# For NAs for GIMAP proteins, meaning that those were exactly identical to another protein and were collapsed. Need to replace these NA's with their uncollapsed parent protein
+C_vir_apop_LFC_GIMAP_full_XP_collapsed <- C_vir_apop_LFC_GIMAP_full_XP %>% filter(is.na(node) & !is.na(log2FoldChange)) 
+C_vir_apop_LFC_GIMAP_full_XP_collapsed_AIG_seq_rm_dup_clstr6 <- AIG_seq_rm_dup_clstr6 %>% filter(protein_id %in% (C_vir_apop_LFC_GIMAP_full_XP_collapsed$protein_id))
+# Find parent proteins in these clusters
+C_vir_apop_LFC_GIMAP_full_XP_collapsed_AIG_seq_rm_dup_clstr6_cluster <- AIG_seq_rm_dup_clstr6[AIG_seq_rm_dup_clstr6$cluster %in% C_vir_apop_LFC_GIMAP_full_XP_collapsed_AIG_seq_rm_dup_clstr6$cluster,]
+
+# Recode original DESeq2 with correcte protein name (they are all exactly the same length, same sequence and from the same gene. 
+    # They are likely just erroneously called isoforms )
+C_vir_apop_LFC_GIMAP$protein_id <- recode(C_vir_apop_LFC_GIMAP$protein_id, "XP_022301588.1" = "XP_022301589.1", "XP_022295278.1"="XP_022295277.1")
+
+# Rejoin the Full list of transcript and check for fixed NA
+C_vir_apop_LFC_GIMAP_full_XP <- full_join(C_vir_apop_LFC_GIMAP, GIMAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
+
+# Reorder both to be the order of the GIMAP tree 
+
+# Change the protein ID column to be called label for plotting 
+colnames(C_vir_apop_LFC_GIMAP)[8] <- "label"
+colnames(C_gig_apop_LFC_GIMAP)[8] <- "label"
+
+# move label to first column
+C_vir_apop_LFC_GIMAP$log2FoldChange <- as.numeric(C_vir_apop_LFC_GIMAP$log2FoldChange)
+C_gig_apop_LFC_GIMAP$log2FoldChange <- as.numeric(C_gig_apop_LFC_GIMAP$log2FoldChange)  
+  
+# Plot of GIMAP vertical tree
+GIMAP_MY_CV_CG_raxml_treedata_vertical
+
+# Plot LFC data
+C_vir_apop_LFC_GIMAP_tile_plot <- ggplot(C_vir_apop_LFC_GIMAP, aes(x=group_by_sim, y = product, fill=log2FoldChange, na.rm= TRUE)) + 
+  geom_tile()  + 
+  #scale_fill_viridis_c(breaks = seq(min(C_vir_apop_LFC_IAP$log2FoldChange, na.rm = TRUE),max(C_vir_apop_LFC_IAP$log2FoldChange, na.rm=TRUE),length.out = 15), 
+  #                   option="plasma", guide=guide_legend()) +
+  scale_fill_viridis_c(breaks = c(-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10), 
+                       option="plasma", guide=guide_legend(), na.value = "transparent") +
+  labs(x="Treatment", y ="Product") +
+  theme(axis.text.x.top = element_text(size=10, family="sans"),
+        axis.text.y.right = element_text(family ="sans"),
+        axis.title = element_text(size=12, family="sans"),
+        legend.position = "bottom",
+        panel.background = element_rect(fill = "transparent"),
+        panel.grid.major.x = element_line(size=0.2, color="gray"),
+        panel.grid.major.y = element_line(size=0.2, color="gray")) +
+  # remove non significant from the list 
+  scale_y_discrete(position = "right", limits=c("GTPase IMAP family member 4-like","GTPase IMAP family member 4-like isoform X2", "GTPase IMAP family member 4-like isoform X3",  
+                                                "GTPase IMAP family member 7-like isoform X2","immune-associated nucleotide-binding protein 9-like",   
+                                                "uncharacterized protein LOC111110237",   "uncharacterized protein LOC111111774"),
+                   labels=c("GTPase IMAP family member 4-like","GTPase IMAP family member 4-like isoform X2", "GTPase IMAP family member 4-like isoform X3",  
+                            "GTPase IMAP family member 7-like isoform X2","immune-associated nucleotide-binding protein 9-like",   
+                            "uncharacterized protein LOC111110237",   "uncharacterized protein LOC111111774")) +
+  scale_x_discrete(limits = c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
+                              "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
+                              "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ), 
+                   labels= c("Hatchery\n Probiotic RI" ,"Lab RI 6hr", "Lab RI 24hr", "Lab S4 6hr","Lab S4 24hr", "Lab RE22" ,
+                             "ROD Sus.\n seed","ROD Res.\n seed", "Dermo\n Sus. 36hr", "Dermo\n Sus. 7d", "Dermo\n Sus. 28d","Dermo\n Tol. 36hr",   
+                             "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top")
+
+C_gig_apop_LFC_GIMAP_tile_plot <- ggplot(C_gig_apop_LFC_GIMAP, aes(x=group_by_sim, y=product, fill=log2FoldChange)) + 
+  geom_tile() + 
+  #scale_fill_viridis_c(breaks = seq(min(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm = TRUE),max(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm=TRUE),length.out = 15), 
+  #                     option="plasma", guide=guide_legend()) +
+  scale_fill_viridis_c(breaks = c(-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14), 
+                       option="plasma", guide=guide_legend(), na.value = "transparent") +
+  labs(x="Treatment", y ="Product") +
+  theme(axis.text.x.top = element_text(size=10, family="sans"),
+        axis.text.y.right = element_text(family ="sans"),
+        axis.title = element_text(size=12, family="sans"),
+        legend.position = "bottom",
+        panel.background = element_rect(fill = "transparent"),
+        panel.grid.major.x = element_line(size=0.2, color="gray"),
+        panel.grid.major.y = element_line(size=0.2, color="gray")) +
+  # remove non significant from the list 
+  scale_y_discrete(position = "right", limits=c("GTPase IMAP family member 2"                         ,"GTPase IMAP family member 4"          ,"GTPase IMAP family member 4 isoform X2"           , 
+                                                "GTPase IMAP family member 4 isoform X3"             , "GTPase IMAP family member 4-like"    , "GTPase IMAP family member 7"                     ,  
+                                                "GTPase IMAP family member 7-like"                   , "GTPase IMAP family member 8-like"    ,
+                                                "reticulocyte-binding protein 2 homolog a isoform X2", "uncharacterized protein LOC105334629", "uncharacterized protein LOC105343525 isoform X1"),
+                   labels=c("GTPase IMAP family member 2","GTPase IMAP family member 4","GTPase IMAP family member 4 isoform X2",
+                            "GTPase IMAP family member 4 isoform X3", "GTPase IMAP family member 4-like", "GTPase IMAP family member 7",
+                            "GTPase IMAP family member 7-like", "GTPase IMAP family member 8-like"    ,
+                            "reticulocyte-binding protein 2 homolog a isoform X2", "uncharacterized protein LOC105334629", "uncharacterized protein LOC105343525 isoform X1")) +
+  scale_x_discrete(limits = c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
+                              "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
+                              "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
+                   labels= c("Zhang\n V. alg","Zhang\n V.tub","Zhang\n LPS", "Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir","He OsHv-1\n 6hr",
+                             "He OsHv-1\n 12hr", "He OsHv-1\n24hr", "He OsHv-1\n48hr", "He OsHv-1\n 120hr","deLorgeril\nOsHV-1\n Res. 6hr","deLorgeril\nOsHV-1\n Res. 12hr","deLorgeril\nOsHV-1\n Res. 24hr" ,"deLorgeril\nOsHV-1\n Res. 48hr",
+                             "deLorgeril\nOsHV-1\n Res. 60hr","deLorgeril\nOsHV-1\n Res. 72hr" ,"deLorgeril\nOsHV-1\n Sus. 6hr", "deLorgeril\nOsHV-1\n Sus. 12hr","deLorgeril\nOsHV-1\n Sus. 24hr","deLorgeril\nOsHV-1\n Sus. 48hr" ,
+                             "deLorgeril\nOsHV-1\n Sus. 60hr","deLorgeril\nOsHV-1\n Sus. 72hr"), position="top")
+
+# Make helper function to get coordinates for plotting LFC data in correct order
+tree_y <-  function(ggtree, data){
+  if(!inherits(ggtree, "ggtree"))
+    stop("not a ggtree object")
+  left_join(select(data, label), select(ggtree$data, label, y)) %>%
+    pull(y)
+}
+
+# replot histogram and heatmap, match the y-coords to the tree
+C_vir_apop_LFC_GIMAP_tile_plot <- ggplot(C_vir_apop_LFC_GIMAP, aes(x=tree_y(GIMAP_MY_CV_CG_raxml_treedata_vertical, C_vir_apop_LFC_GIMAP), y = group_by_sim, fill=log2FoldChange)) + 
+  geom_tile()  + coord_flip()
+  #scale_fill_viridis_c(breaks = seq(min(C_vir_apop_LFC_IAP$log2FoldChange, na.rm = TRUE),max(C_vir_apop_LFC_IAP$log2FoldChange, na.rm=TRUE),length.out = 15), 
+  #                   option="plasma", guide=guide_legend()) +
+  scale_fill_viridis_c(breaks = c(-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10), 
+                       option="plasma", guide=guide_legend(), na.value = "transparent") +
+  labs(x="Treatment", y ="Product") +
+  theme(axis.text.x.top = element_text(size=10, family="sans"),
+        axis.text.y.right = element_text(family ="sans"),
+        axis.title = element_text(size=12, family="sans"),
+        legend.position = "bottom",
+        panel.background = element_rect(fill = "transparent"),
+        panel.grid.major.x = element_line(size=0.2, color="gray"),
+        panel.grid.major.y = element_line(size=0.2, color="gray")) +
+  # remove non significant from the list 
+  #scale_y_discrete(position = "right", limits=c("GTPase IMAP family member 4-like","GTPase IMAP family member 4-like isoform X2", "GTPase IMAP family member 4-like isoform X3",  
+  #                                              "GTPase IMAP family member 7-like isoform X2","immune-associated nucleotide-binding protein 9-like",   
+  #                                              "uncharacterized protein LOC111110237",   "uncharacterized protein LOC111111774"),
+  #                 labels=c("GTPase IMAP family member 4-like","GTPase IMAP family member 4-like isoform X2", "GTPase IMAP family member 4-like isoform X3",  
+  #                          "GTPase IMAP family member 7-like isoform X2","immune-associated nucleotide-binding protein 9-like",   
+  #                          "uncharacterized protein LOC111110237",   "uncharacterized protein LOC111111774")) +
+  scale_x_discrete(limits = c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
+                              "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
+                              "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ), 
+                   labels= c("Hatchery\n Probiotic RI" ,"Lab RI 6hr", "Lab RI 24hr", "Lab S4 6hr","Lab S4 24hr", "Lab RE22" ,
+                             "ROD Sus.\n seed","ROD Res.\n seed", "Dermo\n Sus. 36hr", "Dermo\n Sus. 7d", "Dermo\n Sus. 28d","Dermo\n Tol. 36hr",   
+                             "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top")
+
+
+gg_hist <- ggplot(df1, aes(tree_y(gg_tr, df1), value)) +
+  geom_col(aes(fill=substr(label, 1, 1))) + no_legend() +
+  coord_flip() # flip this plot
+
+
+
+# Combine plots using patchwork
+
+facet_plot(GIMAP_MY_CV_CG_raxml_treedata_LFC_vertical, panel = "Log Fold Change", data = Crassostrea_LFC_GIMAP, geom = geom_tile, 
+           mapping=aes(x=group_by_sim,y=label, fill=log2FoldChange))
+
+#### PLOT IAP DOMAIN STRUCTURE AND COMBINE WITH TREE ####
+# Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
+# Get only the Interproscan domains for my proteins of interest
+IAP_MY_CV_CG_raxml_tibble_join <- IAP_MY_CV_CG_raxml_tibble %>% filter(!is.na(label)) # remove rows with just bootstrap information
+colnames(IAP_MY_CV_CG_raxml_tibble_join)[4] <- "protein_id"
+BIR_XP_gff_Interpro_Domains <-  left_join(IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")], BIR_XP_gff)
+BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains %>% 
+  filter(source =="CDD" | grepl("InterPro:IPR", Dbxref)) # keep Interproscan domain lines and CDD NCBI lines 
+
+BIR_XP_gff_Interpro_Domains_fullprot <- BIR_XP_gff_Interpro_Domains %>% 
+  filter(is.na(source))
+
+nrow(BIR_XP_gff_Interpro_Domains_fullprot %>% filter(is.na(source))) # 246
+nrow(IAP_MY_CV_CG_raxml_tibble_join %>% filter(!is.na(protein_id))) # 246 - they agree, all proteins were found 
+
+# Fill in the CDD rows that have NULL for DBxref with the Name column
+BIR_XP_gff_Interpro_Domains_only$Dbxref[BIR_XP_gff_Interpro_Domains_only$Dbxref == "character(0)" ] <- "CDD"
+
+# unlist
+BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref)
+
+# Change CDD rows to be the Name column
+BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains_only %>% mutate(Dbxref = ifelse(Dbxref == "CDD", Name, Dbxref))
+
+# Get the node order from original IAP tree
+IAP_MY_CV_CG_raxml_treedata_tip  <- fortify(IAP_MY_CV_CG_raxml_treedata)
+IAP_MY_CV_CG_raxml_treedata_tip <- subset(IAP_MY_CV_CG_raxml_treedata_tip, isTip)
+IAP_MY_CV_CG_raxml_treedata_tip_order <- IAP_MY_CV_CG_raxml_treedata_tip$label[order(IAP_MY_CV_CG_raxml_treedata_tip$y, decreasing=TRUE)]
+
+# Reorder the protein and polygon
+BIR_XP_gff_Interpro_Domains_fullprot <- BIR_XP_gff_Interpro_Domains_fullprot[match(IAP_MY_CV_CG_raxml_treedata_tip_order, BIR_XP_gff_Interpro_Domains_fullprot$protein_id),]
+IAP_MY_CV_CG_raxml_treedata_tip_order <- as.data.frame(IAP_MY_CV_CG_raxml_treedata_tip_order)
+colnames(IAP_MY_CV_CG_raxml_treedata_tip_order)[1] <- "protein_id"
+BIR_XP_gff_Interpro_Domains_only <- full_join(IAP_MY_CV_CG_raxml_treedata_tip_order, BIR_XP_gff_Interpro_Domains_only)
+
+# Add polygon height
+BIR_XP_gff_Interpro_Domains_only_ID  <- BIR_XP_gff_Interpro_Domains_only  %>% distinct(protein_id) 
+BIR_XP_gff_Interpro_Domains_only_ID <- BIR_XP_gff_Interpro_Domains_only_ID %>% 
+  mutate(height_start = rev(as.numeric(row.names(BIR_XP_gff_Interpro_Domains_only_ID )) - 0.25)) %>%
+  mutate(height_end = rev(as.numeric(row.names(BIR_XP_gff_Interpro_Domains_only_ID)) + .5))
+
+# Join back in height
+BIR_XP_gff_Interpro_Domains_only <- left_join(BIR_XP_gff_Interpro_Domains_only , BIR_XP_gff_Interpro_Domains_only_ID )
+
+# Set factor level order of the nodes set levels in reverse order
+BIR_XP_gff_Interpro_Domains_only$node <- factor(BIR_XP_gff_Interpro_Domains_only$node, levels = unique(BIR_XP_gff_Interpro_Domains_only$node))
+BIR_XP_gff_Interpro_Domains_only$Dbxref <- factor(BIR_XP_gff_Interpro_Domains_only$Dbxref, levels = unique(BIR_XP_gff_Interpro_Domains_only$Dbxref))
+BIR_XP_gff_Interpro_Domains_fullprot$node <- factor(BIR_XP_gff_Interpro_Domains_fullprot$node, levels = rev(BIR_XP_gff_Interpro_Domains_fullprot$node))
+
+# Plot the line segments of the NA source lines (which have the full protein start and end)
+IAP_Interproscan_domain_plot <- ggplot() + 
+  # plot length of each protein as line
+  geom_segment(data =BIR_XP_gff_Interpro_Domains_fullprot,
+               aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
+  # add boxes with geom_rect 
+  geom_rect(data=BIR_XP_gff_Interpro_Domains_only,
+            aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Dbxref)) +
+  #add labels
+  labs(y = NULL, x = "Protein Domain Position (aa)") +
+  # add text labels
+  geom_text(data=BIR_XP_gff_Interpro_Domains_fullprot,aes(x= end, y = node, label=alias),
+            size=2.0, hjust=-.15, check_overlap = TRUE) + 
   # text theme
   theme_bw() + 
   # plot theme
@@ -1600,25 +1901,70 @@ GIMAP_Interproscan_domain_plot <- ggplot() +
         panel.border = element_blank(),
         axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black")) +
   # Change y axis ticks
-  scale_x_continuous(breaks=c(0,500,1000)) + 
+  scale_x_continuous(breaks=c(0,500,1000,1500,2000,3000)) + 
   # Change domain labels 
-  scale_fill_manual(values=c("#62c36f","#49b9d3", "#cb8130","#45c097","#b35535","#568538","#6d83da","#c2464c",
-                             "#57398c","#be6ec6","#d56cad","#bab237","#c24c6e","#a68742","#9bad47","#892863"), 
+  scale_fill_manual(values=c(
+    "#d44172",
+    "#6d8dd7",
+    "#c972c4",
+    "#ca8853",
+    "#cd9c2e",
+    "#92b540",
+    "#da83b4",
+    "#45c097",
+    "#cba950",
+    "#65c874",
+    "#5b3788",
+    "#8a371d",
+    "#b1457b",
+    "#be4a5b",
+    "#6971d7",
+    "#50893b",
+    "#d55448",
+    "#c46a2f",
+    "#8a8a39",
+    "#d1766b"), 
                     name="Functional Domains",
-                    breaks=c("\"InterPro:IPR001315\"","Coil","\"InterPro:IPR001660\"","\"InterPro:IPR001876\"", "\"InterPro:IPR003598\"",
-                             "\"InterPro:IPR003599\"","\"InterPro:IPR006703\"", "\"InterPro:IPR007110\"","\"InterPro:IPR011029\"",
-                             "\"InterPro:IPR013151\"", "\"InterPro:IPR013761\"","\"InterPro:IPR013783\"","\"InterPro:IPR027417\"", 
-                             "\"InterPro:IPR029071\"","\"InterPro:IPR036179\"", "\"InterPro:IPR036443\""),
-                    labels=c("CARD","Coil", "SAM","Zinc finger, RanBP2-type","Ig subtype 2",
-                             "Ig subtype","AIG1","Ig-like domain",
-                             "DD","Ig","SAM/PTN",
-                             "Ig-like fold","P-loop NTPase","Ubiquitin-like",
-                             "Ig-like domain superfamily","Zinc finger, RanBP2-type"))
-
-## arrange these two plots side by side in inkscape
-
-
-
+                    breaks=c("cd16713",
+                             "\"InterPro:IPR001370\"",
+                             "\"InterPro:IPR013083\"",
+                             "\"InterPro:IPR001841\"",
+                             "\"InterPro:IPR015940\"",
+                             "\"InterPro:IPR003131\"",
+                             "cd18316",
+                             "\"InterPro:IPR011333\"",
+                             "\"InterPro:IPR000210\"",
+                             "\"InterPro:IPR000608\"",
+                             "\"InterPro:IPR016135\"",
+                             "\"InterPro:IPR022103\"",
+                             "\"InterPro:IPR036322\"",
+                             "\"InterPro:IPR011047\"",
+                             "\"InterPro:IPR019775\"",
+                             "\"InterPro:IPR017907\"",
+                             "\"InterPro:IPR038765\"",
+                             "\"InterPro:IPR032171\"",
+                             "\"InterPro:IPR027417\"",
+                             "cd14321"),
+                    labels=c("RING-HC_BIRC2_3_7",
+                             "BIR repeat,",
+                             "Zinc finger, RING-type,",
+                             "Zinc finger, RING/FYVE/PHD-type,",
+                             "Ubiquitin-conjugating enzyme E2,",
+                             "Ubiquitin-conjugating enzyme/RWD-like,",
+                             "BTB_POZ_KCTD-like",
+                             "Baculoviral IAP repeat-containing protein 6,",
+                             "WD40-repeat-containing domain superfamily,",
+                             "Ubiquitin-associated domain,",
+                             "P-loop containing nucleoside triphosphate hydrolase,",
+                             "Quinoprotein alcohol dehydrogenase-like superfamily,",
+                             "WD40 repeat, conserved site,",
+                             "C-terminal of Roc (COR) domain,",
+                             "Zinc finger, RING-type, conserved site,",
+                             "BTB/POZ domain,",
+                             "Potassium channel tetramerisation-type BTB domain,",
+                             "SKP1/BTB/POZ domain superfamily,",
+                             "Papain-like cysteine peptidase superfamily",
+                             "UBA_IAPs"))
 
  #### PLOT ORTHOFINDER SPECIES TREE  ####
 Mollusc_Species_Tree_text <-"((Octopus_bimaculoides:0.0710909,Octopus_sinensis:0.056727)N1:0.21781,((Mizuhopecten_yessoensis:0.315015,(Crassostrea_gigas:0.0955031,C_virginica:0.0982277)N5:0.236348)N3:0.0835452,(Lottia_gigantea:0.31253,(Pomacea_canaliculata:0.34807,(Elysia_chlorotica:0.303751,(Biomphalaria_glabrata:0.296022,Aplysia_californica:0.248891)N8:0.0608488)N7:0.129889)N6:0.0520687)N4:0.0492055)N2:0.21781)N0;"
