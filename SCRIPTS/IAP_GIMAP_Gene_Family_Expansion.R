@@ -26,11 +26,13 @@ library(cowplot)
 #remotes::install_github("YuLab-SMU/ggtree")
 library(ggtree) # install the dev version to get the get.tree function
 library(aplot)
+library(RColorBrewer)
 
+setwd("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics")
 
 #### IMPORT GENOMES AND ANNOTATIONS #####
-#load(file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_annotations.RData")
-#load(file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_apoptosis_products.RData")
+load(file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_annotations.RData")
+load(file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_apoptosis_products.RData")
 # Load the gff file for all mollusc genomes
 All_molluscs_CDS_gff <- readGFF(file="/Volumes/My Passport for Mac/OrthoFinder_Genomes_Mar_2020_Paper1/GFF3/All_molluscs_CDS.gff")
 All_molluscs_CDS_gff <- as.data.frame(All_molluscs_CDS_gff)
@@ -194,31 +196,31 @@ AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count <- rbind(AIG1_XP_ALL_gff_GIMA
 # All are between five and 1 over
 
 ## EXPORT GENE LISTS PER SPECIES TO EXAMINE POTENTIAL ARTIFACTS
-BIR_XP_gff_species_genes <- BIR_XP_gff_species %>% filter(is.na(locus_tag)) %>% distinct(gene)
-BIR_XP_gff_species_locus_tag <- BIR_XP_gff_species %>% filter(is.na(gene)) %>%  distinct(locus_tag) 
-colnames(BIR_XP_gff_species_locus_tag)[1] <- "gene"
+BIR_XP_gff_species_genes <- BIR_XP_gff_species %>% filter(is.na(locus_tag)) %>% distinct(gene, Species)
+BIR_XP_gff_species_locus_tag <- BIR_XP_gff_species %>% filter(is.na(gene)) %>%  distinct(locus_tag, Species) 
+colnames(BIR_XP_gff_species_locus_tag)[3] <- "gene"
 BIR_XP_gff_species_gene_locus_tag <- rbind(BIR_XP_gff_species_genes, BIR_XP_gff_species_locus_tag)
 
-length(BIR_XP_gff_species_gene_locus_tag$gene) # 380
-write.table(BIR_XP_gff_species_gene_locus_tag$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_genes_HMMER_Interpro_BIR.txt",
+length(unique(BIR_XP_gff_species_gene_locus_tag$gene)) # 380
+write.table(unique(BIR_XP_gff_species_gene_locus_tag$gene), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_genes_HMMER_Interpro_BIR.txt",
             quote=FALSE, row.names=FALSE, col.names=FALSE)
 
-AIG1_XP_ALL_gff_GIMAP_species_gene <- AIG1_XP_ALL_gff_GIMAP_species %>% filter(is.na(locus_tag)) %>% distinct(gene)
-AIG1_XP_ALL_gff_GIMAP_species_locus_tag <- AIG1_XP_ALL_gff_GIMAP_species  %>% filter(is.na(gene)) %>%  distinct(locus_tag)
-colnames(AIG1_XP_ALL_gff_GIMAP_species_locus_tag )[1] <- "gene"
+AIG1_XP_ALL_gff_GIMAP_species_gene <- AIG1_XP_ALL_gff_GIMAP_species %>% filter(is.na(locus_tag)) %>% distinct(gene, Species)
+AIG1_XP_ALL_gff_GIMAP_species_locus_tag <- AIG1_XP_ALL_gff_GIMAP_species  %>% filter(is.na(gene)) %>%  distinct(locus_tag, Species)
+colnames(AIG1_XP_ALL_gff_GIMAP_species_locus_tag )[3] <- "gene"
 AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag <- rbind(AIG1_XP_ALL_gff_GIMAP_species_gene, AIG1_XP_ALL_gff_GIMAP_species_locus_tag)
-length(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag$gene) #252
+length(unique(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag$gene)) #252
 
-write.table(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag$gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_genes_HMMER_Interpro_AIG.txt",
+write.table(unique(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag$gene), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/GIMAP_genes_HMMER_Interpro_AIG.txt",
             quote=FALSE, row.names=FALSE, col.names=FALSE)
 
 # Convert locus tag and gene LOC to Extrez ID to get sequences with Batch join by Name column 
-colnames(BIR_XP_gff_species_gene_locus_tag)[1] <- "Name"
+colnames(BIR_XP_gff_species_gene_locus_tag)[3] <- "Name"
 BIR_XP_gff_species_gene_locus_tag_convert <- left_join(BIR_XP_gff_species_gene_locus_tag, All_mollusc_gene_gff[,c("Name","Dbxref","start","end")])
 BIR_XP_gff_species_gene_locus_tag_convert$Dbxref <- str_remove(BIR_XP_gff_species_gene_locus_tag_convert$Dbxref,"GeneID:")
 BIR_XP_gff_species_gene_locus_tag_convert <- BIR_XP_gff_species_gene_locus_tag_convert %>% filter(Dbxref != "character(0)")
 
-colnames(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag)[1] <- "Name"
+colnames(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag)[3] <- "Name"
 AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_convert <-  left_join(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag, All_mollusc_gene_gff[,c("Name","Dbxref",'start',"end")])
 AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_convert$Dbxref <- str_remove(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_convert$Dbxref,"GeneID:")
 AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_convert <- AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_convert %>% filter(Dbxref != "character(0)")
@@ -239,19 +241,19 @@ write.table(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_convert_Elchlor[,c("Nam
             quote = FALSE,col.names = FALSE, row.names=FALSE)
 
 # Export gene lists by species 
-by(BIR_XP_gff_species_gene_locus_tag, BIR_XP_gff_species_gene_locus_tag$Species, FUN=function(i) write.table(i$gene, 
-paste0("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_lists_by_species/BIR_Gene_list_", i$Species[1], ".txt"), 
-quote = FALSE,col.names = FALSE, row.names=FALSE))
+#by(BIR_XP_gff_species_gene_locus_tag, BIR_XP_gff_species_gene_locus_tag$Species, FUN=function(i) write.table(i$gene, 
+#paste0("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_lists_by_species/BIR_Gene_list_", i$Species[1], ".txt"), 
+#quote = FALSE,col.names = FALSE, row.names=FALSE))
 
-by(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag, AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag$Species, FUN=function(i) write.table(i$gene, 
-paste0("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_lists_by_species/AIG_GIMAP_Gene_list_", i$Species[1], ".txt"), 
-quote = FALSE,col.names = FALSE, row.names=FALSE))
+#by(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag, AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag$Species, FUN=function(i) write.table(i$gene, 
+#paste0("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_lists_by_species/AIG_GIMAP_Gene_list_", i$Species[1], ".txt"), 
+#quote = FALSE,col.names = FALSE, row.names=FALSE))
 
 ## EXPORT ONLY C. VIRGINICA GENE LIST AS BED FILE WITH THE START AND END COORDINATES TO LOOK AT MAPPING COVERAGE AND COMPARE IDENTITY
 BIR_XP_gff_species_gene_locus_tag_Cvir <- BIR_XP_gff_species_gene_locus_tag %>% filter(Species =="Crassostrea_virginica")
 AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_C_vir <- AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag %>% filter(Species =="Crassostrea_virginica")
-colnames(BIR_XP_gff_species_gene_locus_tag_Cvir)[1] <- "gene"
-colnames(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_C_vir)[1] <- "gene"
+colnames(BIR_XP_gff_species_gene_locus_tag_Cvir)[3] <- "gene"
+colnames(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_C_vir)[3] <- "gene"
 
 BIR_XP_gff_species_gene_locus_tag_Cvir_BED <- left_join(BIR_XP_gff_species_gene_locus_tag_Cvir, unique(All_mollusc_gene_gff[,c("gene","seqid","start","end")]))
 AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_C_vir_BED <- left_join(AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_C_vir, unique(All_mollusc_gene_gff[,c("gene","seqid","start","end")]))
@@ -268,8 +270,6 @@ write.table(GIMAP_BED, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1
 IAP_BED_name  <- BIR_XP_gff_species_gene_locus_tag_Cvir_BED[,c(3:5,1)]
 GIMAP_BED_name <- AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_C_vir_BED[,c(3:5,1)]
 
-
-
 # Write out table
 write.table(IAP_BED_name, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Cvir_IAP_EMR_Name.bed",
             quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
@@ -278,7 +278,6 @@ write.table(GIMAP_BED_name, file="/Users/erinroberts/Documents/PhD_Research/Chap
 
 save(IAP_BED_name, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Cvir_IAP_EMR_Name.Rdata")
 save(GIMAP_BED_name, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Cvir_GIMAP_EMR_Name.Rdata")
-
 
 
 ## Review Matches
@@ -640,7 +639,7 @@ BIR_dup_seq_rm_kept <- BIR_XP_gff_species_join[BIR_XP_gff_species_join$protein_i
 
 ## Parse the CD-HIT cluster file
 # Followed code from this site: https://rpubs.com/rmurdoch/cdhit_to_mapping_file
-AIG_seq_rm_dup_clustering <- read.txt("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG_GIMAP_HMMER_Interpro_XP_list_all_rm_dup.fa.clstr")
+AIG_seq_rm_dup_clustering <- phylotools:::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG_GIMAP_HMMER_Interpro_XP_list_all_rm_dup.fa.clstr")
 BIR_seq_rm_dup_clustering <- phylotools:::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_HMMER_Interpro_XP_list_all_rm_dup.fa.clstr")
 
 AIG_seq_rm_dup_clstr <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG_GIMAP_HMMER_Interpro_XP_list_all_rm_dup.fa.clstr", sep = "\t", row.names = NULL, header = FALSE, stringsAsFactors = FALSE)
@@ -1182,23 +1181,74 @@ IAP_MY_CV_CG_raxml_tibble$alias <- gsub("uncharacterized protein", "",IAP_MY_CV_
 IAP_MY_CV_CG_raxml_treedata <- as.treedata(IAP_MY_CV_CG_raxml_tibble)
 
 # Plot fan tree
-ggtree(IAP_MY_CV_CG_raxml_treedata, layout="fan", aes(color=Species),  branch.length = "none") + 
-  geom_tiplab2(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
-  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
+#ggtree(IAP_MY_CV_CG_raxml_treedata, layout="fan", aes(color=Species),  branch.length = "none") + 
+#  geom_tiplab2(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
+#  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
+#  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
 
 # Plot vertical tree and edit colors
 IAP_MY_CV_CG_raxml_treedata_vertical <- 
-  ggtree(IAP_MY_CV_CG_raxml_treedata, aes(color=Species, fill=Species), branch.length = "none") + 
-  geom_tiplab(aes(label=alias), size =2.0, offset=0) + # geom_tiplab2 flips the labels correctly
+  ggtree(IAP_MY_CV_CG_raxml_treedata, aes(color=Species, fill=Species),  branch.length = "none") + 
+  geom_tiplab(aes(label=alias), fontface="bold", size =2.0, offset=0) + # geom_tiplab2 flips the labels correctly
+  # add circle for 90-100 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  # add triangle for 70-89 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  # add upside down traingle for 50-69 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  #Edit theme
   theme(legend.position = "bottom", 
         legend.text = element_text(face = "italic", size=8, family="sans"),
         legend.title = element_text(size=12, family="sans")) +
-  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 2.0, fontface="bold") + # allows for subset
+  #geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 2.0, fontface="bold") + # allows for subset
   xlim(-70,31.8) + #change scaling so branch lengths are smaller and all alias labels are showing
   scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
                       labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
-  guides(col = guide_legend(ncol =1, title.position = "top"))
+  guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
+
+# Collapse Mizuhopecten-only parent nodes
+IAP_MY_CV_CG_raxml_treedata_vertical_coll <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical, node=485) +  # collapse using parent number of first protein
+           geom_point2(aes(subset=(node==485)), shape=22, size=0.8, color = '#c55d32',fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll2 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll, node=397) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==397)), shape=22, size=0.8, color = '#c55d32',fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll3 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll2, node=437) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==437)), shape=22, size=0.8, color = '#c55d32',fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll4 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll3, node=266) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==266)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll5 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll4, node=312) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==312)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll6 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll5, node=369) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==369)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll7 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll6, node=372) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==372)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll8 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll7, node=306) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==306)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll9 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll8, node=304) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==304)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll10 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll9, node=416) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==416)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll11 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll10, node=322) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==322)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll12 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll11, node=451) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==451)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll13 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll12, node=456) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==456)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll14 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll13, node=432) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==432)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll15 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll14, node=434) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==434)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll16 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll15, node=404) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==404)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll17 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll16, node=408) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==408)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll18 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll17, node=384) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==384)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll19 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll18, node=385) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==385)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll20 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll19, node=265) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==265)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
+IAP_MY_CV_CG_raxml_treedata_vertical_coll21 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll20, node=302) + # collapse using parent number of first protein 
+  geom_point2(aes(subset=(node==302)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
 
 #### PLOT IAP DOMAIN STRUCTURE AND COMBINE WITH TREE ####
 # Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
@@ -1371,13 +1421,20 @@ C_gig_apop_LFC_IAP_full_XP$protein_id <- factor(C_gig_apop_LFC_IAP_full_XP$prote
 C_vir_apop_LFC_IAP_full_XP$node <- factor(C_vir_apop_LFC_IAP_full_XP$node, levels = rev(unique(C_vir_apop_LFC_IAP_full_XP$node)))
 C_gig_apop_LFC_IAP_full_XP$node <- factor(C_gig_apop_LFC_IAP_full_XP$node, levels = rev(unique(C_gig_apop_LFC_IAP_full_XP$node)))
 
+
 # Plot LFC data
+viridis(15,option="inferno")
+
+viridis_pal <- c("#0D0887FF", "#5402A3FF","#7000A8FF","#8B0AA5FF","#F48849FF","#FEBC2AFF", "#F0F921FF")
 C_vir_apop_LFC_IAP_tile_plot <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y = protein_id, fill=log2FoldChange, na.rm= TRUE)) + 
   geom_tile()  + 
   #scale_fill_viridis_c(breaks = seq(min(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm = TRUE),max(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm=TRUE),length.out = 15), 
-  #                   option="plasma", guide=guide_legend()) +
-  scale_fill_viridis_c(name = "Log2 Fold Change", breaks = c(-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10), 
-                       option="plasma", guide=guide_legend(), na.value = "transparent") +
+  #                  option="magma", guide=guide_legend()) +
+ scale_fill_viridis_c(name = "Log2 Fold Change", 
+                       limits = c(-11,10),
+                       breaks = c(-10,-5,-1,0.5,1,3,5,7,10), 
+                       option="plasma",
+                      guide=guide_legend(), na.value = "transparent") +
   labs(x="Treatment", y =NULL) +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
@@ -1453,8 +1510,13 @@ C_gig_apop_LFC_IAP_tile_plot <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes(x=group_b
   geom_tile() + 
   #scale_fill_viridis_c(breaks = seq(min(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm = TRUE),max(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm=TRUE),length.out = 15), 
   #                     option="plasma", guide=guide_legend()) +
-  scale_fill_viridis_c(name = "Log2 Fold Change", breaks = c(-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14), 
-                       option="plasma", guide=guide_legend(), na.value = "transparent") +
+  #scale_fill_gradientn(colors = viridis_pal, limits=c(-10, 10),breaks = c(-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10),
+  #                     guide=guide_legend(), na.value = "transparent") + 
+  scale_fill_viridis_c(name = "Log2 Fold Change", 
+                       limits = c(-11,10),
+                       breaks = c(-10,-8,-6,-4,-2,-1,0,0.5,1,2,3,4,6,8,10), 
+                       option="plasma",
+                       guide=guide_legend(), na.value = "transparent") +
   labs(x="Treatment", y =NULL) +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
@@ -1520,7 +1582,7 @@ C_gig_apop_LFC_IAP_tile_plot <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes(x=group_b
   scale_x_discrete(limits = c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
                               "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
                               "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
-                   labels= c("Zhang\n V. alg","Zhang\n V.tub","Zhang\n LPS", "Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir","He OsHv-1\n 6hr",
+                   labels= c("Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir","He OsHv-1\n 6hr",
                              "He OsHv-1\n 12hr", "He OsHv-1\n24hr", "He OsHv-1\n48hr", "He OsHv-1\n 120hr","deLorgeril\nOsHV-1\n Res. 6hr","deLorgeril\nOsHV-1\n Res. 12hr","deLorgeril\nOsHV-1\n Res. 24hr" ,"deLorgeril\nOsHV-1\n Res. 48hr",
                              "deLorgeril\nOsHV-1\n Res. 60hr","deLorgeril\nOsHV-1\n Res. 72hr" ,"deLorgeril\nOsHV-1\n Sus. 6hr", "deLorgeril\nOsHV-1\n Sus. 12hr","deLorgeril\nOsHV-1\n Sus. 24hr","deLorgeril\nOsHV-1\n Sus. 48hr" ,
                              "deLorgeril\nOsHV-1\n Sus. 60hr","deLorgeril\nOsHV-1\n Sus. 72hr"), position="top") +
@@ -1550,12 +1612,182 @@ Cvir_IAP_tr_dom_LFC_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_leg
                                           ncol = 3, align="hv")
 Cvir_IAP_tr_dom_LFC_plus_legend <- plot_grid(Cvir_IAP_tr_dom_LFC, Cvir_IAP_tr_dom_LFC_legend, ncol=1, rel_heights =c(1, 0.3))
 
+# Cvir only tree and domains
+Cvir_IAP_tr_dom <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, ncol=3, align='h')
+Cvir_IAP_tr_dom_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, IAP_Interproscan_domain_plot_legend,
+                                        ncol = 2, align="hv")
+Cvir_IAP_tr_dom_plus_legend <- plot_grid(Cvir_IAP_tr_dom, Cvir_IAP_tr_dom_legend, ncol=1, rel_heights =c(1, 0.3))
+
+
 # C gig plots
 Cgig_IAP_tr_dom_LFC <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, C_gig_apop_LFC_IAP_tile_plot_no_legend, ncol=3, align='h',
                                    labels = c('A', 'B', 'C'), label_size = 12)
 Cgig_IAP_tr_dom_LFC_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, IAP_Interproscan_domain_plot_legend,C_gig_apop_LFC_IAP_tile_plot_legend, 
                                           ncol = 3, align="hv")
 Cgig_IAP_tr_dom_LFC_plus_legend <- plot_grid(Cgig_IAP_tr_dom_LFC, Cgig_IAP_tr_dom_LFC_legend, ncol=1, rel_heights =c(1, 0.3))
+
+#### PLOT CONSTITUTIVELY EXPRESSED IAPS ####
+
+# Load data from Transcriptome dataframes
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_gig_vst_common_df_all_mat_limma_IAP_gather_avg.RData")
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_vir_vst_common_df_all_mat_limma_IAP_gather_avg.RData")
+
+# Keep tables separate for plotting 
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg$Species <- "Crassostrea_virginica"
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg$Species <- "Crassostrea_gigas"
+
+# Full Join the list of transcripts so the missing labels are in there and can be ordered for plotting 
+C_gig_vst_common_df_all_mat_limma_IAP_XP <- full_join(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg, IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
+
+# Several NA's meaning that those proteins were ones that were collapsed as duplicates in CD-Hit
+C_gig_vst_common_df_all_mat_limma_IAP_XP_collapsed <- C_gig_vst_common_df_all_mat_limma_IAP_XP %>% filter(is.na(node) & !is.na(avg_vst_counts_per_treatment))  %>% 
+  dplyr::distinct(protein_id)
+C_gig_vst_common_df_all_mat_limma_IAP_XP_collapsed_BIR_seq_rm_dup_clstr6 <- BIR_seq_rm_dup_clstr6 %>% filter(protein_id %in% (C_gig_vst_common_df_all_mat_limma_IAP_XP_collapsed$protein_id))
+# Find parent proteins in these clusters
+C_gig_vst_common_df_all_mat_limma_IAP_XP_collapsed_BIR_seq_rm_dup_clstr6_cluster <- BIR_seq_rm_dup_clstr6[BIR_seq_rm_dup_clstr6$cluster %in% C_gig_vst_common_df_all_mat_limma_IAP_XP_collapsed_BIR_seq_rm_dup_clstr6$cluster,]
+
+# Recode these proteins for the purpose of plotting
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg$protein_id <- recode(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg$protein_id, 
+                                                                      "XP_019925512.1"= "XP_019925513.1",
+                                                                      "XP_011437419.1"= "XP_011437418.1",
+                                                                      "XP_011428385.1"= "XP_011428384.1",
+                                                                      "XP_011414430.1"= "XP_019919109.1",
+                                                                      "XP_011445380.1"= "XP_011445382.1",
+                                                                      "XP_011445381.1"= "XP_011445382.1",
+                                                                      "XP_011445383.1"= "XP_011445382.1",
+                                                                      "XP_011436808.1"= "XP_011436809.1")
+# Rejoin the Full list of transcript and check for fixed NA
+C_gig_vst_common_df_all_mat_limma_IAP_XP <- full_join(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg, IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
+
+# Now check Cvir proteins
+# Full Join the list of transcripts so the missing labels are in there and can be ordered for plotting 
+C_vir_vst_common_df_all_mat_limma_IAP_XP <- full_join(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg, IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
+#several NAs
+
+C_vir_vst_common_df_all_mat_limma_IAP_XP_collapsed <- C_vir_vst_common_df_all_mat_limma_IAP_XP %>% filter(is.na(node) & !is.na(avg_vst_counts_per_treatment))  %>% 
+  dplyr::distinct(protein_id)
+C_vir_vst_common_df_all_mat_limma_IAP_XP_collapsed_BIR_seq_rm_dup_clstr6 <- BIR_seq_rm_dup_clstr6 %>% filter(protein_id %in% (C_vir_vst_common_df_all_mat_limma_IAP_XP_collapsed$protein_id))
+# Find parent proteins in these clusters
+C_vir_vst_common_df_all_mat_limma_IAP_XP_collapsed_BIR_seq_rm_dup_clstr6_cluster <- BIR_seq_rm_dup_clstr6[BIR_seq_rm_dup_clstr6$cluster %in% C_vir_vst_common_df_all_mat_limma_IAP_XP_collapsed_BIR_seq_rm_dup_clstr6$cluster,]
+
+# Recode these proteins for the purpose of plotting
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg$protein_id <- recode(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg$protein_id, 
+                                                                      "XP_022288682.1"="XP_022288684.1",
+                                                                      "XP_022288101.1"="XP_022288100.1", 
+                                                                      "XP_022288102.1"="XP_022288100.1", 
+                                                                      "XP_022289978.1"="XP_022289977.1",
+                                                                      "XP_022287965.1"="XP_022287971.1",
+                                                                      "XP_022287969.1"="XP_022287971.1",
+                                                                      "XP_022290205.1"="XP_022290206.1",
+                                                                      "XP_022288933.1"="XP_022288934.1",
+                                                                      "XP_022295524.1"="XP_022295527.1",
+                                                                      "XP_022288031.1"="XP_022288032.1",
+                                                                      "XP_022292109.1"="XP_022292108.1",
+                                                                      "XP_022288975.1"="XP_022288977.1",
+                                                                      "XP_022293361.1"="XP_022293362.1",
+                                                                      "XP_022292414.1"="XP_022292412.1",
+                                                                      "XP_022292969.1"="XP_022292970.1",
+                                                                      "XP_022293781.1"="XP_022293782.1",
+                                                                      "XP_022291628.1"="XP_022291629.1",
+                                                                      "XP_022286791.1"="XP_022295668.1",
+                                                                      "XP_022287921.1"="XP_022287919.1")
+
+# Rejoin the Full list of transcript and check for fixed NA
+C_vir_vst_common_df_all_mat_limma_IAP_XP <- full_join(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg, IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
+
+# Reorder both to be the order of the tree XPs
+# Get the node order from original tree (done in code chunk regarding domain information above)
+# Reorder the proteins
+C_vir_vst_common_df_all_mat_limma_IAP_XP <- full_join(IAP_MY_CV_CG_raxml_treedata_tip_order, C_vir_vst_common_df_all_mat_limma_IAP_XP)
+C_gig_vst_common_df_all_mat_limma_IAP_XP <- full_join(IAP_MY_CV_CG_raxml_treedata_tip_order, C_gig_vst_common_df_all_mat_limma_IAP_XP)
+
+# Set factor level order of the nodes set levels in reverse order
+C_vir_vst_common_df_all_mat_limma_IAP_XP$protein_id <- factor(C_vir_vst_common_df_all_mat_limma_IAP_XP$protein_id, levels = rev(unique(C_vir_vst_common_df_all_mat_limma_IAP_XP$protein_id)))
+C_gig_vst_common_df_all_mat_limma_IAP_XP$protein_id <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$protein_id, levels = rev(unique(C_gig_vst_common_df_all_mat_limma_IAP_XP$protein_id)))
+C_vir_vst_common_df_all_mat_limma_IAP_XP$node <- factor(C_vir_vst_common_df_all_mat_limma_IAP_XP$node, levels = rev(unique(C_vir_vst_common_df_all_mat_limma_IAP_XP$node)))
+C_gig_vst_common_df_all_mat_limma_IAP_XP$node <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$node, levels = rev(unique(C_gig_vst_common_df_all_mat_limma_IAP_XP$node)))
+
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
+  geom_tile() + 
+  scale_fill_viridis_c(name = "Avg. Read Count", 
+                      # limits = c(-11,10),
+                      # breaks = c(-10,-8,-6,-4,-2,-1,0,0.5,1,2,3,4,6,8,10), 
+                       option="plasma",
+                       guide=guide_legend(), na.value = "transparent") +
+  labs(x="Treatment", y =NULL) +
+  theme(#axis.ticks.y = element_blank(), 
+    #axis.text.y = element_blank(),
+    axis.text.x.top = element_text(size=8, family="sans"),
+    axis.title.x.top = element_text(size=12, family="sans"),
+    legend.position = "bottom",
+    legend.title = element_text(size=12, family="sans"), 
+    legend.text = element_text(size=8, family="sans"),
+    panel.background = element_rect(fill = "transparent"),
+    panel.grid.major.x = element_line(size=0.2, color="gray"),
+    panel.grid.major.y = element_line(size=0.2, color="gray")) +
+  # change to product name 
+   # put X limits in the same order as limits from the LFC plots 
+  scale_x_discrete(limits =  c("Untreated_control","Bacillus_pumilus_RI0695", "Pro_RE22_Control_no_treatment", "Bacillus_pumilus_RI06_95_exposure_6h","Bacillus_pumilus_RI06_95_exposure_24h",
+                               "Phaeobacter_inhibens_S4_exposure_6h", "Phaeobacter_inhibens_S4_exposure_24h", "Vibrio_coralliilyticus_RE22_exposure_6h",
+                               "ROD_Res_Control","ROD_Res_Challenge","ROD_Sus_Control","ROD_Sus_Challenge","Dermo_Sus_36h_Control","Dermo_Sus_28d_Control",
+                               "Dermo_Sus_7d_Control","Dermo_Sus_36h_Injected","Dermo_Sus_7d_Injected","Dermo_Sus_28d_Injected","Dermo_Tol_36h_Control",
+                               "Dermo_Tol_7d_Control","Dermo_Tol_28d_Control","Dermo_Tol_36h_Injected","Dermo_Tol_7d_Injected","Dermo_Tol_28d_Injected"), 
+                   labels= c("Hatchery\n Probiotic\n RI Con." , "Hatchery\n Probiotic\n RI Chall.", "Lab Probiotic/RE22\n Control","Lab RI 6hr", "Lab RI 24hr", "Lab S4 6hr","Lab S4 24hr", "Lab RE22" ,
+                             "ROD Sus.\n Control", "ROD Sus.\n seed", "ROD Res.\n Control","ROD Res.\n seed", "Dermo\n Sus. Con.\n 36hr", "Dermo\n Sus.Con.\n 7d", "Dermo\n Sus. Con.\n 28d", 
+                             "Dermo\n Sus. 36hr", "Dermo\n Sus. 7d", "Dermo\n Sus. 28d", "Dermo\n Tol. Con.\n 36hr", "Dermo\n Tol. Con.\n 7d","Dermo\n Tol. Con.\n 28d",
+                             "Dermo\n Tol. 36hr", "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top") +
+  guides(fill=guide_legend(ncol=3, title.position="top"))
+
+# plot heatmap of vst counts for each treatment 
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot <- ggplot(C_gig_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
+  geom_tile() + 
+  scale_fill_viridis_c(name = "Avg. Read Count", 
+                       #limits = c(-11,10),
+                       #breaks = c(-10,-8,-6,-4,-2,-1,0,0.5,1,2,3,4,6,8,10), 
+                       option="plasma", 
+                       guide=guide_legend(), na.value = "transparent") +
+  labs(x="Treatment", y =NULL) +
+  theme(#axis.ticks.y = element_blank(), 
+    #axis.text.y = element_blank(),
+    axis.text.x.top = element_text(size=8, family="sans"),
+    axis.title.x.top = element_text(size=12, family="sans"),
+    legend.position = "bottom",
+    legend.title = element_text(size=12, family="sans"), 
+    legend.text = element_text(size=8, family="sans"),
+    panel.background = element_rect(fill = "transparent"),
+    panel.grid.major.x = element_line(size=0.2, color="gray"),
+    panel.grid.major.y = element_line(size=0.2, color="gray")) +
+  # put in the product name
+  # put X limits in the same order as limits from the LFC plots 
+  scale_x_discrete(limits = c( "Zhang_Control","V_aes_V_alg1_V_alg2","V_tub_V_ang","LPS_M_lut","Rubio_Control","Vcrass_J2_8","Vcrass_J2_9","Vtasma_LGP32",
+                               "Vtasma_LMG20012T","Time0_control","6h_control","6h_OsHV1","12h_control","12h_OsHV1","24h_control","24h_OsHV1","48h_control",
+                               "48h_OsHV1","120hr_control","120hr_OsHV1","AF21_Resistant_control_0h","AF21_Resistant_6h","AF21_Resistant_12h","AF21_Resistant_24h",
+                               "AF21_Resistant_48h","AF21_Resistant_60h","AF21_Resistant_72h","AF11_Susceptible_control_0h","AF11_Susceptible_6h","AF11_Susceptible_12h","AF11_Susceptible_24h","AF11_Susceptible_48h","AF11_Susceptible_60h","AF11_Susceptible_72h"), 
+                   labels= c("Zhang\n Control","Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nControl","Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir",
+                             "He Time 0\n Control","He 6hr\n Control", "He OsHv-1\n 6hr","He 12hr\n Control","He OsHv-1\n 12hr", "He 24hr\n Control","He OsHv-1\n24hr",
+                             "He 48hr\n Control","He OsHv-1\n48hr","He 120hr\n Control", "He OsHv-1\n 120hr","deLorg\nOsHV-1\n Res.Con 0hr","deLorg\nOsHV-1\n Res. 6hr","deLorg\nOsHV-1\n Res. 12hr","deLorg\nOsHV-1\n Res. 24hr" ,"deLorg\nOsHV-1\n Res. 48hr",
+                             "deLorg\nOsHV-1\n Res. 60hr","deLorg\nOsHV-1\n Res. 72hr" ,"deLorg\nOsHV-1\n Sus. Con 0hr","deLorg\nOsHV-1\n Sus. 6hr", "deLorg\nOsHV-1\n Sus. 12hr","deLorg\nOsHV-1\n Sus. 24hr","deLorg\nOsHV-1\n Sus. 48hr" ,
+                             "deLorg\nOsHV-1\n Sus. 60hr","deLorg\nOsHV-1\n Sus. 72hr"), position="top") +
+  guides(fill=guide_legend(ncol=3, title.position="top"))
+
+# Use cowplot to extract legends and then add separately
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_legend <- cowplot::get_legend(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot)
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_no_legend <- C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot + theme(legend.position='none')
+
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_legend <- cowplot::get_legend(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot)
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_no_legend <- C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot + theme(legend.position='none')
+
+### Plot tree, LFC plot, consitutive expression, side by side
+Cvir_IAP_tr_LFC_const <- plot_grid(p3_no_legend, C_vir_apop_LFC_IAP_tile_plot_no_legend, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_no_legend, ncol=3, align='h')
+Cvir_IAP_tr_LFC_const_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, C_vir_apop_LFC_IAP_tile_plot_legend, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_legend,
+                                    ncol = 3, align="hv")
+Cvir_IAP_tr_LFC_const_plus_legend <- plot_grid(Cvir_IAP_tr_LFC_const, Cvir_IAP_tr_LFC_const_legend, ncol=1, rel_heights =c(1, 0.3))
+
+Cgig_IAP_tr_LFC_const <- plot_grid(p3_no_legend, C_gig_apop_LFC_IAP_tile_plot_no_legend, C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_no_legend, ncol=3, align='h')
+Cgig_IAP_tr_LFC_const_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, C_gig_apop_LFC_IAP_tile_plot_legend, C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_legend,
+                                          ncol = 3, align="hv")
+Cgig_IAP_tr_LFC_const_plus_legend <- plot_grid(Cgig_IAP_tr_LFC_const , Cgig_IAP_tr_LFC_const_legend, ncol=1, rel_heights =c(1, 0.3))
+
 
 #### PLOT FULL GIMAP PROTEIN TREE ####
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
@@ -1918,7 +2150,7 @@ GIMAP_MY_CV_CG_raxml_treedata_vertical <-
   xlim(-70,31.8) + #change scaling so branch lengths are smaller and all alias labels are showing
   scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
                     labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
-  guides(col = guide_legend(ncol =1, title.position = "top"))
+  guides(col = guide_legend(ncol =1, title.position = "top",  override.aes = aes(label = "")))
 
 #### PLOT GIMAP DOMAIN STRUCTURE AND COMBINE WITH TREE ####
 # Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
@@ -2106,7 +2338,7 @@ C_vir_apop_LFC_GIMAP_tile_plot <- ggplot(C_vir_apop_LFC_GIMAP_full_XP, aes(x=gro
   scale_x_discrete(limits = c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
                               "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
                               "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ), 
-                   labels= c("Hatchery\n Probiotic RI" ,"Lab RI 6hr", "Lab RI 24hr", "Lab S4 6hr","Lab S4 24hr", "Lab RE22" ,
+                   labels= c("Hatchery\n RI" ,"Lab RI 6hr", "Lab RI 24hr", "Lab S4 6hr","Lab S4 24hr", "Lab RE22" ,
                              "ROD Sus.\n seed","ROD Res.\n seed", "Dermo\n Sus. 36hr", "Dermo\n Sus. 7d", "Dermo\n Sus. 28d","Dermo\n Tol. 36hr",   
                              "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top") +
   guides(fill=guide_legend(ncol=2, title.position="top"))
@@ -2158,7 +2390,7 @@ C_gig_apop_LFC_GIMAP_tile_plot <- ggplot(C_gig_apop_LFC_GIMAP_full_XP, aes(x=gro
   scale_x_discrete(limits = c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
                               "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
                               "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
-                   labels= c("Zhang\n V. alg","Zhang\n V.tub","Zhang\n LPS", "Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir","He OsHv-1\n 6hr",
+                   labels= c("Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir","He OsHv-1\n 6hr",
                              "He OsHv-1\n 12hr", "He OsHv-1\n24hr", "He OsHv-1\n48hr", "He OsHv-1\n 120hr","deLorgeril\nOsHV-1\n Res. 6hr","deLorgeril\nOsHV-1\n Res. 12hr","deLorgeril\nOsHV-1\n Res. 24hr" ,"deLorgeril\nOsHV-1\n Res. 48hr",
                              "deLorgeril\nOsHV-1\n Res. 60hr","deLorgeril\nOsHV-1\n Res. 72hr" ,"deLorgeril\nOsHV-1\n Sus. 6hr", "deLorgeril\nOsHV-1\n Sus. 12hr","deLorgeril\nOsHV-1\n Sus. 24hr","deLorgeril\nOsHV-1\n Sus. 48hr" ,
                              "deLorgeril\nOsHV-1\n Sus. 60hr","deLorgeril\nOsHV-1\n Sus. 72hr"), position="top") +
@@ -2196,7 +2428,19 @@ Cgig_GIMAP_tr_dom_LFC_legend <- plot_grid(GIMAP_MY_CV_CG_raxml_treedata_vertical
 Cgig_GIMAP_tr_dom_LFC_plus_legend <- plot_grid(Cgig_GIMAP_tr_dom_LFC, Cgig_GIMAP_tr_dom_LFC_legend, ncol=1, rel_heights =c(1, 0.2))
 
 
- #### PLOT ORTHOFINDER SPECIES TREE  ####
+#### PLOT CONSTITUTIVELY EXPRESSED GIMAPS ####
+
+
+# Load data from Transcriptome dataframes
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_gig_vst_common_df_all_mat_limma_GIMAP.RData")
+load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_vir_vst_common_df_all_mat_limma_GIMAP.RData")
+
+C_gig_vst_common_df_all_mat_limma_GIMAP
+C_vir_vst_common_df_all_mat_limma_GIMAP
+
+
+ 
+#### PLOT ORTHOFINDER SPECIES TREE  ####
 Mollusc_Species_Tree_text <-"((Octopus_bimaculoides:0.0710909,Octopus_sinensis:0.056727)N1:0.21781,((Mizuhopecten_yessoensis:0.315015,(Crassostrea_gigas:0.0955031,C_virginica:0.0982277)N5:0.236348)N3:0.0835452,(Lottia_gigantea:0.31253,(Pomacea_canaliculata:0.34807,(Elysia_chlorotica:0.303751,(Biomphalaria_glabrata:0.296022,Aplysia_californica:0.248891)N8:0.0608488)N7:0.129889)N6:0.0520687)N4:0.0492055)N2:0.21781)N0;"
 Mollusc_Species_Tree <- read.newick(text=Mollusc_Species_Tree_text)
 Mollusc_Species_tibble <- as.tibble(Mollusc_Species_Tree)
