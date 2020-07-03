@@ -182,11 +182,25 @@ save(BIR_XP_gff_CV_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chap
 save(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_protein_list_CG.Rdata")
 save(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_protein_list_CV.Rdata")
 
+# How many IAP proteins in each 
+length(BIR_XP_gff_CG_uniq_XP) # 74
+length(BIR_XP_gff_CV_uniq_XP) # 164
+length(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP) # 31
+length(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP) # 109
+
+# how many uncharacterized?
+BIR_XP_gff_CG %>% distinct(protein_id, .keep_all = TRUE) %>% filter(grepl("uncharacterized", product)) # 15
+BIR_XP_gff_CV %>% distinct(protein_id, .keep_all = TRUE) %>% filter(grepl("uncharacterized", product)) # 39
+
 #Count IAP genes across species
 BIR_XP_gff_species_gene_count <- BIR_XP_gff_species %>% group_by(Species) %>% filter(is.na(locus_tag)) %>% distinct(gene)  %>% summarise(gene_count = n())
 BIR_XP_gff_species_locus_tag_count <- BIR_XP_gff_species %>% group_by(Species) %>% filter(is.na(gene)) %>%  distinct(locus_tag) %>% summarise(locus_tag_count = n())
 colnames(BIR_XP_gff_species_locus_tag_count)[2] <- "gene_count"
 BIR_XP_gff_species_gene_locus_tag_count <- rbind(BIR_XP_gff_species_gene_count, BIR_XP_gff_species_locus_tag_count)
+
+# total gene count across species 
+sum(BIR_XP_gff_species_gene_locus_tag_count$gene_count) # 380
+
 
 #Count GIMAP and IAN genes across species to compare with Lu et al. 2020 paper
 AIG1_XP_ALL_gff_GIMAP_species_gene_count <- AIG1_XP_ALL_gff_GIMAP_species %>% group_by(Species) %>% filter(is.na(locus_tag)) %>% distinct(gene)  %>% summarise(gene_count = n())
@@ -1146,7 +1160,7 @@ IAP_raxml_treedata_artifact_tree <- ggtree(IAP_raxml_treedata_artifact, aes(colo
   theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-40,40)  
 
 
-#### PLOT IAP MY, CV, CG PROTEIN TREE ####
+ #### PLOT IAP MY, CV, CG PROTEIN TREE ####
 
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
 IAP_MY_CV_CG_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG_MSA_RAxML")
@@ -1206,7 +1220,7 @@ IAP_MY_CV_CG_raxml_treedata_vertical <-
                       labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
   guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
 
-# Collapse Mizuhopecten-only parent nodes
+# Collapse Mizuhopecten-only parent nodes manually (for comparison)
 IAP_MY_CV_CG_raxml_treedata_vertical_coll <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical, node=485) +  # collapse using parent number of first protein
            geom_point2(aes(subset=(node==485)), shape=22, size=0.8, color = '#c55d32',fill='#c55d32')
 IAP_MY_CV_CG_raxml_treedata_vertical_coll2 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll, node=397) + # collapse using parent number of first protein 
@@ -1250,15 +1264,87 @@ IAP_MY_CV_CG_raxml_treedata_vertical_coll20 <- collapse(IAP_MY_CV_CG_raxml_treed
 IAP_MY_CV_CG_raxml_treedata_vertical_coll21 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll20, node=302) + # collapse using parent number of first protein 
   geom_point2(aes(subset=(node==302)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
 
+# Drop tips to collapse Mizuhopecten tips (done by manually looking at tree and keeping the outgroup for each group)
+IAP_to_drop <- c("236","237","238","239","240","205","206","115","116","117","120","121","122","200","201",
+                 "196","185","186","187","194","190","192","183","179","189","161","162","141","142","146","143",
+                 "144","145","149","154","128","129","130","13","17","15","16","20","18","19","21","26","22","23","24",
+                 "25","50","52","53","54","59","60","61","62","63","70","71")
+
+
+# get labels for nodes to drop
+IAP_to_drop_label <- IAP_MY_CV_CG_raxml_tibble[IAP_MY_CV_CG_raxml_tibble$node %in% IAP_to_drop,]
+IAP_to_drop_label <- IAP_to_drop_label$label
+
+# labels for when to add shapes for dropped tips 
+IAP_to_label <- c("241","207","118","119","202","184","195","188","193","189","191","182","181","163","147","148","153","127","14","12","49","51","63","72")
+IAP_to_label_XP <- IAP_MY_CV_CG_raxml_tibble[IAP_MY_CV_CG_raxml_tibble$node %in% IAP_to_label,]
+IAP_to_label_XP <- IAP_to_label_XP$label
+
+#Collapse
+IAP_MY_CV_CG_raxml_treedata_collapsed <- drop.tip(IAP_MY_CV_CG_raxml_treedata , IAP_to_drop_label)
+View(as.tibble(IAP_MY_CV_CG_raxml_treedata_collapsed))
+IAP_MY_CV_CG_raxml_treedata_collapsed # tips were dropped
+
+# get new node numbers for where to add shapes 
+IAP_collapsed_tibble <- as.tibble(IAP_MY_CV_CG_raxml_treedata_collapsed)
+IAP_shape_label <- IAP_collapsed_tibble[IAP_collapsed_tibble$label %in% IAP_to_label_XP, ]
+IAP_shape_node <- IAP_shape_label$node
+length(IAP_shape_node)
+
+# Plot collapsed tree
+# Plot vertical tree and edit colors
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <- 
+  ggtree(IAP_MY_CV_CG_raxml_treedata_collapsed, aes(color=Species, fill=Species),  branch.length = "none") + 
+  geom_tiplab(aes(label=alias), fontface="bold", size =2.0, offset=0) + # geom_tiplab2 flips the labels correctly
+  # add circle for 90-100 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  # add triangle for 70-89 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  # add upside down traingle for 50-69 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  # Add shape for tips removed (see IAP_shape_node above)
+  geom_point2(aes(subset=(node==12)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==13)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==36)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==37)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==48)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==91)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==92)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==97)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==108)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==109)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==113)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==120)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==137)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==138)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==139)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==140)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==141)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==142)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==143)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==147)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==150)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==179)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  #Edit theme
+  theme(legend.position = "bottom", 
+        legend.text = element_text(face = "italic", size=8, family="sans"),
+        legend.title = element_text(size=12, family="sans")) +
+  #geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 2.0, fontface="bold") + # allows for subset
+  xlim(-70,31.8) + #change scaling so branch lengths are smaller and all alias labels are showing
+  scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
+                      labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
+  guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
+
 #### PLOT IAP DOMAIN STRUCTURE AND COMBINE WITH TREE ####
 # Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
 # Get only the Interproscan domains for my proteins of interest
-IAP_MY_CV_CG_raxml_tibble_join <- IAP_MY_CV_CG_raxml_tibble %>% filter(!is.na(label)) # remove rows with just bootstrap information
+IAP_MY_CV_CG_raxml_tibble_join <- IAP_collapsed_tibble %>% filter(!is.na(label)) # remove rows with just bootstrap information
 colnames(IAP_MY_CV_CG_raxml_tibble_join)[4] <- "protein_id"
 BIR_XP_gff_Interpro_Domains <-  left_join(IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")], BIR_XP_gff)
 BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains %>% 
   filter(source =="CDD" | grepl("InterPro:IPR", Dbxref)) # keep Interproscan domain lines and CDD NCBI lines 
 
+# filter out NA source lines
 BIR_XP_gff_Interpro_Domains_fullprot <- BIR_XP_gff_Interpro_Domains %>% 
   filter(is.na(source))
 
@@ -1274,8 +1360,8 @@ BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains_only %>% unnest(
 # Change CDD rows to be the Name column
 BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains_only %>% mutate(Dbxref = ifelse(Dbxref == "CDD", Name, Dbxref))
 
-# Get the node order from original IAP tree
-IAP_MY_CV_CG_raxml_treedata_tip  <- fortify(IAP_MY_CV_CG_raxml_treedata)
+# Get the node order from collapsed IAP tree
+IAP_MY_CV_CG_raxml_treedata_tip  <- fortify(IAP_MY_CV_CG_raxml_treedata_collapsed) # not changing code from here down
 IAP_MY_CV_CG_raxml_treedata_tip <- subset(IAP_MY_CV_CG_raxml_treedata_tip, isTip)
 IAP_MY_CV_CG_raxml_treedata_tip_order <- IAP_MY_CV_CG_raxml_treedata_tip$label[order(IAP_MY_CV_CG_raxml_treedata_tip$y, decreasing=TRUE)]
 
@@ -1299,6 +1385,16 @@ BIR_XP_gff_Interpro_Domains_only$node <- factor(BIR_XP_gff_Interpro_Domains_only
 BIR_XP_gff_Interpro_Domains_only$Dbxref <- factor(BIR_XP_gff_Interpro_Domains_only$Dbxref, levels = unique(BIR_XP_gff_Interpro_Domains_only$Dbxref))
 BIR_XP_gff_Interpro_Domains_fullprot$node <- factor(BIR_XP_gff_Interpro_Domains_fullprot$node, levels = rev(BIR_XP_gff_Interpro_Domains_fullprot$node))
 
+### Stats
+# How many unique domains in MY, CV, CG
+BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref) %>% distinct(Dbxref)
+
+# How many proteins with three BIR domains MY, CV, CG? This is difficult because often times the cddBIR and the
+BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref) %>% filter(Dbxref == "\"InterPro:IPR001370\"") %>% group_by(protein_id) %>% 
+    filter(n() >=3) %>% distinct(protein_id)
+
+
+### Plotting
 # Plot the line segments of the NA source lines (which have the full protein start and end)
 IAP_Interproscan_domain_plot <- ggplot() + 
   # plot length of each protein as line
@@ -1332,14 +1428,46 @@ IAP_Interproscan_domain_plot <- ggplot() +
                              "#da83b4","#45c097","#cba950","#65c874","#5b3788","#8a371d","#b1457b",
                              "#be4a5b","#6971d7","#50893b","#d55448","#c46a2f","#8a8a39","#d1766b"), 
     name="Functional Domains",
-    breaks=c("cd16713","\"InterPro:IPR001370\"","\"InterPro:IPR013083\"","\"InterPro:IPR001841\"","\"InterPro:IPR015940\"",
-             "\"InterPro:IPR003131\"","cd18316","\"InterPro:IPR011333\"","\"InterPro:IPR000210\"","\"InterPro:IPR000608\"",
-             "\"InterPro:IPR016135\"","\"InterPro:IPR022103\"","\"InterPro:IPR036322\"","\"InterPro:IPR011047\"","\"InterPro:IPR019775\"",
-             "\"InterPro:IPR017907\"","\"InterPro:IPR038765\"","\"InterPro:IPR032171\"","\"InterPro:IPR027417\"","cd14321"),
-    labels=c("RING-HC_BIRC2_3_7","BIR repeat","Zinc finger, RING-type","Zinc finger, RING/FYVE/PHD-type","Ubiquitin-conjugating enzyme E2",
-             "Ubiquitin-conjugating enzyme/RWD-like","BTB_POZ_KCTD-like","Baculoviral IAP repeat-containing protein 6","WD40-repeat-containing domain superfamily",
-             "Ubiquitin-associated domain","P-loop containing nucleoside triphosphate hydrolase","Quinoprotein alcohol dehydrogenase-like superfamily","WD40 repeat, conserved site","C-terminal of Roc (COR) domain","Zinc finger, RING-type, conserved site",
-             "BTB/POZ domain","Potassium channel tetramerisation-type BTB domain","SKP1/BTB/POZ domain superfamily","Papain-like cysteine peptidase superfamily","UBA_IAPs")) +
+    breaks=c("cd16713",
+             "\"InterPro:IPR001370\"",
+             "\"InterPro:IPR013083\"",
+             "\"InterPro:IPR001841\"",
+             "\"InterPro:IPR015940\"",
+             "\"InterPro:IPR003131\"",
+             "cd18316",
+             "\"InterPro:IPR011333\"",
+             "\"InterPro:IPR000210\"",
+             "\"InterPro:IPR000608\"",
+             "\"InterPro:IPR016135\"",
+             "\"InterPro:IPR022103\"",
+             "\"InterPro:IPR036322\"",
+             "\"InterPro:IPR011047\"",
+             "\"InterPro:IPR019775\"",
+             "\"InterPro:IPR017907\"",
+             "\"InterPro:IPR038765\"",
+             "\"InterPro:IPR032171\"",
+             "\"InterPro:IPR027417\"",
+             "cd14321"),
+    labels=c("RING-HC_BIRC2_3_7",
+             "BIR repeat",
+             "Zinc finger, RING/FYVE/PHD-type",
+             "Zinc finger, RING-type",
+             "Ubiquitin-associated domain",
+             "Potassium channel tetramerisation-type BTB domain",
+             "BTB/POZ domain",
+             "SKP1/BTB/POZ domain superfamily",
+             "BTB/POZ domain",
+             "Ubiquitin-conjugating enzyme E2",
+             "Ubiquitin-conjugating enzyme/RWD-like",
+             "Baculoviral IAP repeat-containing protein 6",
+             "WD40-repeat-containing domain superfamily",
+             "Quinoprotein alcohol dehydrogenase-like superfamily",
+             "WD40 repeat, conserved site",
+             "Zinc finger, RING-type, conserved site",
+             "Papain-like cysteine peptidase superfamily",
+             "C-terminal of Roc (COR) domain",
+             "P-loop containing nucleoside triphosphate hydrolase",
+             "UBA_IAPs")) +
   # change number of legend columns and put the legend title on top
   guides(fill=guide_legend(ncol=3, title.position="top"))
 
@@ -1421,20 +1549,97 @@ C_gig_apop_LFC_IAP_full_XP$protein_id <- factor(C_gig_apop_LFC_IAP_full_XP$prote
 C_vir_apop_LFC_IAP_full_XP$node <- factor(C_vir_apop_LFC_IAP_full_XP$node, levels = rev(unique(C_vir_apop_LFC_IAP_full_XP$node)))
 C_gig_apop_LFC_IAP_full_XP$node <- factor(C_gig_apop_LFC_IAP_full_XP$node, levels = rev(unique(C_gig_apop_LFC_IAP_full_XP$node)))
 
-
 # Plot LFC data
-viridis(15,option="inferno")
+# plot below uses the full non collapsed Mizuhopecten code
+#C_vir_apop_LFC_IAP_tile_plot <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y = protein_id, fill=log2FoldChange, na.rm= TRUE)) + 
+#  geom_tile()  + 
+#  #scale_fill_viridis_c(breaks = seq(min(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm = TRUE),max(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm=TRUE),length.out = 15), 
+#  #                  option="magma", guide=guide_legend()) +
+# scale_fill_viridis_c(name = "Log2 Fold Change", 
+#                       limits = c(-11,10),
+#                       breaks = c(-10,-5,-1,0.5,1,3,5,7,10), 
+#                       option="plasma",
+#                      guide=guide_legend(), na.value = "transparent") +
+#  labs(x="Treatment", y =NULL) +
+#  theme(axis.ticks.y = element_blank(), 
+#        axis.text.y = element_blank(),
+#        axis.text.x.top = element_text(size=8, family="sans"),
+#        #axis.text.y.left = element_text(family ="sans"),
+#        axis.title = element_text(size=12, family="sans"),
+#        legend.position = "bottom",
+#        legend.title = element_text(size=12, family="sans"), 
+#        legend.text = element_text(size=8, family="sans"),
+#        panel.background = element_rect(fill = "transparent"),
+#        panel.grid.major.x = element_line(size=0.2, color="gray"),
+#        panel.grid.major.y = element_line(size=0.2, color="gray")) +
+#  # remove NA row from the list (get list from rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)))
+#  scale_y_discrete(limits=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
+#                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
+#                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
+#                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
+#                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
+#                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
+#                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
+#                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
+#                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
+#                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
+#                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
+#                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
+#                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
+#                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
+#                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
+#                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
+#                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
+#                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
+#                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
+#                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
+#                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
+#                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
+#                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
+#                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
+#                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1"),
+#                   labels=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
+#                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
+#                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
+#                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
+#                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
+#                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
+#                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
+#                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
+#                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
+#                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
+#                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
+#                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
+#                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
+#                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
+#                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
+#                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
+#                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
+#                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
+#                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
+#                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
+#                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
+#                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
+#                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
+#                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
+#                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
+#  scale_x_discrete(limits = c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
+#                              "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
+#                              "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ), 
+#                   labels= c("Hatchery\n Probiotic RI" ,"Lab RI 6hr", "Lab RI 24hr", "Lab S4 6hr","Lab S4 24hr", "Lab RE22" ,
+#                             "ROD Sus.\n seed","ROD Res.\n seed", "Dermo\n Sus. 36hr", "Dermo\n Sus. 7d", "Dermo\n Sus. 28d","Dermo\n Tol. 36hr",   
+#                             "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top") +
+#  guides(fill=guide_legend(ncol=4, title.position="top"))
 
-viridis_pal <- c("#0D0887FF", "#5402A3FF","#7000A8FF","#8B0AA5FF","#F48849FF","#FEBC2AFF", "#F0F921FF")
-C_vir_apop_LFC_IAP_tile_plot <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y = protein_id, fill=log2FoldChange, na.rm= TRUE)) + 
+C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y = protein_id, fill=log2FoldChange, na.rm= TRUE)) + 
   geom_tile()  + 
   #scale_fill_viridis_c(breaks = seq(min(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm = TRUE),max(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm=TRUE),length.out = 15), 
   #                  option="magma", guide=guide_legend()) +
- scale_fill_viridis_c(name = "Log2 Fold Change", 
+  scale_fill_viridis_c(name = "Log2 Fold Change", 
                        limits = c(-11,10),
                        breaks = c(-10,-5,-1,0.5,1,3,5,7,10), 
                        option="plasma",
-                      guide=guide_legend(), na.value = "transparent") +
+                       guide=guide_legend(), na.value = "transparent") +
   labs(x="Treatment", y =NULL) +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
@@ -1448,56 +1653,40 @@ C_vir_apop_LFC_IAP_tile_plot <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes(x=group_b
         panel.grid.major.x = element_line(size=0.2, color="gray"),
         panel.grid.major.y = element_line(size=0.2, color="gray")) +
   # remove NA row from the list (get list from rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)))
-  scale_y_discrete(limits=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
-                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
-                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
-                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
-                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
-                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
-                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
-                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
-                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
-                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
-                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
-                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
-                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
-                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
-                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
-                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
-                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
-                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
-                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
-                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
-                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
-                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
-                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
-                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
-                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1"),
-                   labels=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
-                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
-                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
-                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
-                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
-                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
-                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
-                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
-                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
-                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
-                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
-                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
-                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
-                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
-                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
-                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
-                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
-                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
-                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
-                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
-                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
-                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
-                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
-                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
-                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
+  scale_y_discrete(limits=c(  "XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019920103.1", "XP_021350197.1",
+                              "XP_011416423.1", "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_019919109.1", "XP_019919110.1", "XP_022292970.1",
+                              "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1", "XP_022311926.1", "XP_022311074.1", "XP_021356418.1",
+                              "XP_022293362.1", "XP_011455007.1", "XP_021355384.1", "XP_022287287.1", "XP_022287292.1", "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_021362910.1", "XP_021372726.1",
+                              "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021345058.1", "XP_021360744.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
+                              "XP_021345059.1", "XP_021365104.1", "XP_021365115.1", "XP_021366455.1", "XP_022305768.1", "XP_021365097.1", "XP_021353464.1", "XP_021347771.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1",
+                              "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1",
+                              "XP_019920663.1", "XP_019922714.1", "XP_019922712.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363602.1", "XP_011435383.1", "XP_021363252.1",
+                              "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1", "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1",
+                              "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_021345008.1", "XP_021348428.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1",
+                              "XP_022322279.1", "XP_022322278.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1", "XP_019929019.1", "XP_011433586.1",
+                              "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1", "XP_022290906.1", "XP_021360358.1", "XP_011433457.1",
+                              "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021344945.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021362783.1", "XP_011444161.1", "XP_022289969.1",
+                              "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_022288032.1", "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1",
+                              "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1", "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1",
+                              "XP_022295029.1", "XP_022293847.1", "XP_022295527.1", "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1",
+                              "XP_019924100.1", "XP_019919899.1", "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1"),
+                   labels=c( "XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019920103.1", "XP_021350197.1",
+                             "XP_011416423.1", "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_019919109.1", "XP_019919110.1", "XP_022292970.1",
+                             "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1", "XP_022311926.1", "XP_022311074.1", "XP_021356418.1",
+                             "XP_022293362.1", "XP_011455007.1", "XP_021355384.1", "XP_022287287.1", "XP_022287292.1", "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_021362910.1", "XP_021372726.1",
+                             "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021345058.1", "XP_021360744.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
+                             "XP_021345059.1", "XP_021365104.1", "XP_021365115.1", "XP_021366455.1", "XP_022305768.1", "XP_021365097.1", "XP_021353464.1", "XP_021347771.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1",
+                             "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1",
+                             "XP_019920663.1", "XP_019922714.1", "XP_019922712.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363602.1", "XP_011435383.1", "XP_021363252.1",
+                             "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1", "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1",
+                             "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_021345008.1", "XP_021348428.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1",
+                             "XP_022322279.1", "XP_022322278.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1", "XP_019929019.1", "XP_011433586.1",
+                             "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1", "XP_022290906.1", "XP_021360358.1", "XP_011433457.1",
+                             "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021344945.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021362783.1", "XP_011444161.1", "XP_022289969.1",
+                             "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_022288032.1", "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1",
+                             "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1", "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1",
+                             "XP_022295029.1", "XP_022293847.1", "XP_022295527.1", "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1",
+                             "XP_019924100.1", "XP_019919899.1", "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
   scale_x_discrete(limits = c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
                               "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
                               "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ), 
@@ -1506,7 +1695,102 @@ C_vir_apop_LFC_IAP_tile_plot <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes(x=group_b
                              "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top") +
   guides(fill=guide_legend(ncol=4, title.position="top"))
 
-C_gig_apop_LFC_IAP_tile_plot <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y=protein_id, fill=log2FoldChange)) + 
+#C_gig_apop_LFC_IAP_tile_plot <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y=protein_id, fill=log2FoldChange)) + 
+#  geom_tile() + 
+#  #scale_fill_viridis_c(breaks = seq(min(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm = TRUE),max(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm=TRUE),length.out = 15), 
+#  #                     option="plasma", guide=guide_legend()) +
+#  #scale_fill_gradientn(colors = viridis_pal, limits=c(-10, 10),breaks = c(-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10),
+#  #                     guide=guide_legend(), na.value = "transparent") + 
+#  scale_fill_viridis_c(name = "Log2 Fold Change", 
+#                       limits = c(-11,10),
+#                       breaks = c(-10,-8,-6,-4,-2,-1,0,0.5,1,2,3,4,6,8,10), 
+#                       option="plasma",
+#                       guide=guide_legend(), na.value = "transparent") +
+#  labs(x="Treatment", y =NULL) +
+#  theme(axis.ticks.y = element_blank(), 
+#        axis.text.y = element_blank(),
+#        axis.text.x.top = element_text(size=8, family="sans"),
+#        axis.title.x.top = element_text(size=12, family="sans"),
+#        legend.position = "bottom",
+#        legend.title = element_text(size=12, family="sans"), 
+#        legend.text = element_text(size=8, family="sans"),
+#        panel.background = element_rect(fill = "transparent"),
+#        panel.grid.major.x = element_line(size=0.2, color="gray"),
+#        panel.grid.major.y = element_line(size=0.2, color="gray")) +
+#  # remove NA row from the list 
+#  scale_y_discrete(limits=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
+#                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
+#                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
+#                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
+#                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
+#                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
+#                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
+#                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
+#                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
+#                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
+#                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
+#                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
+#                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
+#                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
+#                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
+#                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
+#                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
+#                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
+#                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
+#                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
+#                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
+#                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
+#                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
+#                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
+#                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1"),
+#                   labels=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
+#                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
+#                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
+#                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
+#                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
+#                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
+#                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
+#                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
+#                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
+#                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
+#                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
+#                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
+#                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
+#                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
+#                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
+#                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
+#                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
+#                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
+#                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
+#                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
+#                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
+#                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
+#                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
+#                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
+#                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
+#  scale_x_discrete(limits = c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
+#                              "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
+#                              "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
+#                   labels= c("Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir","He OsHv-1\n 6hr",
+#                             "He OsHv-1\n 12hr", "He OsHv-1\n24hr", "He OsHv-1\n48hr", "He OsHv-1\n 120hr","deLorgeril\nOsHV-1\n Res. 6hr","deLorgeril\nOsHV-1\n Res. 12hr","deLorgeril\nOsHV-1\n Res. 24hr" ,"deLorgeril\nOsHV-1\n Res. 48hr",
+#                             "deLorgeril\nOsHV-1\n Res. 60hr","deLorgeril\nOsHV-1\n Res. 72hr" ,"deLorgeril\nOsHV-1\n Sus. 6hr", "deLorgeril\nOsHV-1\n Sus. 12hr","deLorgeril\nOsHV-1\n Sus. 24hr","deLorgeril\nOsHV-1\n Sus. 48hr" ,
+#                             "deLorgeril\nOsHV-1\n Sus. 60hr","deLorgeril\nOsHV-1\n Sus. 72hr"), position="top") +
+#  guides(fill=guide_legend(ncol=3, title.position="top"))
+
+
+
+# Change factor level order of experiment for ggplot 
+C_gig_apop_LFC_IAP_full_XP$experiment <- factor(C_gig_apop_LFC_IAP_full_XP$experiment, levels = c("Zhang", "Rubio","He","deLorgeril_sus", "deLorgeril_res","NA"), 
+       labels = c("Zhang\nVibrio spp." ,"Rubio\nVibrio spp." , "He OsHV-1" ,"de Lorgeril Susceptible\n OsHV-1", "de Lorgeril Resistant\nOsHV-1","de Lorgeril Resistant\nOsHV-1"))
+C_gig_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_gig_apop_LFC_IAP_full_XP$group_by_sim, levels= c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
+           "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
+           "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
+labels= c("V. alg","V.tub\n V. ang","LPS\nM. Lut", "V. crass\n J2_8\n NVir","V. crass\n J2_9\n Vir" ,"V. tasma\n LGP32\n Vir","V. tasma\n LMG20012T\n NVir","6hr",
+          "12hr", "24hr", "48hr", "120hr","Res. 6hr","Res. 12hr","Res. 24hr" ,"Res. 48hr",
+          "Res. 60hr","Res. 72hr" ,"Sus. 6hr", "Sus. 12hr","Sus. 24hr","Sus. 48hr" ,
+          "Sus. 60hr","Sus. 72hr"))
+
+C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y=protein_id, fill=log2FoldChange)) + 
   geom_tile() + 
   #scale_fill_viridis_c(breaks = seq(min(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm = TRUE),max(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm=TRUE),length.out = 15), 
   #                     option="plasma", guide=guide_legend()) +
@@ -1517,6 +1801,8 @@ C_gig_apop_LFC_IAP_tile_plot <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes(x=group_b
                        breaks = c(-10,-8,-6,-4,-2,-1,0,0.5,1,2,3,4,6,8,10), 
                        option="plasma",
                        guide=guide_legend(), na.value = "transparent") +
+  # add facet to plot 
+  facet_grid(.~experiment, scales="free",space="free", drop=TRUE) + 
   labs(x="Treatment", y =NULL) +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
@@ -1527,65 +1813,51 @@ C_gig_apop_LFC_IAP_tile_plot <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes(x=group_b
         legend.text = element_text(size=8, family="sans"),
         panel.background = element_rect(fill = "transparent"),
         panel.grid.major.x = element_line(size=0.2, color="gray"),
-        panel.grid.major.y = element_line(size=0.2, color="gray")) +
+        panel.grid.major.y = element_line(size=0.2, color="gray"),
+        strip.text.x = element_text(
+          size = 12, face = "bold")) +
   # remove NA row from the list 
-  scale_y_discrete(limits=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
-                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
-                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
-                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
-                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
-                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
-                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
-                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
-                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
-                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
-                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
-                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
-                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
-                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
-                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
-                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
-                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
-                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
-                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
-                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
-                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
-                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
-                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
-                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
-                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1"),
-                   labels=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
-                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
-                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
-                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
-                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
-                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
-                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
-                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
-                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
-                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
-                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
-                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
-                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
-                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
-                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
-                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
-                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
-                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
-                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
-                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
-                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
-                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
-                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
-                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
-                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
-  scale_x_discrete(limits = c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
-                              "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
-                              "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
-                   labels= c("Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir","He OsHv-1\n 6hr",
-                             "He OsHv-1\n 12hr", "He OsHv-1\n24hr", "He OsHv-1\n48hr", "He OsHv-1\n 120hr","deLorgeril\nOsHV-1\n Res. 6hr","deLorgeril\nOsHV-1\n Res. 12hr","deLorgeril\nOsHV-1\n Res. 24hr" ,"deLorgeril\nOsHV-1\n Res. 48hr",
-                             "deLorgeril\nOsHV-1\n Res. 60hr","deLorgeril\nOsHV-1\n Res. 72hr" ,"deLorgeril\nOsHV-1\n Sus. 6hr", "deLorgeril\nOsHV-1\n Sus. 12hr","deLorgeril\nOsHV-1\n Sus. 24hr","deLorgeril\nOsHV-1\n Sus. 48hr" ,
-                             "deLorgeril\nOsHV-1\n Sus. 60hr","deLorgeril\nOsHV-1\n Sus. 72hr"), position="top") +
+  scale_y_discrete(limits=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019920103.1", "XP_021350197.1",
+                            "XP_011416423.1", "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_019919109.1", "XP_019919110.1", "XP_022292970.1",
+                            "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1", "XP_022311926.1", "XP_022311074.1", "XP_021356418.1",
+                            "XP_022293362.1", "XP_011455007.1", "XP_021355384.1", "XP_022287287.1", "XP_022287292.1", "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_021362910.1", "XP_021372726.1",
+                            "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021345058.1", "XP_021360744.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
+                            "XP_021345059.1", "XP_021365104.1", "XP_021365115.1", "XP_021366455.1", "XP_022305768.1", "XP_021365097.1", "XP_021353464.1", "XP_021347771.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1",
+                            "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1",
+                            "XP_019920663.1", "XP_019922714.1", "XP_019922712.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363602.1", "XP_011435383.1", "XP_021363252.1",
+                            "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1", "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1",
+                            "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_021345008.1", "XP_021348428.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1",
+                            "XP_022322279.1", "XP_022322278.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1", "XP_019929019.1", "XP_011433586.1",
+                            "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1", "XP_022290906.1", "XP_021360358.1", "XP_011433457.1",
+                            "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021344945.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021362783.1", "XP_011444161.1", "XP_022289969.1",
+                            "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_022288032.1", "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1",
+                            "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1", "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1",
+                            "XP_022295029.1", "XP_022293847.1", "XP_022295527.1", "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1",
+                            "XP_019924100.1", "XP_019919899.1", "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1"),
+                   labels=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019920103.1", "XP_021350197.1",
+                            "XP_011416423.1", "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_019919109.1", "XP_019919110.1", "XP_022292970.1",
+                            "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1", "XP_022311926.1", "XP_022311074.1", "XP_021356418.1",
+                            "XP_022293362.1", "XP_011455007.1", "XP_021355384.1", "XP_022287287.1", "XP_022287292.1", "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_021362910.1", "XP_021372726.1",
+                            "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021345058.1", "XP_021360744.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
+                            "XP_021345059.1", "XP_021365104.1", "XP_021365115.1", "XP_021366455.1", "XP_022305768.1", "XP_021365097.1", "XP_021353464.1", "XP_021347771.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1",
+                            "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1",
+                            "XP_019920663.1", "XP_019922714.1", "XP_019922712.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363602.1", "XP_011435383.1", "XP_021363252.1",
+                            "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1", "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1",
+                            "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_021345008.1", "XP_021348428.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1",
+                            "XP_022322279.1", "XP_022322278.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1", "XP_019929019.1", "XP_011433586.1",
+                            "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1", "XP_022290906.1", "XP_021360358.1", "XP_011433457.1",
+                            "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021344945.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021362783.1", "XP_011444161.1", "XP_022289969.1",
+                            "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_022288032.1", "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1",
+                            "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1", "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1",
+                            "XP_022295029.1", "XP_022293847.1", "XP_022295527.1", "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1",
+                            "XP_019924100.1", "XP_019919899.1", "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
+ # scale_x_discrete(position = "top",limits = c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
+ #                             "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
+ #                             "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
+ #                  labels= c("Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir","He OsHv-1\n 6hr",
+ #                            "He OsHv-1\n 12hr", "He OsHv-1\n24hr", "He OsHv-1\n48hr", "He OsHv-1\n 120hr","deLorgeril\nOsHV-1\n Res. 6hr","deLorgeril\nOsHV-1\n Res. 12hr","deLorgeril\nOsHV-1\n Res. 24hr" ,"deLorgeril\nOsHV-1\n Res. 48hr",
+ #                            "deLorgeril\nOsHV-1\n Res. 60hr","deLorgeril\nOsHV-1\n Res. 72hr" ,"deLorgeril\nOsHV-1\n Sus. 6hr", "deLorgeril\nOsHV-1\n Sus. 12hr","deLorgeril\nOsHV-1\n Sus. 24hr","deLorgeril\nOsHV-1\n Sus. 48hr" ,
+ #                            "deLorgeril\nOsHV-1\n Sus. 60hr","deLorgeril\nOsHV-1\n Sus. 72hr"), position="top") +
   guides(fill=guide_legend(ncol=3, title.position="top"))
 
 ## Plot DESeq2 alongside tree and domain structure
@@ -1648,14 +1920,15 @@ C_gig_vst_common_df_all_mat_limma_IAP_XP_collapsed_BIR_seq_rm_dup_clstr6_cluster
 
 # Recode these proteins for the purpose of plotting
 C_gig_vst_common_df_all_mat_limma_IAP_gather_avg$protein_id <- recode(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg$protein_id, 
-                                                                      "XP_019925512.1"= "XP_019925513.1",
-                                                                      "XP_011437419.1"= "XP_011437418.1",
-                                                                      "XP_011428385.1"= "XP_011428384.1",
-                                                                      "XP_011414430.1"= "XP_019919109.1",
-                                                                      "XP_011445380.1"= "XP_011445382.1",
-                                                                      "XP_011445381.1"= "XP_011445382.1",
-                                                                      "XP_011445383.1"= "XP_011445382.1",
-                                                                      "XP_011436808.1"= "XP_011436809.1")
+                                                                      # "XP_019925512.1"= "XP_019925513.1",
+                                                                      # "XP_011437419.1"= "XP_011437418.1",
+                                                                      "XP_011428385.1"= "XP_011428384.1",  #these proteins only ones to recode after LFC genes removed from list 
+                                                                      "XP_011414430.1"= "XP_019919109.1" #these proteins only ones to recode after LFC genes removed from list 
+                                                                      # "XP_011445380.1"= "XP_011445382.1",
+                                                                      # "XP_011445381.1"= "XP_011445382.1",
+                                                                      # "XP_011445383.1"= "XP_011445382.1",
+                                                                      # "XP_011436808.1"= "XP_011436809.1"
+                                                                      )
 # Rejoin the Full list of transcript and check for fixed NA
 C_gig_vst_common_df_all_mat_limma_IAP_XP <- full_join(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg, IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
 
@@ -1671,26 +1944,28 @@ C_vir_vst_common_df_all_mat_limma_IAP_XP_collapsed_BIR_seq_rm_dup_clstr6 <- BIR_
 C_vir_vst_common_df_all_mat_limma_IAP_XP_collapsed_BIR_seq_rm_dup_clstr6_cluster <- BIR_seq_rm_dup_clstr6[BIR_seq_rm_dup_clstr6$cluster %in% C_vir_vst_common_df_all_mat_limma_IAP_XP_collapsed_BIR_seq_rm_dup_clstr6$cluster,]
 
 # Recode these proteins for the purpose of plotting
+
 C_vir_vst_common_df_all_mat_limma_IAP_gather_avg$protein_id <- recode(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg$protein_id, 
                                                                       "XP_022288682.1"="XP_022288684.1",
                                                                       "XP_022288101.1"="XP_022288100.1", 
                                                                       "XP_022288102.1"="XP_022288100.1", 
-                                                                      "XP_022289978.1"="XP_022289977.1",
+                                                                     # "XP_022289978.1"="XP_022289977.1", # ones commented out were removed when the LFC genes were removed 
                                                                       "XP_022287965.1"="XP_022287971.1",
                                                                       "XP_022287969.1"="XP_022287971.1",
                                                                       "XP_022290205.1"="XP_022290206.1",
                                                                       "XP_022288933.1"="XP_022288934.1",
-                                                                      "XP_022295524.1"="XP_022295527.1",
+                                                                      # "XP_022295524.1"="XP_022295527.1",
                                                                       "XP_022288031.1"="XP_022288032.1",
-                                                                      "XP_022292109.1"="XP_022292108.1",
+                                                                      #"XP_022292109.1"="XP_022292108.1",
                                                                       "XP_022288975.1"="XP_022288977.1",
                                                                       "XP_022293361.1"="XP_022293362.1",
-                                                                      "XP_022292414.1"="XP_022292412.1",
-                                                                      "XP_022292969.1"="XP_022292970.1",
-                                                                      "XP_022293781.1"="XP_022293782.1",
-                                                                      "XP_022291628.1"="XP_022291629.1",
-                                                                      "XP_022286791.1"="XP_022295668.1",
-                                                                      "XP_022287921.1"="XP_022287919.1")
+                                                                      #"XP_022292414.1"="XP_022292412.1",
+                                                                      #"XP_022292969.1"="XP_022292970.1",
+                                                                      #"XP_022293781.1"="XP_022293782.1",
+                                                                      #"XP_022291628.1"="XP_022291629.1",
+                                                                      "XP_022286791.1"="XP_022295668.1"
+                                                                      #"XP_022287921.1"="XP_022287919.1"
+                                                                     )
 
 # Rejoin the Full list of transcript and check for fixed NA
 C_vir_vst_common_df_all_mat_limma_IAP_XP <- full_join(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg, IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
