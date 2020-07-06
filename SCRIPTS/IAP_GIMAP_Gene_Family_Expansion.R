@@ -27,7 +27,8 @@ library(cowplot)
 library(ggtree) # install the dev version to get the get.tree function
 library(aplot)
 library(RColorBrewer)
-
+library(gtable)
+library(grid)
 setwd("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics")
 
 #### IMPORT GENOMES AND ANNOTATIONS #####
@@ -51,7 +52,7 @@ Cgig_gff_IAP_family <- C_gig_rtracklayer[grepl("inhibitor of apoptosis", C_gig_r
                                            grepl("baculoviral", C_gig_rtracklayer$product, ignore.case=TRUE),]
 Cgig_gff_IAP_family_XP <- Cgig_gff_IAP_family[!duplicated(Cgig_gff_IAP_family$protein_id),]
 Cgig_gff_IAP_family_XP <- Cgig_gff_IAP_family_XP[!is.na(Cgig_gff_IAP_family_XP$protein_id),]
-length(unique(Cgig_gff_IAP_family_XP$protein_id)) #65
+length(unique(Cgig_gff_IAP_family_XP$protein_id)) #64
 length(unique(Cgig_gff_IAP_family_XP$gene)) # 35
 
 Cvir_gff_GIMAP_family <- C_vir_rtracklayer[grepl("IMAP", C_vir_rtracklayer$product, ignore.case=TRUE) | grepl("immune-associated nucleotide-binding protein", C_vir_rtracklayer$product, ignore.case=TRUE),]
@@ -299,60 +300,12 @@ BIR_XP_gff_species
 AIG1_XP_ALL_gff_GIMAP_species
 View(unique(BIR_XP_gff_species$product)) # has one phosphatase and actin regulator 4-B-like but does have the IAP repeats 
 View(unique(AIG1_XP_ALL_gff_GIMAP_species$product))
-# Potentially erroneous proteins in GIMAP:
-# calponin homology domain-containing protein DDB_G0272472-like
-# myb-like protein X
-# PREDICTED: dentin sialophosphoprotein-like
-# PREDICTED: GTPase Era, mitochondrial-like
-# PREDICTED: mitochondrial ribosome-associated GTPase 1-like
-# PREDICTED: reticulocyte-binding protein 2 homolog a isoform X2
-# PREDICTED: putative protein PHLOEM PROTEIN 2-LIKE A3
-# PREDICTED: rho-associated protein kinase let-502-like
-# reticulocyte-binding protein 2 homolog a-like
-# transmembrane GTPase fzo-like
-# trichohyalin-like
-# vicilin-like seed storage protein At2g18540 isoform X1
-# Reviewing Domains and comparing list to Lu et al., 2020
-# Lu et al. 2020 counted rho-associated protein kinase let-502-like , putative protein PHLOEM PROTEIN 2-LIKE A3 as a GIMAP, 
-# Lu et al. 2020 called PREDICTED: dentin sialophosphoprotein-like
-# the P-loop_NTPase Superfamily seems to be what is brining up these extra hits
-# Are there other domains that are specific to the erroneous proteins 
-
-# Examine domains from these proteins
-AIG1_CDD_GIMAP_questioned_hits <- AIG1_XP_ALL_gff_GIMAP_species[grepl("calponin",AIG1_XP_ALL_gff_GIMAP_species$product, ignore.case = TRUE) | grepl("myb", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) |
-                                                   grepl("dentin sialophosphoprotein", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("GTPase Era", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | 
-                                                   grepl("mitochondrial", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("trichohyalin", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE)|
-                                                   grepl("reticulocyte", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("PHLOEM", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) |
-                                                   grepl("rho", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("fzo", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("vicilin", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE),]
-
-# What domains do the GIMAPs have?
-AIG1_CDD_GIMAP_only <- AIG1_XP_ALL_gff_GIMAP_species[grepl("IMAP",AIG1_XP_ALL_gff_GIMAP_species$product) | grepl("immune", AIG1_XP_ALL_gff_GIMAP_species$product),]
-AIG1_CDD_GIMAP_only_domains <- AIG1_CDD_GIMAP_only %>% group_by(signature_desc) %>% summarise(count = n())
-length(unique(AIG1_CDD_GIMAP_only$protein_id)) # 242 proteins 
-AIG1_CDD_GIMAP_only_domains$type <-"GIMAP"
-
-# What domains are in non GIMAPs?
-AIG1_CDD_GIMAP_non_gimap <- AIG1_XP_ALL_gff_GIMAP_species[!grepl("IMAP", AIG1_XP_ALL_gff_GIMAP_species$product) | !grepl("uncharacterized",AIG1_XP_ALL_gff_GIMAP_species$product) | !grepl("immune", AIG1_XP_ALL_gff_GIMAP_species$product),]
-AIG1_CDD_GIMAP_non_gimap_domains <- AIG1_CDD_GIMAP_non_gimap  %>% group_by(Short.name) %>% summarise(count = n())
-AIG1_CDD_GIMAP_non_gimap_domains$type <-"non-GIMAP"
-
-# What domains are unique to the non-GIMAPS?
-AIG1_CDD_GIMAP_non_gimap_domains_NOT_SHARED <-AIG1_CDD_GIMAP_non_gimap_domains[!(AIG1_CDD_GIMAP_non_gimap_domains$Short.name %in%AIG1_CDD_GIMAP_only_domains$Short.name),]
-# Pkc domains, STKc, FN3
-
-# try removing the Pkc and STK containing domain proteins to see if this removes erroneous non GIMAP hits
-AIG1_CDD_GIMAP_no_Pkc_STK <- AIG1_CDD_GIMAP %>% group_by(protein_id) %>% filter(all(!grepl("PKc",ignore.case = TRUE, Short.name) | !grepl("PKc",ignore.case = TRUE, Short.name))) 
-View(unique(AIG1_CDD_GIMAP_no_Pkc_STK$product))
-
-# compare to both gimap and non gimap lists
-setdiff(AIG1_CDD_GIMAP_only$protein_id, AIG1_CDD_GIMAP_no_Pkc_STK$protein_id) #0 none we wanted were remove
-setdiff(AIG1_CDD_GIMAP_no_Pkc_STK$protein_id, AIG1_CDD_GIMAP_only$protein_id) # 184 remain that weren't removed
 
 ##################### ORTHOGROUP ANALYSIS ###############################
 
 ### Load May15th Orthogroup Analysis of 10 Mollusc species from Orthogroup.tsv file ###
 # Load tsv
-Orthogroups <- read_tsv("/Volumes/My Passport for Mac/OrthoFinder_3_25_2020_Bluewaves_Backup/Results_May15/Orthogroups/Orthogroups.tsv",
+#Orthogroups <- read_tsv("/Volumes/My Passport for Mac/OrthoFinder_3_25_2020_Bluewaves_Backup/Results_May15/Orthogroups/Orthogroups.tsv",
                         col_names = c("Orthogroup","Elysia_chlorotica", "Aplysia_californica", "Crassostrea_gigas", "Lottia_gigantea", 
                                       "Biomphalaria_glabrata", "Octopus_bimaculoides",
                                       "C_virginica", "Mizuhopecten_yessoensis",	"Pomacea_canaliculata",	"Octopus_sinensis"))
@@ -362,31 +315,31 @@ CV_CG_IAP_list <- as.list(CV_CG_IAP)
 CV_CG_GIMAP_list <- as.list(CV_CG_GIMAP)
 
 #CV_CG_IAP_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(CV_CG_IAP_list, collapse="|"), i))),]
-length(CV_CG_IAP_list_lookup$Orthogroup)
+#length(CV_CG_IAP_list_lookup$Orthogroup)
 # 27 orthogroups
 
 #CV_CG_GIMAP_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(CV_CG_GIMAP_list, collapse="|"), i))),]
-length(CV_CG_GIMAP_list_lookup$Orthogroup)
+#length(CV_CG_GIMAP_list_lookup$Orthogroup)
 #9
 
 #### USE FULL IAP AND GIMAP LISTS TO PULL OUT ALL MOLLUSC ORTHOGROUPS ####
 BIR_XP_gff_species_list <- as.list(unique(BIR_XP_gff_species$protein_id))
 #BIR_XP_gff_species_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(BIR_XP_gff_species_list, collapse="|"), i))),]
-length(BIR_XP_gff_species_list_lookup$Orthogroup)
+#length(BIR_XP_gff_species_list_lookup$Orthogroup)
 # 35 orthogroups (got one extra orthogroup when setting hmmer to eval -3)
 
 #Compare to list from original orthogroup search using only proteins in annotation
-setdiff(CV_CG_IAP_list_lookup$Orthogroup, BIR_XP_gff_species_list_lookup$Orthogroup) # 4 missed "OG0003807" "OG0015932" "OG0016100" "OG0018222" "OG0020281"
-setdiff(BIR_XP_gff_species_list_lookup$Orthogroup, CV_CG_IAP_list_lookup$Orthogroup) # 13 added "OG0001642" "OG0002611" "OG0004344" "OG0007118" "OG0011865" "OG0011926" "OG0012919" "OG0013878" "OG0014276" "OG0016483" "OG0017158" "OG0017983" "OG0018491"
+#setdiff(CV_CG_IAP_list_lookup$Orthogroup, BIR_XP_gff_species_list_lookup$Orthogroup) # 4 missed "OG0003807" "OG0015932" "OG0016100" "OG0018222" "OG0020281"
+#setdiff(BIR_XP_gff_species_list_lookup$Orthogroup, CV_CG_IAP_list_lookup$Orthogroup) # 13 added "OG0001642" "OG0002611" "OG0004344" "OG0007118" "OG0011865" "OG0011926" "OG0012919" "OG0013878" "OG0014276" "OG0016483" "OG0017158" "OG0017983" "OG0018491"
 
 AIG1_XP_ALL_gff_GIMAP_species_list <- as.list(unique(AIG1_XP_ALL_gff_GIMAP_species$protein_id))
 length(AIG1_XP_ALL_gff_GIMAP_species_list)
 #AIG1_XP_ALL_gff_GIMAP_species_list_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(AIG1_XP_ALL_gff_GIMAP_species_list, collapse="|"), i))),]
-length(AIG1_XP_ALL_gff_GIMAP_species_list_lookup$Orthogroup)
+#length(AIG1_XP_ALL_gff_GIMAP_species_list_lookup$Orthogroup)
 #12
 
-setdiff(CV_CG_GIMAP_list_lookup$Orthogroup,AIG1_XP_ALL_gff_GIMAP_species_list_lookup$Orthogroup) # 2 not found "OG0013109" "OG0016155"
-setdiff(AIG1_XP_ALL_gff_GIMAP_species_list_lookup$Orthogroup, CV_CG_GIMAP_list_lookup$Orthogroup) # 5 added
+#setdiff(CV_CG_GIMAP_list_lookup$Orthogroup,AIG1_XP_ALL_gff_GIMAP_species_list_lookup$Orthogroup) # 2 not found "OG0013109" "OG0016155"
+#setdiff(AIG1_XP_ALL_gff_GIMAP_species_list_lookup$Orthogroup, CV_CG_GIMAP_list_lookup$Orthogroup) # 5 added
 
 #### USE CG AND CV SPECIFIC IAP AND GIMAP HMMER/INTERPROSCAN LISTS TO PULL OUT ORTHOGROUPS ###
 BIR_XP_gff_CG_CV <- rbind(BIR_XP_gff_CG, BIR_XP_gff_CV)
@@ -395,55 +348,55 @@ AIG1_XP_ALL_gff_GIMAP_CG_CV <- rbind(AIG1_XP_ALL_gff_GIMAP_CG, AIG1_XP_ALL_gff_G
 # Use CV and CG only lists to pull out orthogroups
 BIR_XP_gff_CG_CV_list <- as.list(unique(BIR_XP_gff_CG_CV$protein_id))
 #BIR_XP_gff_CG_CV_lookup <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(BIR_XP_gff_CG_CV_list, collapse="|"), i))),]
-length(BIR_XP_gff_CG_CV_lookup$Orthogroup)
+#length(BIR_XP_gff_CG_CV_lookup$Orthogroup)
 # 26 orthogroups, 11 are added when you include all the mollusc proteins
 
 #Compare to list from original orthogroup search using only proteins in annotation
-setdiff(CV_CG_IAP_list_lookup$Orthogroup, BIR_XP_gff_CG_CV_lookup$Orthogroup) #  "OG0003807" "OG0006831" "OG0015932" "OG0016100" "OG0018222" "OG0020281"
-setdiff(BIR_XP_gff_CG_CV_lookup$Orthogroup, CV_CG_IAP_list_lookup$Orthogroup) # "OG0004344" "OG0011865" "OG0012919" "OG0013878" "OG0017983"
+#setdiff(CV_CG_IAP_list_lookup$Orthogroup, BIR_XP_gff_CG_CV_lookup$Orthogroup) #  "OG0003807" "OG0006831" "OG0015932" "OG0016100" "OG0018222" "OG0020281"
+#setdiff(BIR_XP_gff_CG_CV_lookup$Orthogroup, CV_CG_IAP_list_lookup$Orthogroup) # "OG0004344" "OG0011865" "OG0012919" "OG0013878" "OG0017983"
 
 AIG1_CDD_GIMAP_only_CV_CG_list <- as.list(unique(AIG1_XP_ALL_gff_GIMAP_CG_CV$protein_id))
-length(AIG1_CDD_GIMAP_only_CV_CG_list)
+length(AIG1_CDD_GIMAP_only_CV_CG_list) # 140
 #AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG <- Orthogroups[apply(Orthogroups, 1, function(i) any(grepl(paste(AIG1_CDD_GIMAP_only_CV_CG_list, collapse="|"), i))),]
-length(AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG$Orthogroup)
+#length(AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG$Orthogroup)
 # 9 orthogroups,
 
 #Compare to list from original orthogroup search using only proteins in annotation
-setdiff(CV_CG_GIMAP_list_lookup$Orthogroup,AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG$Orthogroup) # "OG0013109" "OG0016155"
-setdiff(AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG$Orthogroup, CV_CG_GIMAP_list_lookup$Orthogroup) # 0"OG0007435" "OG0014793"
+#setdiff(CV_CG_GIMAP_list_lookup$Orthogroup,AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG$Orthogroup) # "OG0013109" "OG0016155"
+#setdiff(AIG1_CDD_GIMAP_only_CV_CG_list_lookup_CV_CG$Orthogroup, CV_CG_GIMAP_list_lookup$Orthogroup) # 0"OG0007435" "OG0014793"
 
 #### GET ALL MOLLUSCS IAP ORTHOGROUP HITS #####
 
 ## IAP genes 
 # Get full list of proteins for each species by transposing and uniting
 # Transpose the rows and column 
-BIR_XP_gff_species_list_lookup_transpose <- t(BIR_XP_gff_species_list_lookup)
-class(BIR_XP_gff_species_list_lookup_transpose) # matrix
-BIR_XP_gff_species_list_lookup_transpose <- as.data.frame(BIR_XP_gff_species_list_lookup_transpose)
-# unite all columns into one column 
-BIR_XP_gff_species_list_lookup_transpose_united <- unite(BIR_XP_gff_species_list_lookup_transpose, full_protein_list, sep=",")
-# remove NAs
-BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list <- gsub("NA,", "",BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list)
-BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list <- gsub(",NA", "",BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list)
-BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list <- gsub("NA", "", BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list)
-# Put all into single vector for annot and export to make tree
-# Concatenate each into single vector
-BIR_XP_gff_species_list_lookup_transpose_united_all <- BIR_XP_gff_species_list_lookup_transpose_united %>% summarise(combined =paste(full_protein_list, collapse=","))
-BIR_XP_gff_species_list_lookup_transpose_united_all_col <- data.frame(protein_id = unlist(strsplit(as.character(BIR_XP_gff_species_list_lookup_transpose_united_all$combined), ",")))
-# trimws and remove orthogroups
-BIR_XP_gff_species_list_lookup_united_all_col <- BIR_XP_gff_species_list_lookup_transpose_united_all_col[-c(1:35),1]
-BIR_XP_gff_species_list_lookup_united_all_col <- trimws(BIR_XP_gff_species_list_lookup_united_all_col, which="left")
+#BIR_XP_gff_species_list_lookup_transpose <- t(BIR_XP_gff_species_list_lookup)
+#class(BIR_XP_gff_species_list_lookup_transpose) # matrix
+#BIR_XP_gff_species_list_lookup_transpose <- as.data.frame(BIR_XP_gff_species_list_lookup_transpose)
+## unite all columns into one column 
+#BIR_XP_gff_species_list_lookup_transpose_united <- unite(BIR_XP_gff_species_list_lookup_transpose, full_protein_list, sep=",")
+## remove NAs
+#BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list <- gsub("NA,", "",BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list)
+#BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list <- gsub(",NA", "",BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list)
+#BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list <- gsub("NA", "", BIR_XP_gff_species_list_lookup_transpose_united$full_protein_list)
+## Put all into single vector for annot and export to make tree
+## Concatenate each into single vector
+#BIR_XP_gff_species_list_lookup_transpose_united_all <- BIR_XP_gff_species_list_lookup_transpose_united %>% summarise(combined =paste(full_protein_list, collapse=","))
+#BIR_XP_gff_species_list_lookup_transpose_united_all_col <- data.frame(protein_id = unlist(strsplit(as.character(BIR_XP_gff_species_list_lookup_transpose_united_all$combined), ",")))
+## trimws and remove orthogroups
+#BIR_XP_gff_species_list_lookup_united_all_col <- BIR_XP_gff_species_list_lookup_transpose_united_all_col[-c(1:35),1]
+#BIR_XP_gff_species_list_lookup_united_all_col <- trimws(BIR_XP_gff_species_list_lookup_united_all_col, which="left")
 
 # How many XPs identified?
-length(BIR_XP_gff_species_list_lookup_united_all_col) # 601
-length(BIR_XP_gff_species_list) # 791
+#length(BIR_XP_gff_species_list_lookup_united_all_col) # 601
+#length(BIR_XP_gff_species_list) # 791
 
 # Are there any duplicated proteins found in orthogroups?
-BIR_XP_gff_species_list_lookup_united_all_col[duplicated(BIR_XP_gff_species_list_lookup_united_all_col)] # 0 duplicated
+#BIR_XP_gff_species_list_lookup_united_all_col[duplicated(BIR_XP_gff_species_list_lookup_united_all_col)] # 0 duplicated
 
 # Were all the original proteins found? - NO
-setdiff(BIR_XP_gff_species_list,  BIR_XP_gff_species_list_lookup_united_all_col) # 272 proteins are present in original HMMER list that are not in the Orthogroup list
-length(setdiff(BIR_XP_gff_species_list_lookup_united_all_col, BIR_XP_gff_species_list)) # 82 are added in that are not in the original orthogroup list
+#setdiff(BIR_XP_gff_species_list,  BIR_XP_gff_species_list_lookup_united_all_col) # 272 proteins are present in original HMMER list that are not in the Orthogroup list
+#length(setdiff(BIR_XP_gff_species_list_lookup_united_all_col, BIR_XP_gff_species_list)) # 82 are added in that are not in the original orthogroup list
 
 ## Find genes in original HMMER list for each protein NOTE THAT Elysia chlorotica, Lottia gigantea ONLY HAVE LOCUS TAGS AND NOT GENES
 BIR_XP_gff_species_join <- left_join(unique(BIR_XP_gff_species[,c("protein_id","product","Species")]), All_molluscs_CDS_gff[,c("protein_id","gene")])
@@ -458,57 +411,57 @@ BIR_XP_gff_species_genes <- BIR_XP_gff_species_join[!duplicated(BIR_XP_gff_speci
 nrow(BIR_XP_gff_species_genes) # 380
 
 ## Find genes in full Orthogroup list and compare
-BIR_XP_gff_species_list_lookup_united_all_col_df <- as.data.frame(BIR_XP_gff_species_list_lookup_united_all_col)
-colnames(BIR_XP_gff_species_list_lookup_united_all_col_df)[1]<-"protein_id"
-BIR_XP_gff_species_list_lookup_united_all_col_df_genes <- left_join(BIR_XP_gff_species_list_lookup_united_all_col_df, All_molluscs_CDS_gff[,c("protein_id","gene","product")])
-BIR_XP_gff_species_list_lookup_united_all_col_df_genes <- left_join(BIR_XP_gff_species_list_lookup_united_all_col_df_genes, All_molluscs_CDS_gff[,c("protein_id","locus_tag","gene","product")])
-# are any still unfilled?
-BIR_XP_gff_species_list_lookup_united_all_col_df_genes %>% filter(is.na(gene) & is.na(locus_tag)) %>% View() # none
-# remove duplicates
-BIR_XP_gff_species_list_lookup_united_all_col_df_genes <- BIR_XP_gff_species_list_lookup_united_all_col_df_genes[!duplicated(BIR_XP_gff_species_list_lookup_united_all_col_df_genes[,c("gene","locus_tag")]),]
-# how many genes
-nrow(BIR_XP_gff_species_list_lookup_united_all_col_df_genes ) # 308
+#BIR_XP_gff_species_list_lookup_united_all_col_df <- as.data.frame(BIR_XP_gff_species_list_lookup_united_all_col)
+#colnames(BIR_XP_gff_species_list_lookup_united_all_col_df)[1]<-"protein_id"
+#BIR_XP_gff_species_list_lookup_united_all_col_df_genes <- left_join(BIR_XP_gff_species_list_lookup_united_all_col_df, All_molluscs_CDS_gff[,c("protein_id","gene","product")])
+#BIR_XP_gff_species_list_lookup_united_all_col_df_genes <- left_join(BIR_XP_gff_species_list_lookup_united_all_col_df_genes, All_molluscs_CDS_gff[,c("protein_id","locus_tag","gene","product")])
+## are any still unfilled?
+#BIR_XP_gff_species_list_lookup_united_all_col_df_genes %>% filter(is.na(gene) & is.na(locus_tag)) %>% View() # none
+## remove duplicates
+#BIR_XP_gff_species_list_lookup_united_all_col_df_genes <- BIR_XP_gff_species_list_lookup_united_all_col_df_genes[!duplicated(BIR_XP_gff_species_list_lookup_united_all_col_df_genes[,c("gene","locus_tag")]),]
+## how many genes
+#nrow(BIR_XP_gff_species_list_lookup_united_all_col_df_genes ) # 308
 
 ## Write out to table the gene list to use for gathering sequences for MAFFT 
 # Collapse the locus tag and gene columns into one
-BIR_XP_gff_species_list_lookup_united_all_col_df_genes <- BIR_XP_gff_species_list_lookup_united_all_col_df_genes %>% 
-        unite(gene_locus_tag, c("gene","locus_tag"))
-BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag <- str_remove(BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag, "NA_")
-BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag <- str_remove(BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag, "_NA")
-
-write.table(BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_mollusc_orthogroups_gene_locus_tag_list.txt",
-            row.names = FALSE, col.names = FALSE, quote=FALSE)
+#BIR_XP_gff_species_list_lookup_united_all_col_df_genes <- BIR_XP_gff_species_list_lookup_united_all_col_df_genes %>% 
+#        unite(gene_locus_tag, c("gene","locus_tag"))
+#BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag <- str_remove(BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag, "NA_")
+#BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag <- str_remove(BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag, "_NA")
+#
+#write.table(BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_mollusc_orthogroups_gene_locus_tag_list.txt",
+#            row.names = FALSE, col.names = FALSE, quote=FALSE)
 
 ### GIMAP genes
 # Get full list of proteins for each species by transposing and uniting
 # Transpose the rows and column 
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose <- t(AIG1_XP_ALL_gff_GIMAP_species_list_lookup)
-class(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose) # matrix
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose <- as.data.frame(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose)
-# unite all columns into one column 
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united <- unite(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose, full_protein_list, sep=",")
-# remove NAs
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list <- gsub("NA,", "",AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list)
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list <- gsub(",NA", "",AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list)
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list <- gsub("NA", "", AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list)
-# Put all into single vector for annot and export to make tree
-# Concatenate each into single vector
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united_all <- AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united %>% summarise(combined =paste(full_protein_list, collapse=","))
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united_all_col <- data.frame(protein_id = unlist(strsplit(as.character(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united_all$combined), ",")))
-# trimws and remove orthogroups
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col <- AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united_all_col[-c(1:12),1]
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col <- trimws(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col, which="left")
-
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose <- t(AIG1_XP_ALL_gff_GIMAP_species_list_lookup)
+#class(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose) # matrix
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose <- as.data.frame(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose)
+## unite all columns into one column 
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united <- unite(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose, full_protein_list, sep=",")
+## remove NAs
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list <- gsub("NA,", "",AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list)
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list <- gsub(",NA", "",AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list)
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list <- gsub("NA", "", AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united$full_protein_list)
+## Put all into single vector for annot and export to make tree
+## Concatenate each into single vector
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united_all <- AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united %>% summarise(combined =paste(full_protein_list, collapse=","))
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united_all_col <- data.frame(protein_id = unlist(strsplit(as.character(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united_all$combined), ",")))
+## trimws and remove orthogroups
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col <- AIG1_XP_ALL_gff_GIMAP_species_list_lookup_transpose_united_all_col[-c(1:12),1]
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col <- trimws(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col, which="left")
+#
 # How many XPs identified?
-length(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col) # 438
-length(AIG1_XP_ALL_gff_GIMAP_species_list ) # 403
+#length(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col) # 438
+#length(AIG1_XP_ALL_gff_GIMAP_species_list ) # 403
 
 # Are there any duplicated proteins found in orthogroups?
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col[duplicated(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col)] #0 duplicated
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col[duplicated(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col)] #0 duplicated
 
 # Were all the original proteins found? - NO
-setdiff(AIG1_XP_ALL_gff_GIMAP_species_list,  AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col) # 132 proteins are present in original HMMER list that are not in the Orthogroup list
-length(setdiff(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col, AIG1_XP_ALL_gff_GIMAP_species_list)) # 167 are added in that are not in the original orthogroup list
+#setdiff(AIG1_XP_ALL_gff_GIMAP_species_list,  AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col) # 132 proteins are present in original HMMER list that are not in the Orthogroup list
+#length(setdiff(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col, AIG1_XP_ALL_gff_GIMAP_species_list)) # 167 are added in that are not in the original orthogroup list
 
 ## Find genes in original HMMER list for each protein NOTE THAT Elysia chlorotica, Lottia gigantea ONLY HAVE LOCUS TAGS AND NOT GENES
 AIG1_XP_ALL_gff_GIMAP_species_join <- left_join(unique(AIG1_XP_ALL_gff_GIMAP_species[,c("protein_id","product","Species")]), All_molluscs_CDS_gff[,c("protein_id","gene")])
@@ -521,46 +474,46 @@ AIG1_XP_ALL_gff_GIMAP_species_genes <- AIG1_XP_ALL_gff_GIMAP_species_join[!dupli
 nrow(AIG1_XP_ALL_gff_GIMAP_species_genes) # 252
 
 ## Find genes in full Orthogroup list and compare
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df <- as.data.frame(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col)
-colnames(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df)[1]<-"protein_id"
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes <- left_join(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df, All_molluscs_CDS_gff[,c("protein_id","gene","product")])
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes <- left_join(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes, All_molluscs_CDS_gff[,c("protein_id","locus_tag","gene","product")])
-# are any still unfilled?
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes %>% filter(is.na(gene) & is.na(locus_tag)) %>% View() # none
-# remove duplicates
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes <- AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes[!duplicated(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes[,c("gene","locus_tag")]),]
-# how many genes
-nrow(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes ) # 308
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df <- as.data.frame(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col)
+#colnames(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df)[1]<-"protein_id"
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes <- left_join(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df, All_molluscs_CDS_gff[,c("protein_id","gene","product")])
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes <- left_join(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes, All_molluscs_CDS_gff[,c("protein_id","locus_tag","gene","product")])
+## are any still unfilled?
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes %>% filter(is.na(gene) & is.na(locus_tag)) %>% View() # none
+## remove duplicates
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes <- AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes[!duplicated(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes[,c("gene","locus_tag")]),]
+## how many genes
+#nrow(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes ) # 308
 
 ## Write out to table the gene list to use for gathering sequences for MAFFT 
 # Collapse the locus tag and gene columns into one
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes <- AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes %>% 
-  unite(gene_locus_tag, c("gene","locus_tag"))
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag <- str_remove(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag, "NA_")
-AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag <- str_remove(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag, "_NA")
-
-write.table(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_mollusc_orthogroups_gene_locus_tag_list.txt",
-            row.names = FALSE, col.names = FALSE, quote=FALSE)
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes <- AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes %>% 
+#  unite(gene_locus_tag, c("gene","locus_tag"))
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag <- str_remove(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag, "NA_")
+#AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag <- str_remove(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag, "_NA")
+#
+#write.table(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_mollusc_orthogroups_gene_locus_tag_list.txt",
+ #           row.names = FALSE, col.names = FALSE, quote=FALSE)
 
 ###### COMPARATIVE STATISTICS BETWEEN HMMER, ANNOTATION, AND ORTHOFINDER #####
 
 ### IAP ###
 ## Were all the original HMMER/Interproscan genes found in the Orthofinder results?
-IAP_Orthogroup_missing_genes <- BIR_XP_gff_species_genes[!(BIR_XP_gff_species_genes$gene %in% BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag),]
-IAP_Orthogroup_missing_genes <- IAP_Orthogroup_missing_genes %>% filter(!is.na(gene)) %>% distinct(gene)
-length(setdiff(BIR_XP_gff_species_genes$locus_tag,  BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag)) # 2  locus tag added
-nrow(IAP_Orthogroup_missing_genes) #120
+#IAP_Orthogroup_missing_genes <- BIR_XP_gff_species_genes[!(BIR_XP_gff_species_genes$gene %in% BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag),]
+#IAP_Orthogroup_missing_genes <- IAP_Orthogroup_missing_genes %>% filter(!is.na(gene)) %>% distinct(gene)
+#length(setdiff(BIR_XP_gff_species_genes$locus_tag,  BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag)) # 2  locus tag added
+#nrow(IAP_Orthogroup_missing_genes) #120
 # 120 genes + 2 locus tags is 122 genes
   # Mostly missing PREDICTED genes, partial genes, and uncharacterized protein genes. All missing are Lottia gigantea and Elysia chlorotica genes
 
 ## Were any genes added in Orthogroups that weren't in HMMER?
-IAP_Orthogroup_added_genes <- BIR_XP_gff_species_list_lookup_united_all_col_df_genes[!(BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag %in% BIR_XP_gff_species_genes$gene),]
-# need to add in line to take into account locus tag vs gene here 
-setdiff(BIR_XP_gff_species_list_lookup_united_all_col_df_genes$locus_tag,  BIR_XP_gff_species_genes$locus_tag) # 0 new locus tags added
+#IAP_Orthogroup_added_genes <- BIR_XP_gff_species_list_lookup_united_all_col_df_genes[!(BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag %in% BIR_XP_gff_species_genes$gene),]
+## need to add in line to take into account locus tag vs gene here 
+#setdiff(BIR_XP_gff_species_list_lookup_united_all_col_df_genes$locus_tag,  BIR_XP_gff_species_genes$locus_tag) # 0 new locus tags added
 
 ## Are all the CV and CG IAP genes found from the genome in the Orthogroup search ?
-View(Cgig_gff_IAP_family_XP[!(Cgig_gff_IAP_family_XP$gene %in% BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag),]) # 7 CG genes were missed by Orthofinder that were annotated in genome
-View(Cvir_gff_IAP_family_XP[!(Cvir_gff_IAP_family_XP$gene %in% BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag),]) # 12 CV genes were missed by Orthofinder that were annotated in genome
+#View(Cgig_gff_IAP_family_XP[!(Cgig_gff_IAP_family_XP$gene %in% BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag),]) # 7 CG genes were missed by Orthofinder that were annotated in genome
+#View(Cvir_gff_IAP_family_XP[!(Cvir_gff_IAP_family_XP$gene %in% BIR_XP_gff_species_list_lookup_united_all_col_df_genes$gene_locus_tag),]) # 12 CV genes were missed by Orthofinder that were annotated in genome
 
 ## Were any genes added by HMMER that were not in the genome? 
 BIR_XP_gff_species_genes_CG <- BIR_XP_gff_species_genes %>% filter(Species=="Crassostrea_gigas")
@@ -585,22 +538,22 @@ Cvir_gff_IAP_family_XP[!(Cvir_gff_IAP_family_XP$gene %in% BIR_XP_gff_species_gen
 
 ## GIMAP ###
 ## Were all the original HMMER/Interproscan genes found in the Orthofinder results?
-GIMAP_Orthogroup_missing_genes <- AIG1_XP_ALL_gff_GIMAP_species_genes[!(AIG1_XP_ALL_gff_GIMAP_species_genes$gene %in% AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag),]
-GIMAP_Orthogroup_missing_genes <- GIMAP_Orthogroup_missing_genes %>% filter(!is.na(gene)) %>% distinct(gene)
-length(setdiff(AIG1_XP_ALL_gff_GIMAP_species_genes$locus_tag,  AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag)) # 3  locus tag added
-nrow(GIMAP_Orthogroup_missing_genes) #65
+#GIMAP_Orthogroup_missing_genes <- AIG1_XP_ALL_gff_GIMAP_species_genes[!(AIG1_XP_ALL_gff_GIMAP_species_genes$gene %in% AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag),]
+#GIMAP_Orthogroup_missing_genes <- GIMAP_Orthogroup_missing_genes %>% filter(!is.na(gene)) %>% distinct(gene)
+#length(setdiff(AIG1_XP_ALL_gff_GIMAP_species_genes$locus_tag,  AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag)) # 3  locus tag added
+#nrow(GIMAP_Orthogroup_missing_genes) #65
 # 65 genes + 3 locus tags is 68 genes
 
 ## Were any genes added in Orthogroups that weren't in HMMER?
-GIMAP_Orthogroup_added_genes <- AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes[!(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag %in% AIG1_XP_ALL_gff_GIMAP_species_genes$gene),]
+#GIMAP_Orthogroup_added_genes <- AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes[!(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag %in% AIG1_XP_ALL_gff_GIMAP_species_genes$gene),]
 # need to add in line to take into account locus tag vs gene here 
-setdiff(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$locus_tag,  AIG1_XP_ALL_gff_GIMAP_species_genes$locus_tag) # 0 new locus tags added
+#setdiff(AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$locus_tag,  AIG1_XP_ALL_gff_GIMAP_species_genes$locus_tag) # 0 new locus tags added
 
 ## Are all the CV and CG IAP genes found from the genome in the Orthogroup search ?
-GIMAP_missing_CG<- Cgig_gff_IAP_family_XP[!(Cgig_gff_IAP_family_XP$gene %in% AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag),] #  CG genes were missed by Orthofinder that were annotated in genome
-length(unique(GIMAP_missing_CG$gene)) #35
-GIMAP_missing_CV <- Cvir_gff_IAP_family_XP[!(Cvir_gff_IAP_family_XP$gene %in% AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag),] #  CV genes were missed by Orthofinder that were annotated in genome
-length(unique(GIMAP_missing_CV$gene)) #67
+#GIMAP_missing_CG<- Cgig_gff_IAP_family_XP[!(Cgig_gff_IAP_family_XP$gene %in% AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag),] #  CG genes were missed by Orthofinder that were annotated in genome
+#length(unique(GIMAP_missing_CG$gene)) #35
+#GIMAP_missing_CV <- Cvir_gff_IAP_family_XP[!(Cvir_gff_IAP_family_XP$gene %in% AIG1_XP_ALL_gff_GIMAP_species_list_lookup_united_all_col_df_genes$gene_locus_tag),] #  CV genes were missed by Orthofinder that were annotated in genome
+#length(unique(GIMAP_missing_CV$gene)) #67
 
 ## Were any genes added by HMMER that were not in the genome? 
 AIG1_XP_ALL_gff_GIMAP_species_genes_CG <- AIG1_XP_ALL_gff_GIMAP_species_genes %>% filter(Species=="Crassostrea_gigas")
@@ -1342,23 +1295,51 @@ IAP_MY_CV_CG_raxml_tibble_join <- IAP_collapsed_tibble %>% filter(!is.na(label))
 colnames(IAP_MY_CV_CG_raxml_tibble_join)[4] <- "protein_id"
 BIR_XP_gff_Interpro_Domains <-  left_join(IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")], BIR_XP_gff)
 BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains %>% 
-  filter(source =="CDD" | grepl("InterPro:IPR", Dbxref)) # keep Interproscan domain lines and CDD NCBI lines 
+  filter(source =="CDD" | grepl("InterPro:IPR", Dbxref) | grepl("G3DSA:1.10.533.10", Name)) # keep Interproscan domain lines, CDD NCBI lines, and death domain structure
+
+BIR_XP_gff_Interpro_Domains_all <- BIR_XP_gff_Interpro_Domains
+
+# Which domains were removed
+BIR_XP_gff_Interpro_Domains_Name <- BIR_XP_gff_Interpro_Domains %>% distinct(Name) 
+BIR_XP_gff_Interpro_Domains_only_Name <- BIR_XP_gff_Interpro_Domains_only%>% distinct(Name) 
+
+BIR_XP_gff_Interpro_Domains_Name[!(BIR_XP_gff_Interpro_Domains_Name$Name %in% BIR_XP_gff_Interpro_Domains_only_Name$Name),] # 13 were removed 
+#  2 SSF57924 : IAP superfamily          
+#  3 G3DSA:1.10.1170.10: CATH Superfamily 1.10.1170.10 , Inhibitor Of Apoptosis Protein (2mihbC-IAP-1); Chain A
+#  4 PF13920: Zinc finger, C3HC4 type (RING finger)           
+#  5 mobidb-lite       
+#  6 G3DSA:1.10.533.10: this includes the Death domains, Fas
+#  7 Coil              
+#  8 G3DSA:1.10.8.10: Ubiquitin-associated (UBA) domain
+#  9 PIRSF036836 : E3 ubiquitin-protein ligase BOI-like      
+#  10 G3DSA:3.30.710.10: Potassium Channel Kv1.1; Chain A 
+#  11 SM00212: Ubiquitin-conjugating enzyme E2, catalytic domain homologues           
+#  12 G3DSA:3.40.50.300 : P-loop containing nucleotide triphosphate hydrolases
+#  13 G3DSA:1.10.10.2190: unnamed domain
+
+# Which domains do I keep since some of these (other than the death domain) are also identified by Interproscan 
 
 # filter out NA source lines
 BIR_XP_gff_Interpro_Domains_fullprot <- BIR_XP_gff_Interpro_Domains %>% 
   filter(is.na(source))
+BIR_XP_gff_Interpro_Domains_all_fullprot <- BIR_XP_gff_Interpro_Domains_all %>% 
+  filter(is.na(source))
 
-nrow(BIR_XP_gff_Interpro_Domains_fullprot %>% filter(is.na(source))) # 246
-nrow(IAP_MY_CV_CG_raxml_tibble_join %>% filter(!is.na(protein_id))) # 246 - they agree, all proteins were found 
+nrow(BIR_XP_gff_Interpro_Domains_fullprot %>% filter(is.na(source))) # 184
+nrow(IAP_MY_CV_CG_raxml_tibble_join %>% filter(!is.na(protein_id))) # 184 - they agree, all proteins were found - number is less because mizuhopecten proteins were collapsed 
+nrow(BIR_XP_gff_Interpro_Domains_all_full_prot) 
 
 # Fill in the CDD rows that have NULL for DBxref with the Name column
 BIR_XP_gff_Interpro_Domains_only$Dbxref[BIR_XP_gff_Interpro_Domains_only$Dbxref == "character(0)" ] <- "CDD"
+BIR_XP_gff_Interpro_Domains_all$Dbxref[BIR_XP_gff_Interpro_Domains_all$Dbxref == "character(0)" ] <- "CDD"
 
 # unlist
 BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref)
+BIR_XP_gff_Interpro_Domains_all <- BIR_XP_gff_Interpro_Domains_all  %>% unnest(Dbxref)
 
 # Change CDD rows to be the Name column
 BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains_only %>% mutate(Dbxref = ifelse(Dbxref == "CDD", Name, Dbxref))
+BIR_XP_gff_Interpro_Domains_all<- BIR_XP_gff_Interpro_Domains_all  %>% mutate(Dbxref = ifelse(Dbxref == "CDD", Name, Dbxref))
 
 # Get the node order from collapsed IAP tree
 IAP_MY_CV_CG_raxml_treedata_tip  <- fortify(IAP_MY_CV_CG_raxml_treedata_collapsed) # not changing code from here down
@@ -1371,19 +1352,32 @@ IAP_MY_CV_CG_raxml_treedata_tip_order <- as.data.frame(IAP_MY_CV_CG_raxml_treeda
 colnames(IAP_MY_CV_CG_raxml_treedata_tip_order)[1] <- "protein_id"
 BIR_XP_gff_Interpro_Domains_only <- full_join(IAP_MY_CV_CG_raxml_treedata_tip_order, BIR_XP_gff_Interpro_Domains_only)
 
+BIR_XP_gff_Interpro_Domains_all_fullprot <- BIR_XP_gff_Interpro_Domains_all_fullprot[match(IAP_MY_CV_CG_raxml_treedata_tip_order, BIR_XP_gff_Interpro_Domains_all_fullprot$protein_id),]
+BIR_XP_gff_Interpro_Domains_all <- full_join(IAP_MY_CV_CG_raxml_treedata_tip_order, BIR_XP_gff_Interpro_Domains_all)
+
 # Add polygon height
 BIR_XP_gff_Interpro_Domains_only_ID  <- BIR_XP_gff_Interpro_Domains_only  %>% distinct(protein_id) 
 BIR_XP_gff_Interpro_Domains_only_ID <- BIR_XP_gff_Interpro_Domains_only_ID %>% 
   mutate(height_start = rev(as.numeric(row.names(BIR_XP_gff_Interpro_Domains_only_ID )) - 0.25)) %>%
   mutate(height_end = rev(as.numeric(row.names(BIR_XP_gff_Interpro_Domains_only_ID)) + .5))
 
+BIR_XP_gff_Interpro_Domains_all_ID  <- BIR_XP_gff_Interpro_Domains_all  %>% distinct(protein_id) 
+BIR_XP_gff_Interpro_Domains_all_ID <- BIR_XP_gff_Interpro_Domains_all_ID %>% 
+  mutate(height_start = rev(as.numeric(row.names(BIR_XP_gff_Interpro_Domains_all_ID )) - 0.25)) %>%
+  mutate(height_end = rev(as.numeric(row.names(BIR_XP_gff_Interpro_Domains_all_ID)) + .5))
+
 # Join back in height
 BIR_XP_gff_Interpro_Domains_only <- left_join(BIR_XP_gff_Interpro_Domains_only , BIR_XP_gff_Interpro_Domains_only_ID )
+BIR_XP_gff_Interpro_Domains_all <- left_join(BIR_XP_gff_Interpro_Domains_all , BIR_XP_gff_Interpro_Domains_all_ID )
 
 # Set factor level order of the nodes set levels in reverse order
 BIR_XP_gff_Interpro_Domains_only$node <- factor(BIR_XP_gff_Interpro_Domains_only$node, levels = unique(BIR_XP_gff_Interpro_Domains_only$node))
 BIR_XP_gff_Interpro_Domains_only$Dbxref <- factor(BIR_XP_gff_Interpro_Domains_only$Dbxref, levels = unique(BIR_XP_gff_Interpro_Domains_only$Dbxref))
 BIR_XP_gff_Interpro_Domains_fullprot$node <- factor(BIR_XP_gff_Interpro_Domains_fullprot$node, levels = rev(BIR_XP_gff_Interpro_Domains_fullprot$node))
+
+BIR_XP_gff_Interpro_Domains_all$node <-   factor(BIR_XP_gff_Interpro_Domains_all$node, levels = unique(BIR_XP_gff_Interpro_Domains_all$node))
+BIR_XP_gff_Interpro_Domains_all$Dbxref <- factor(BIR_XP_gff_Interpro_Domains_all$Dbxref, levels = unique(BIR_XP_gff_Interpro_Domains_all$Dbxref))
+BIR_XP_gff_Interpro_Domains_all_fullprot$node <- factor(BIR_XP_gff_Interpro_Domains_all_fullprot$node, levels = rev(BIR_XP_gff_Interpro_Domains_all_fullprot$node))
 
 ### Stats
 # How many unique domains in MY, CV, CG
@@ -1393,8 +1387,7 @@ BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref) %>% distinct(Dbxref)
 BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref) %>% filter(Dbxref == "\"InterPro:IPR001370\"") %>% group_by(protein_id) %>% 
     filter(n() >=3) %>% distinct(protein_id)
 
-
-### Plotting
+### Plot select domains 
 # Plot the line segments of the NA source lines (which have the full protein start and end)
 IAP_Interproscan_domain_plot <- ggplot() + 
   # plot length of each protein as line
@@ -1426,7 +1419,7 @@ IAP_Interproscan_domain_plot <- ggplot() +
   # Change domain labels 
   scale_fill_manual(values=c("#d44172","#6d8dd7","#c972c4","#ca8853","#cd9c2e","#92b540",
                              "#da83b4","#45c097","#cba950","#65c874","#5b3788","#8a371d","#b1457b",
-                             "#be4a5b","#6971d7","#50893b","#d55448","#c46a2f","#8a8a39","#d1766b"), 
+                             "#be4a5b","#6971d7","#50893b","#d55448","#c46a2f","#8a8a39","#d1766b","#6da6a1"), 
     name="Functional Domains",
     breaks=c("cd16713",
              "\"InterPro:IPR001370\"",
@@ -1447,7 +1440,8 @@ IAP_Interproscan_domain_plot <- ggplot() +
              "\"InterPro:IPR038765\"",
              "\"InterPro:IPR032171\"",
              "\"InterPro:IPR027417\"",
-             "cd14321"),
+             "cd14321", 
+             "G3DSA:1.10.533.10"),
     labels=c("RING-HC_BIRC2_3_7",
              "BIR repeat",
              "Zinc finger, RING/FYVE/PHD-type",
@@ -1467,9 +1461,95 @@ IAP_Interproscan_domain_plot <- ggplot() +
              "Papain-like cysteine peptidase superfamily",
              "C-terminal of Roc (COR) domain",
              "P-loop containing nucleoside triphosphate hydrolase",
-             "UBA_IAPs")) +
+             "Ubiquitin-associated domain",
+             "Death domain, Fas")) +
   # change number of legend columns and put the legend title on top
   guides(fill=guide_legend(ncol=3, title.position="top"))
+
+# Plotting all domains 
+IAP_Interproscan_all_domain_plot <- ggplot() + 
+  # plot length of each protein as line
+  geom_segment(data =BIR_XP_gff_Interpro_Domains_all_fullprot,
+               aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
+  # add boxes with geom_rect 
+  geom_rect(data=BIR_XP_gff_Interpro_Domains_all,
+            aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Dbxref)) +
+  #add labels
+  labs(y = NULL, x = "Protein Domain Position (aa)") +
+  # add text labels
+  #geom_text(data=BIR_XP_gff_Interpro_Domains_fullprot,aes(x= end, y = node, label=alias),
+  #          size=2.0, hjust=-.15, check_overlap = TRUE) + 
+  # text theme
+  theme_bw() + 
+  # plot theme
+  theme(axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black"),
+        legend.position = "bottom",
+        legend.box = "vertical",
+        legend.text = element_text(size=8, family="sans"),
+        legend.title = element_text(size=12, family="sans"))+
+  # Change y axis ticks
+  scale_x_continuous(breaks=c(0,500,1000,1500,2000,3000), expand = c(0,0)) + 
+  # Change domain labels 
+  scale_fill_manual(values=c("#d44172","#6d8dd7","#c972c4","#ca8853","#cd9c2e","#92b540",
+                             "#da83b4","#45c097","#cba950","#65c874","#5b3788","#8a371d","#b1457b",
+                             "#be4a5b","#6971d7","#50893b","#d55448","#c46a2f","#8a8a39","#d1766b"), 
+                    name="Functional Domains",
+                    breaks=c("cd16713",
+                             "\"InterPro:IPR001370\"",
+                             "\"InterPro:IPR013083\"",
+                             "\"InterPro:IPR001841\"",
+                             "\"InterPro:IPR015940\"",
+                             "\"InterPro:IPR003131\"",
+                             "cd18316",
+                             "\"InterPro:IPR011333\"",
+                             "\"InterPro:IPR000210\"",
+                             "\"InterPro:IPR000608\"",
+                             "\"InterPro:IPR016135\"",
+                             "\"InterPro:IPR022103\"",
+                             "\"InterPro:IPR036322\"",
+                             "\"InterPro:IPR011047\"",
+                             "\"InterPro:IPR019775\"",
+                             "\"InterPro:IPR017907\"",
+                             "\"InterPro:IPR038765\"",
+                             "\"InterPro:IPR032171\"",
+                             "\"InterPro:IPR027417\"",
+                             "cd14321"),
+                    labels=c("RING-HC_BIRC2_3_7",
+                             "BIR repeat",
+                             "Zinc finger, RING/FYVE/PHD-type",
+                             "Zinc finger, RING-type",
+                             "Ubiquitin-associated domain",
+                             "Potassium channel tetramerisation-type BTB domain",
+                             "BTB/POZ domain",
+                             "SKP1/BTB/POZ domain superfamily",
+                             "BTB/POZ domain",
+                             "Ubiquitin-conjugating enzyme E2",
+                             "Ubiquitin-conjugating enzyme/RWD-like",
+                             "Baculoviral IAP repeat-containing protein 6",
+                             "WD40-repeat-containing domain superfamily",
+                             "Quinoprotein alcohol dehydrogenase-like superfamily",
+                             "WD40 repeat, conserved site",
+                             "Zinc finger, RING-type, conserved site",
+                             "Papain-like cysteine peptidase superfamily",
+                             "C-terminal of Roc (COR) domain",
+                             "P-loop containing nucleoside triphosphate hydrolase",
+                             "Ubiquitin-associated domain")) +
+  # change number of legend columns and put the legend title on top
+  guides(fill=guide_legend(ncol=3, title.position="top"))
+
+
+#### CHARACTERIZE TYPE 1 AND TYPE II BIR IAP REPEATS ####
+
+# This information will be used to cluster the proteins by similarity
+
+
+
+
 
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
 load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_vir_apop_LFC_IAP.Rdata")
@@ -1631,7 +1711,15 @@ C_gig_apop_LFC_IAP_full_XP$node <- factor(C_gig_apop_LFC_IAP_full_XP$node, level
 #                             "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top") +
 #  guides(fill=guide_legend(ncol=4, title.position="top"))
 
-C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y = protein_id, fill=log2FoldChange, na.rm= TRUE)) + 
+C_vir_apop_LFC_IAP_full_XP$experiment <- factor(C_vir_apop_LFC_IAP_full_XP$experiment, levels=c("Hatchery_Probiotic_RI",  "Lab_Pro_RE22","ROD", "Dermo", "NA"), 
+                                                labels= c("Hatchery\nProbiotic RI",  "Lab Probiotic\nRE22","ROD", "Dermo", "NA"))
+C_vir_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_vir_apop_LFC_IAP_full_XP$group_by_sim, levels=c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
+                          "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
+                          "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ),
+                          labels= c("RI" ,"RI 6hr", "RI 24hr", "S4 6hr","S4 24hr", "RE22" ,"Sus.\nROD","Res.\nROD", "Sus. 36hr", "Sus. 7d", "Sus. 28d","Tol. 36hr",   
+                      "Tol. 7d","Tol. 28d"))
+
+C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP[!(is.na(C_vir_apop_LFC_IAP_full_XP$experiment)),], aes(x=group_by_sim, y = protein_id, fill=log2FoldChange, na.rm= TRUE)) + 
   geom_tile()  + 
   #scale_fill_viridis_c(breaks = seq(min(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm = TRUE),max(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm=TRUE),length.out = 15), 
   #                  option="magma", guide=guide_legend()) +
@@ -1640,10 +1728,11 @@ C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes
                        breaks = c(-10,-5,-1,0.5,1,3,5,7,10), 
                        option="plasma",
                        guide=guide_legend(), na.value = "transparent") +
-  labs(x="Treatment", y =NULL) +
+  facet_grid(.~experiment, scales="free",space="free", drop=TRUE) + 
+  labs(x=NULL, y =NULL) +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.text.x.top = element_text(size=8, family="sans"),
+        axis.text.x.bottom = element_text(size=10, family="sans", face="bold"),
         #axis.text.y.left = element_text(family ="sans"),
         axis.title = element_text(size=12, family="sans"),
         legend.position = "bottom",
@@ -1651,7 +1740,9 @@ C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes
         legend.text = element_text(size=8, family="sans"),
         panel.background = element_rect(fill = "transparent"),
         panel.grid.major.x = element_line(size=0.2, color="gray"),
-        panel.grid.major.y = element_line(size=0.2, color="gray")) +
+        panel.grid.major.y = element_line(size=0.2, color="gray"),
+        strip.text.x = element_text(
+          size = 10, face = "bold")) +
   # remove NA row from the list (get list from rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)))
   scale_y_discrete(limits=c(  "XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019920103.1", "XP_021350197.1",
                               "XP_011416423.1", "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_019919109.1", "XP_019919110.1", "XP_022292970.1",
@@ -1687,12 +1778,6 @@ C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes
                              "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1", "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1",
                              "XP_022295029.1", "XP_022293847.1", "XP_022295527.1", "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1",
                              "XP_019924100.1", "XP_019919899.1", "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
-  scale_x_discrete(limits = c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
-                              "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
-                              "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ), 
-                   labels= c("Hatchery\n Probiotic RI" ,"Lab RI 6hr", "Lab RI 24hr", "Lab S4 6hr","Lab S4 24hr", "Lab RE22" ,
-                             "ROD Sus.\n seed","ROD Res.\n seed", "Dermo\n Sus. 36hr", "Dermo\n Sus. 7d", "Dermo\n Sus. 28d","Dermo\n Tol. 36hr",   
-                             "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top") +
   guides(fill=guide_legend(ncol=4, title.position="top"))
 
 #C_gig_apop_LFC_IAP_tile_plot <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y=protein_id, fill=log2FoldChange)) + 
@@ -1785,12 +1870,12 @@ C_gig_apop_LFC_IAP_full_XP$experiment <- factor(C_gig_apop_LFC_IAP_full_XP$exper
 C_gig_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_gig_apop_LFC_IAP_full_XP$group_by_sim, levels= c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
            "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
            "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
-labels= c("V. alg","V.tub\n V. ang","LPS\nM. Lut", "V. crass\n J2_8\n NVir","V. crass\n J2_9\n Vir" ,"V. tasma\n LGP32\n Vir","V. tasma\n LMG20012T\n NVir","6hr",
-          "12hr", "24hr", "48hr", "120hr","Res. 6hr","Res. 12hr","Res. 24hr" ,"Res. 48hr",
-          "Res. 60hr","Res. 72hr" ,"Sus. 6hr", "Sus. 12hr","Sus. 24hr","Sus. 48hr" ,
-          "Sus. 60hr","Sus. 72hr"))
+labels= c("V. alg","V.tub\n V. ang","LPS\nM. Lut", "V. cras\nNVir","V. cras\nVir" ,"V. tas\nVir","V. tas\nNVir","6hr\nOsHv-1",
+          "12hr\nOsHv-1", "24hr\nOsHv-1", "48hr\nOsHv-1", "120hr\nOsHv-1","6hr\nOsHv-1","12hr\nOsHv-1","24hr\nOsHv-1" ,"48hr\nOsHv-1",
+          "60hr\nOsHv-1", "72hr\nOsHv-1" ,"6hr\nOsHv-1", "12hr\nOsHv-1","24hr\nOsHv-1","48hr\nOsHv-1" ,
+          "60hr\nOsHv-1", "72hr\nOsHv-1"))
 
-C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y=protein_id, fill=log2FoldChange)) + 
+C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP[!(is.na(C_gig_apop_LFC_IAP_full_XP$experiment)),], aes(x=group_by_sim, y=protein_id, fill=log2FoldChange)) + 
   geom_tile() + 
   #scale_fill_viridis_c(breaks = seq(min(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm = TRUE),max(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm=TRUE),length.out = 15), 
   #                     option="plasma", guide=guide_legend()) +
@@ -1803,11 +1888,11 @@ C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes
                        guide=guide_legend(), na.value = "transparent") +
   # add facet to plot 
   facet_grid(.~experiment, scales="free",space="free", drop=TRUE) + 
-  labs(x="Treatment", y =NULL) +
+  labs(x=NULL, y =NULL) +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.text.x.top = element_text(size=8, family="sans"),
-        axis.title.x.top = element_text(size=12, family="sans"),
+        axis.text.x.bottom = element_text(size=10, family="sans", face = "bold"),
+        #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
         legend.position = "bottom",
         legend.title = element_text(size=12, family="sans"), 
         legend.text = element_text(size=8, family="sans"),
@@ -1815,7 +1900,7 @@ C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes
         panel.grid.major.x = element_line(size=0.2, color="gray"),
         panel.grid.major.y = element_line(size=0.2, color="gray"),
         strip.text.x = element_text(
-          size = 12, face = "bold")) +
+          size = 10, face = "bold")) +
   # remove NA row from the list 
   scale_y_discrete(limits=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019920103.1", "XP_021350197.1",
                             "XP_011416423.1", "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_019919109.1", "XP_019919110.1", "XP_022292970.1",
@@ -1851,13 +1936,6 @@ C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes
                             "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1", "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1",
                             "XP_022295029.1", "XP_022293847.1", "XP_022295527.1", "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1",
                             "XP_019924100.1", "XP_019919899.1", "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
- # scale_x_discrete(position = "top",limits = c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
- #                             "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
- #                             "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
- #                  labels= c("Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir","He OsHv-1\n 6hr",
- #                            "He OsHv-1\n 12hr", "He OsHv-1\n24hr", "He OsHv-1\n48hr", "He OsHv-1\n 120hr","deLorgeril\nOsHV-1\n Res. 6hr","deLorgeril\nOsHV-1\n Res. 12hr","deLorgeril\nOsHV-1\n Res. 24hr" ,"deLorgeril\nOsHV-1\n Res. 48hr",
- #                            "deLorgeril\nOsHV-1\n Res. 60hr","deLorgeril\nOsHV-1\n Res. 72hr" ,"deLorgeril\nOsHV-1\n Sus. 6hr", "deLorgeril\nOsHV-1\n Sus. 12hr","deLorgeril\nOsHV-1\n Sus. 24hr","deLorgeril\nOsHV-1\n Sus. 48hr" ,
- #                            "deLorgeril\nOsHV-1\n Sus. 60hr","deLorgeril\nOsHV-1\n Sus. 72hr"), position="top") +
   guides(fill=guide_legend(ncol=3, title.position="top"))
 
 ## Plot DESeq2 alongside tree and domain structure
@@ -1876,22 +1954,38 @@ C_vir_apop_LFC_IAP_tile_plot_no_legend <- C_vir_apop_LFC_IAP_tile_plot + theme(l
 C_gig_apop_LFC_IAP_tile_plot_legend <- cowplot::get_legend(C_gig_apop_LFC_IAP_tile_plot)
 C_gig_apop_LFC_IAP_tile_plot_no_legend <- C_gig_apop_LFC_IAP_tile_plot + theme(legend.position='none')
 
+# Repeat for collapsed trees
+C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED)
+C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_vir_apop_LFC_IAP_tile_plot_COLLAPSED + theme(legend.position='none')
+
+C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_gig_apop_LFC_IAP_tile_plot_COLLAPSED)
+C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_gig_apop_LFC_IAP_tile_plot_COLLAPSED + theme(legend.position='none')
+
 # Now plots are aligned vertically with the legend in one row underneath
-#C vir plot
+#C vir plot (not collapsed)
 Cvir_IAP_tr_dom_LFC <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, C_vir_apop_LFC_IAP_tile_plot_no_legend, ncol=3, align='h',
                                    labels = c('A', 'B', 'C'), label_size = 12)
 Cvir_IAP_tr_dom_LFC_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, IAP_Interproscan_domain_plot_legend,C_vir_apop_LFC_IAP_tile_plot_legend, 
                                           ncol = 3, align="hv")
 Cvir_IAP_tr_dom_LFC_plus_legend <- plot_grid(Cvir_IAP_tr_dom_LFC, Cvir_IAP_tr_dom_LFC_legend, ncol=1, rel_heights =c(1, 0.3))
 
-# Cvir only tree and domains
-Cvir_IAP_tr_dom <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, ncol=3, align='h')
+# Cvir only tree and domains (not collapsed)
+Cvir_IAP_tr_dom <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, ncol=2, align='h')
 Cvir_IAP_tr_dom_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, IAP_Interproscan_domain_plot_legend,
                                         ncol = 2, align="hv")
 Cvir_IAP_tr_dom_plus_legend <- plot_grid(Cvir_IAP_tr_dom, Cvir_IAP_tr_dom_legend, ncol=1, rel_heights =c(1, 0.3))
 
+# Cvir_Cgig MY collapsed tree and domains
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed)
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + theme(legend.position='none')
+p3_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(IAP_Interproscan_domain_plot_no_legend)
 
-# C gig plots
+IAP_tr_dom_collapsed <- plot_grid(p3_collapsed_no_legend, IAP_Interproscan_domain_plot_no_legend, ncol=2, align='h')
+IAP_tr_dom_collapsed_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, IAP_Interproscan_domain_plot_legend,
+                                    ncol = 2, align="hv")
+IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_legend, ncol=1, rel_heights =c(1, 0.3))
+
+# C gig plots (not collapsed)
 Cgig_IAP_tr_dom_LFC <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, C_gig_apop_LFC_IAP_tile_plot_no_legend, ncol=3, align='h',
                                    labels = c('A', 'B', 'C'), label_size = 12)
 Cgig_IAP_tr_dom_LFC_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, IAP_Interproscan_domain_plot_legend,C_gig_apop_LFC_IAP_tile_plot_legend, 
@@ -1982,69 +2076,168 @@ C_gig_vst_common_df_all_mat_limma_IAP_XP$protein_id <- factor(C_gig_vst_common_d
 C_vir_vst_common_df_all_mat_limma_IAP_XP$node <- factor(C_vir_vst_common_df_all_mat_limma_IAP_XP$node, levels = rev(unique(C_vir_vst_common_df_all_mat_limma_IAP_XP$node)))
 C_gig_vst_common_df_all_mat_limma_IAP_XP$node <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$node, levels = rev(unique(C_gig_vst_common_df_all_mat_limma_IAP_XP$node)))
 
-C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
+# Plot not collapsed
+#C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
+#  geom_tile() + 
+#  scale_fill_viridis_c(name = "Avg. Read Count", 
+#                      # limits = c(-11,10),
+#                      # breaks = c(-10,-8,-6,-4,-2,-1,0,0.5,1,2,3,4,6,8,10), 
+#                       option="plasma",
+#                       guide=guide_legend(), na.value = "transparent") +
+#  labs(x="Treatment", y =NULL) +
+#  theme(#axis.ticks.y = element_blank(), 
+#    #axis.text.y = element_blank(),
+#    axis.text.x.top = element_text(size=8, family="sans"),
+#    axis.title.x.top = element_text(size=12, family="sans"),
+#    legend.position = "bottom",
+#    legend.title = element_text(size=12, family="sans"), 
+#    legend.text = element_text(size=8, family="sans"),
+#    panel.background = element_rect(fill = "transparent"),
+#    panel.grid.major.x = element_line(size=0.2, color="gray"),
+#    panel.grid.major.y = element_line(size=0.2, color="gray")) +
+#  # change to product name 
+#   # put X limits in the same order as limits from the LFC plots 
+#  scale_x_discrete(limits =  c("Untreated_control","Bacillus_pumilus_RI0695", "Pro_RE22_Control_no_treatment", "Bacillus_pumilus_RI06_95_exposure_6h","Bacillus_pumilus_RI06_95_exposure_24h",
+#                               "Phaeobacter_inhibens_S4_exposure_6h", "Phaeobacter_inhibens_S4_exposure_24h", "Vibrio_coralliilyticus_RE22_exposure_6h",
+#                               "ROD_Res_Control","ROD_Res_Challenge","ROD_Sus_Control","ROD_Sus_Challenge","Dermo_Sus_36h_Control","Dermo_Sus_28d_Control",
+#                               "Dermo_Sus_7d_Control","Dermo_Sus_36h_Injected","Dermo_Sus_7d_Injected","Dermo_Sus_28d_Injected","Dermo_Tol_36h_Control",
+#                               "Dermo_Tol_7d_Control","Dermo_Tol_28d_Control","Dermo_Tol_36h_Injected","Dermo_Tol_7d_Injected","Dermo_Tol_28d_Injected"), 
+#                   labels= c("Hatchery\n Probiotic\n RI Con." , "Hatchery\n Probiotic\n RI Chall.", "Lab Probiotic/RE22\n Control","Lab RI 6hr", "Lab RI 24hr", "Lab S4 6hr","Lab S4 24hr", "Lab RE22" ,
+#                             "ROD Sus.\n Control", "ROD Sus.\n seed", "ROD Res.\n Control","ROD Res.\n seed", "Dermo\n Sus. Con.\n 36hr", "Dermo\n Sus.Con.\n 7d", "Dermo\n Sus. Con.\n 28d", 
+#                             "Dermo\n Sus. 36hr", "Dermo\n Sus. 7d", "Dermo\n Sus. 28d", "Dermo\n Tol. Con.\n 36hr", "Dermo\n Tol. Con.\n 7d","Dermo\n Tol. Con.\n 28d",
+#                             "Dermo\n Tol. 36hr", "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top") +
+#  guides(fill=guide_legend(ncol=3, title.position="top"))
+
+# Edit factor labels# need to get rid of ROD susceptible vs resistant level and the Dermo tolerant and Dermo susceptible levels
+C_vir_vst_common_df_all_mat_limma_IAP_XP$Experiment <- recode_factor(C_vir_vst_common_df_all_mat_limma_IAP_XP$Experiment,
+                                                              "ROD_Susceptible"="ROD", 
+                                                              "ROD_Resistant"="ROD", 
+                                                              "Dermo_Susceptible"="Dermo",
+                                                              "Dermo_Tolerant"="Dermo")
+C_vir_vst_common_df_all_mat_limma_IAP_XP$Experiment <- factor(C_vir_vst_common_df_all_mat_limma_IAP_XP$Experiment, levels=c("Hatchery_Probiotic", "Pro_RE22","ROD","Dermo", "NA"),
+                                                              labels=c("Hatchery\nProbiotic RI",  "Lab Probiotic\nRE22","ROD", "Dermo","NA"))
+
+C_vir_vst_common_df_all_mat_limma_IAP_XP$Condition <- factor(C_vir_vst_common_df_all_mat_limma_IAP_XP$Condition, levels=c("Untreated_control","Bacillus_pumilus_RI0695", "Pro_RE22_Control_no_treatment", "Bacillus_pumilus_RI06_95_exposure_6h","Bacillus_pumilus_RI06_95_exposure_24h",
+                                                                                                "Phaeobacter_inhibens_S4_exposure_6h", "Phaeobacter_inhibens_S4_exposure_24h", "Vibrio_coralliilyticus_RE22_exposure_6h",
+                                                                                                "ROD_Res_Control","ROD_Res_Challenge","ROD_Sus_Control","ROD_Sus_Challenge","Dermo_Sus_36h_Control","Dermo_Sus_28d_Control",
+                                                                                                "Dermo_Sus_7d_Control","Dermo_Sus_36h_Injected","Dermo_Sus_7d_Injected","Dermo_Sus_28d_Injected","Dermo_Tol_36h_Control",
+                                                                                                "Dermo_Tol_7d_Control","Dermo_Tol_28d_Control","Dermo_Tol_36h_Injected","Dermo_Tol_7d_Injected","Dermo_Tol_28d_Injected"),
+                                                  labels=c("RI Con." , "RI", "RE22\nControl","RI\n6hr", "RI\n24hr", "S4\n6hr","S4\n24hr", "RE22" ,
+                                                           "Sus.\nControl", "Sus.\nROD", "Res.\nControl","Res.\nROD", "Sus.\nCon.\n 36hr", "Sus.\nCon.\n 7d", "Sus.\nCon.\n 28d", 
+                                                           "Sus.\nDermo\n36hr", "Sus.\nDermo\n7d", "Sus.\nDermo\n28d", "Tol.\nCon.\n36hr", "Tol.\nCon.\n 7d","Tol.\nCon.\n 28d",
+                                                           "Tol.\nDermo\n36hr", "Tol.\nDermo\n7d","Tol.\nDermo\n28d"))
+# Plot IAP collapsed
+# Fix scale (check yellow)
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=protein_id, fill=avg_vst_counts_per_treatment)) + 
   geom_tile() + 
   scale_fill_viridis_c(name = "Avg. Read Count", 
-                      # limits = c(-11,10),
-                      # breaks = c(-10,-8,-6,-4,-2,-1,0,0.5,1,2,3,4,6,8,10), 
+                       # limits = c(-11,10),
+                       breaks = c(0,0.5,1,2,3,4,6,8,11,12), 
                        option="plasma",
                        guide=guide_legend(), na.value = "transparent") +
-  labs(x="Treatment", y =NULL) +
-  theme(#axis.ticks.y = element_blank(), 
-    #axis.text.y = element_blank(),
-    axis.text.x.top = element_text(size=8, family="sans"),
-    axis.title.x.top = element_text(size=12, family="sans"),
-    legend.position = "bottom",
-    legend.title = element_text(size=12, family="sans"), 
-    legend.text = element_text(size=8, family="sans"),
-    panel.background = element_rect(fill = "transparent"),
-    panel.grid.major.x = element_line(size=0.2, color="gray"),
-    panel.grid.major.y = element_line(size=0.2, color="gray")) +
-  # change to product name 
-   # put X limits in the same order as limits from the LFC plots 
-  scale_x_discrete(limits =  c("Untreated_control","Bacillus_pumilus_RI0695", "Pro_RE22_Control_no_treatment", "Bacillus_pumilus_RI06_95_exposure_6h","Bacillus_pumilus_RI06_95_exposure_24h",
-                               "Phaeobacter_inhibens_S4_exposure_6h", "Phaeobacter_inhibens_S4_exposure_24h", "Vibrio_coralliilyticus_RE22_exposure_6h",
-                               "ROD_Res_Control","ROD_Res_Challenge","ROD_Sus_Control","ROD_Sus_Challenge","Dermo_Sus_36h_Control","Dermo_Sus_28d_Control",
-                               "Dermo_Sus_7d_Control","Dermo_Sus_36h_Injected","Dermo_Sus_7d_Injected","Dermo_Sus_28d_Injected","Dermo_Tol_36h_Control",
-                               "Dermo_Tol_7d_Control","Dermo_Tol_28d_Control","Dermo_Tol_36h_Injected","Dermo_Tol_7d_Injected","Dermo_Tol_28d_Injected"), 
-                   labels= c("Hatchery\n Probiotic\n RI Con." , "Hatchery\n Probiotic\n RI Chall.", "Lab Probiotic/RE22\n Control","Lab RI 6hr", "Lab RI 24hr", "Lab S4 6hr","Lab S4 24hr", "Lab RE22" ,
-                             "ROD Sus.\n Control", "ROD Sus.\n seed", "ROD Res.\n Control","ROD Res.\n seed", "Dermo\n Sus. Con.\n 36hr", "Dermo\n Sus.Con.\n 7d", "Dermo\n Sus. Con.\n 28d", 
-                             "Dermo\n Sus. 36hr", "Dermo\n Sus. 7d", "Dermo\n Sus. 28d", "Dermo\n Tol. Con.\n 36hr", "Dermo\n Tol. Con.\n 7d","Dermo\n Tol. Con.\n 28d",
-                             "Dermo\n Tol. 36hr", "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top") +
+  facet_grid(.~Experiment, scales="free",space="free", drop= TRUE) + 
+  labs(x=NULL, y =NULL) +
+  theme(axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.text.x.bottom = element_text(size=10, family="sans", face = "bold"),
+        #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
+        legend.position = "right", 
+        legend.title = element_text(size=12, family="sans"), 
+        legend.text = element_text(size=8, family="sans"),
+        panel.background = element_rect(fill = "transparent"),
+        panel.grid.major.x = element_line(size=0.2, color="gray"),
+        panel.grid.major.y = element_line(size=0.2, color="gray"),
+        strip.text.x = element_text(
+          size = 10, face = "bold")) +
   guides(fill=guide_legend(ncol=3, title.position="top"))
 
-# plot heatmap of vst counts for each treatment 
-C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot <- ggplot(C_gig_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
+# drop NA column with gtable (see https://stackoverflow.com/questions/40141684/suppress-na-column-when-faceting)
+Cvir_const_IAP_gt <- ggplot_gtable(ggplot_build(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED))
+#find column to drop
+gtable_show_layout(Cvir_const_IAP_gt) # drop 13
+Cvir_const_IAP_gt2 <- Cvir_const_IAP_gt[,-13]
+#save plot as ggplot object
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- as.ggplot(Cvir_const_IAP_gt2)
+
+# plot heatmap of vst counts for each treatment - not collapsed
+#C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot <- ggplot(C_gig_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
+#  geom_tile() + 
+#  scale_fill_viridis_c(name = "Avg. Read Count", 
+#                       #limits = c(-11,10),
+#                       breaks = c(0,0.5,1,2,3,4,6,8,10,11,12), 
+#                       option="plasma", 
+#                       guide=guide_legend(), na.value = "transparent") +
+#  labs(x="Treatment", y =NULL) +
+#  theme(#axis.ticks.y = element_blank(), 
+#    #axis.text.y = element_blank(),
+#    axis.text.x.top = element_text(size=8, family="sans"),
+#    axis.title.x.top = element_text(size=12, family="sans"),
+#    legend.position = "bottom",
+#    legend.title = element_text(size=12, family="sans"), 
+#    legend.text = element_text(size=8, family="sans"),
+#    panel.background = element_rect(fill = "transparent"),
+#    panel.grid.major.x = element_line(size=0.2, color="gray"),
+#    panel.grid.major.y = element_line(size=0.2, color="gray")) +
+#  # put in the product name
+#  # put X limits in the same order as limits from the LFC plots 
+#  scale_x_discrete(limits = c( "Zhang_Control","V_aes_V_alg1_V_alg2","V_tub_V_ang","LPS_M_lut","Rubio_Control","Vcrass_J2_8","Vcrass_J2_9","Vtasma_LGP32",
+#                               "Vtasma_LMG20012T","Time0_control","6h_control","6h_OsHV1","12h_control","12h_OsHV1","24h_control","24h_OsHV1","48h_control",
+#                               "48h_OsHV1","120hr_control","120hr_OsHV1","AF21_Resistant_control_0h","AF21_Resistant_6h","AF21_Resistant_12h","AF21_Resistant_24h",
+#                               "AF21_Resistant_48h","AF21_Resistant_60h","AF21_Resistant_72h","AF11_Susceptible_control_0h","AF11_Susceptible_6h","AF11_Susceptible_12h","AF11_Susceptible_24h","AF11_Susceptible_48h","AF11_Susceptible_60h","AF11_Susceptible_72h"), 
+#                   labels= c("Zhang\n Control","Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nControl","Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir",
+#                             "He Time 0\n Control","He 6hr\n Control", "He OsHv-1\n 6hr","He 12hr\n Control","He OsHv-1\n 12hr", "He 24hr\n Control","He OsHv-1\n24hr",
+#                             "He 48hr\n Control","He OsHv-1\n48hr","He 120hr\n Control", "He OsHv-1\n 120hr","deLorg\nOsHV-1\n Res.Con 0hr","deLorg\nOsHV-1\n Res. 6hr","deLorg\nOsHV-1\n Res. 12hr","deLorg\nOsHV-1\n Res. 24hr" ,"deLorg\nOsHV-1\n Res. 48hr",
+#                             "deLorg\nOsHV-1\n Res. 60hr","deLorg\nOsHV-1\n Res. 72hr" ,"deLorg\nOsHV-1\n Sus. Con 0hr","deLorg\nOsHV-1\n Sus. 6hr", "deLorg\nOsHV-1\n Sus. 12hr","deLorg\nOsHV-1\n Sus. 24hr","deLorg\nOsHV-1\n Sus. 48hr" ,
+#                             "deLorg\nOsHV-1\n Sus. 60hr","deLorg\nOsHV-1\n Sus. 72hr"), position="top") +
+#  guides(fill=guide_legend(ncol=3, title.position="top"))
+
+# Edit factor levels for C. gig
+C_gig_vst_common_df_all_mat_limma_IAP_XP$Experiment <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$Experiment, levels = c("Zhang", "Rubio","He","deLorgeril_Susceptible", "deLorgeril_Resistant"), 
+                                                              labels = c("Zhang\nVibrio spp." ,"Rubio\nVibrio spp." , "He OsHV-1" ,"de Lorgeril Susceptible\n OsHV-1", "de Lorgeril Resistant\nOsHV-1"))
+
+C_gig_vst_common_df_all_mat_limma_IAP_XP$Condition <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$Condition, levels = c( "Zhang_Control","V_aes_V_alg1_V_alg2","V_tub_V_ang","LPS_M_lut","Rubio_Control","Vcrass_J2_8","Vcrass_J2_9","Vtasma_LGP32",
+                                                                              "Vtasma_LMG20012T","Time0_control","6h_control","6h_OsHV1","12h_control","12h_OsHV1","24h_control","24h_OsHV1","48h_control",
+                                                                              "48h_OsHV1","120hr_control","120hr_OsHV1","AF21_Resistant_control_0h","AF21_Resistant_6h","AF21_Resistant_12h","AF21_Resistant_24h",
+                                                                              "AF21_Resistant_48h","AF21_Resistant_60h","AF21_Resistant_72h","AF11_Susceptible_control_0h","AF11_Susceptible_6h","AF11_Susceptible_12h","AF11_Susceptible_24h","AF11_Susceptible_48h","AF11_Susceptible_60h","AF11_Susceptible_72h"), 
+                                                                  labels= c("Control","V. alg","V.tub\n V. ang","LPS\nM. Lut", "Control","V. cras\nNVir","V. cras\nVir" ,"V. tas\nVir","V. tas\nNVir",
+                                                                            "0hr\n Control","6hr\n Control", "6hr\nOsHv-1","12hr\nControl","12hr\nOsHv-1", "24hr\nControl","24hr\nOsHv-1",
+                                                                            "48hr\nControl","48hr\nOsHv-1","120hr\nControl", "120hr\nOsHv-1","0hr\nControl","6hr\nOsHv-1","12hr\nOsHv-1","24hr\nOsHv-1" ,"48hr\nOsHv-1",
+                                                                            "60hr\nOsHv-1","72hr\nOsHv-1" ,"0hr\nControl","6hr\nOsHv-1", "12hr\nOsHv-1","24hr\nOsHv-1","48hr\nOsHv-1" ,
+                                                                            "60hr\nOsHv-1","72hr\nOsHv-1"))
+
+# Plot C_gig IAP collapsed tree
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C_gig_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
   geom_tile() + 
   scale_fill_viridis_c(name = "Avg. Read Count", 
-                       #limits = c(-11,10),
-                       #breaks = c(-10,-8,-6,-4,-2,-1,0,0.5,1,2,3,4,6,8,10), 
-                       option="plasma", 
+                       # limits = c(-11,10),
+                       breaks = c(0,0.5,1,2,3,4,6,8,11,12,13,14), 
+                       option="plasma",
                        guide=guide_legend(), na.value = "transparent") +
-  labs(x="Treatment", y =NULL) +
-  theme(#axis.ticks.y = element_blank(), 
-    #axis.text.y = element_blank(),
-    axis.text.x.top = element_text(size=8, family="sans"),
-    axis.title.x.top = element_text(size=12, family="sans"),
-    legend.position = "bottom",
-    legend.title = element_text(size=12, family="sans"), 
-    legend.text = element_text(size=8, family="sans"),
-    panel.background = element_rect(fill = "transparent"),
-    panel.grid.major.x = element_line(size=0.2, color="gray"),
-    panel.grid.major.y = element_line(size=0.2, color="gray")) +
-  # put in the product name
-  # put X limits in the same order as limits from the LFC plots 
-  scale_x_discrete(limits = c( "Zhang_Control","V_aes_V_alg1_V_alg2","V_tub_V_ang","LPS_M_lut","Rubio_Control","Vcrass_J2_8","Vcrass_J2_9","Vtasma_LGP32",
-                               "Vtasma_LMG20012T","Time0_control","6h_control","6h_OsHV1","12h_control","12h_OsHV1","24h_control","24h_OsHV1","48h_control",
-                               "48h_OsHV1","120hr_control","120hr_OsHV1","AF21_Resistant_control_0h","AF21_Resistant_6h","AF21_Resistant_12h","AF21_Resistant_24h",
-                               "AF21_Resistant_48h","AF21_Resistant_60h","AF21_Resistant_72h","AF11_Susceptible_control_0h","AF11_Susceptible_6h","AF11_Susceptible_12h","AF11_Susceptible_24h","AF11_Susceptible_48h","AF11_Susceptible_60h","AF11_Susceptible_72h"), 
-                   labels= c("Zhang\n Control","Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nControl","Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir",
-                             "He Time 0\n Control","He 6hr\n Control", "He OsHv-1\n 6hr","He 12hr\n Control","He OsHv-1\n 12hr", "He 24hr\n Control","He OsHv-1\n24hr",
-                             "He 48hr\n Control","He OsHv-1\n48hr","He 120hr\n Control", "He OsHv-1\n 120hr","deLorg\nOsHV-1\n Res.Con 0hr","deLorg\nOsHV-1\n Res. 6hr","deLorg\nOsHV-1\n Res. 12hr","deLorg\nOsHV-1\n Res. 24hr" ,"deLorg\nOsHV-1\n Res. 48hr",
-                             "deLorg\nOsHV-1\n Res. 60hr","deLorg\nOsHV-1\n Res. 72hr" ,"deLorg\nOsHV-1\n Sus. Con 0hr","deLorg\nOsHV-1\n Sus. 6hr", "deLorg\nOsHV-1\n Sus. 12hr","deLorg\nOsHV-1\n Sus. 24hr","deLorg\nOsHV-1\n Sus. 48hr" ,
-                             "deLorg\nOsHV-1\n Sus. 60hr","deLorg\nOsHV-1\n Sus. 72hr"), position="top") +
+  facet_grid(.~Experiment, scales="free",space="free", drop= TRUE) + 
+  labs(x=NULL, y =NULL) +
+  theme(axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.text.x.bottom = element_text(size=10, family="sans", face = "bold"),
+        #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
+        legend.position = "right",
+        legend.title = element_text(size=12, family="sans"), 
+        legend.text = element_text(size=8, family="sans"),
+        panel.background = element_rect(fill = "transparent"),
+        panel.grid.major.x = element_line(size=0.2, color="gray"),
+        panel.grid.major.y = element_line(size=0.2, color="gray"),
+        strip.text.x = element_text(
+          size = 10, face = "bold")) +
   guides(fill=guide_legend(ncol=3, title.position="top"))
 
+# drop NA column with gtable (see https://stackoverflow.com/questions/40141684/suppress-na-column-when-faceting)
+Cgig_const_IAP_gt <- ggplot_gtable(ggplot_build(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED))
+#find column to drop
+gtable_show_layout(Cgig_const_IAP_gt) # drop 15
+Cgig_const_IAP_gt2 <- Cgig_const_IAP_gt[,-15]
+#save plot as ggplot object
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- as.ggplot(Cgig_const_IAP_gt2)
+
+### Plot tree, LFC plot, consitutive expression, side by side - NOT COLLAPSED
 # Use cowplot to extract legends and then add separately
 C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_legend <- cowplot::get_legend(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot)
 C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_no_legend <- C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot + theme(legend.position='none')
@@ -2052,7 +2245,6 @@ C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_no_legend <- C_vir_vs
 C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_legend <- cowplot::get_legend(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot)
 C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_no_legend <- C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot + theme(legend.position='none')
 
-### Plot tree, LFC plot, consitutive expression, side by side
 Cvir_IAP_tr_LFC_const <- plot_grid(p3_no_legend, C_vir_apop_LFC_IAP_tile_plot_no_legend, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_no_legend, ncol=3, align='h')
 Cvir_IAP_tr_LFC_const_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, C_vir_apop_LFC_IAP_tile_plot_legend, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_legend,
                                     ncol = 3, align="hv")
@@ -2062,6 +2254,34 @@ Cgig_IAP_tr_LFC_const <- plot_grid(p3_no_legend, C_gig_apop_LFC_IAP_tile_plot_no
 Cgig_IAP_tr_LFC_const_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, C_gig_apop_LFC_IAP_tile_plot_legend, C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_legend,
                                           ncol = 3, align="hv")
 Cgig_IAP_tr_LFC_const_plus_legend <- plot_grid(Cgig_IAP_tr_LFC_const , Cgig_IAP_tr_LFC_const_legend, ncol=1, rel_heights =c(1, 0.3))
+
+### Plot tree, LFC plot, consitutive expression, side by side -COLLAPSED
+# Use cowplot to extract legends and then add separately
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm)
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm + theme(legend.position='none')
+
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm)
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm + theme(legend.position='none')
+
+# set the yaxis
+IAP_tree_sety_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend)
+IAP_const_sety_collapsed_no_legend <- C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend + aplot::ylim2(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend)
+
+
+Cvir_IAP_COLLAPSED_tr_LFC_const <- plot_grid(IAP_tree_sety_collapsed_no_legend, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend, IAP_const_sety_collapsed_no_legend, ncol=3, align='h', axis='b')
+Cvir_IAP_COLLAPSED_tr_LFC_const_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_legend, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend,
+                                          ncol = 3, align="hv")
+Cvir_IAP_COLLAPSED_tr_LFC_const_plus_legend <- plot_grid(Cvir_IAP_COLLAPSED_tr_LFC_const, Cvir_IAP_COLLAPSED_tr_LFC_const_legend, ncol=1, rel_heights =c(1, 0.3))
+
+Cgig_IAP_COLLAPSED_tr_LFC_const <- plot_grid(p3_collapsed_no_legend, C_gig_apop_LFC_IAP_tile_plot_no_legend, C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_no_legend, ncol=3, align='h')
+Cgig_IAP_COLLAPSED_tr_LFC_const_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_legend, C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend,
+                                          ncol = 3, align="hv")
+Cgig_IAP_COLLAPSED_tr_LFC_const_plus_legend <- plot_grid(Cgig_IAP_COLLAPSED_tr_LFC_const , Cgig_IAP_COLLAPSED_tr_LFC_const_legend , ncol=1, rel_heights =c(1, 0.3))
+
+
+### Plot collapsed tree with LFC side by side
+
+### Plot collapsed tree with const. expression side by side
 
 
 #### PLOT FULL GIMAP PROTEIN TREE ####
@@ -2433,8 +2653,11 @@ GIMAP_MY_CV_CG_raxml_treedata_vertical <-
 GIMAP_MY_CV_CG_raxml_tibble_join <- GIMAP_MY_CV_CG_raxml_tibble %>% filter(!is.na(label)) # remove rows with just bootstrap information
 colnames(GIMAP_MY_CV_CG_raxml_tibble_join)[4] <- "protein_id"
 AIG1_XP_ALL_gff_GIMAP_Interpro_Domains <-  left_join(GIMAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")], AIG1_XP_ALL_gff_GIMAP)
-AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains %>% 
+#AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_only <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains %>% 
   filter(grepl("InterPro:IPR", Dbxref) | source == "Coils") # keep Interproscan domain lines and coiled coil lines 
+
+# REMOVE THIS SUBSETTING 
+
 
 AIG1_XP_ALL_gff_GIMAP_Interpro_Domains_fullprot <- AIG1_XP_ALL_gff_GIMAP_Interpro_Domains %>% 
   filter(is.na(source))
@@ -2800,6 +3023,58 @@ AIG_extra_collapse_test <- AIG_extra_collapse[1,]
 AIG_full_seq[AIG_full_seq$seq.text %in%  AIG_extra_collapse_test$seq.text,] # only 1 hit in the original list
 AIG_extra_collapse_test <- AIG_extra_collapse[2,]
 AIG_full_seq[AIG_full_seq$seq.text %in%  AIG_extra_collapse_test$seq.text,]
+
+
+# Potentially erroneous proteins in GIMAP:
+# calponin homology domain-containing protein DDB_G0272472-like
+# myb-like protein X
+# PREDICTED: dentin sialophosphoprotein-like
+# PREDICTED: GTPase Era, mitochondrial-like
+# PREDICTED: mitochondrial ribosome-associated GTPase 1-like
+# PREDICTED: reticulocyte-binding protein 2 homolog a isoform X2
+# PREDICTED: putative protein PHLOEM PROTEIN 2-LIKE A3
+# PREDICTED: rho-associated protein kinase let-502-like
+# reticulocyte-binding protein 2 homolog a-like
+# transmembrane GTPase fzo-like
+# trichohyalin-like
+# vicilin-like seed storage protein At2g18540 isoform X1
+# Reviewing Domains and comparing list to Lu et al., 2020
+# Lu et al. 2020 counted rho-associated protein kinase let-502-like , putative protein PHLOEM PROTEIN 2-LIKE A3 as a GIMAP, 
+# Lu et al. 2020 called PREDICTED: dentin sialophosphoprotein-like
+# the P-loop_NTPase Superfamily seems to be what is bringing up these extra hits
+# Are there other domains that are specific to the erroneous proteins 
+
+# Examine domains from these proteins
+AIG1_CDD_GIMAP_questioned_hits <- AIG1_XP_ALL_gff_GIMAP_species[grepl("calponin",AIG1_XP_ALL_gff_GIMAP_species$product, ignore.case = TRUE) | grepl("myb", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) |
+                                                                  grepl("dentin sialophosphoprotein", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("GTPase Era", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | 
+                                                                  grepl("mitochondrial", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("trichohyalin", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE)|
+                                                                  grepl("reticulocyte", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("PHLOEM", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) |
+                                                                  grepl("rho", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("fzo", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE) | grepl("vicilin", AIG1_XP_ALL_gff_GIMAP_species$product,ignore.case = TRUE),]
+
+# What domains do the GIMAPs have?
+AIG1_CDD_GIMAP_only <- AIG1_XP_ALL_gff_GIMAP_species[grepl("IMAP",AIG1_XP_ALL_gff_GIMAP_species$product) | grepl("immune", AIG1_XP_ALL_gff_GIMAP_species$product),]
+AIG1_CDD_GIMAP_only_domains <- AIG1_CDD_GIMAP_only %>% group_by(signature_desc) %>% summarise(count = n())
+length(unique(AIG1_CDD_GIMAP_only$protein_id)) # 242 proteins 
+AIG1_CDD_GIMAP_only_domains$type <-"GIMAP"
+
+# What domains are in non GIMAPs?
+AIG1_CDD_GIMAP_non_gimap <- AIG1_XP_ALL_gff_GIMAP_species[!grepl("IMAP", AIG1_XP_ALL_gff_GIMAP_species$product) | !grepl("uncharacterized",AIG1_XP_ALL_gff_GIMAP_species$product) | !grepl("immune", AIG1_XP_ALL_gff_GIMAP_species$product),]
+AIG1_CDD_GIMAP_non_gimap_domains <- AIG1_CDD_GIMAP_non_gimap  %>% group_by(Short.name) %>% summarise(count = n())
+AIG1_CDD_GIMAP_non_gimap_domains$type <-"non-GIMAP"
+
+# What domains are unique to the non-GIMAPS?
+AIG1_CDD_GIMAP_non_gimap_domains_NOT_SHARED <-AIG1_CDD_GIMAP_non_gimap_domains[!(AIG1_CDD_GIMAP_non_gimap_domains$Short.name %in%AIG1_CDD_GIMAP_only_domains$Short.name),]
+# Pkc domains, STKc, FN3
+
+# try removing the Pkc and STK containing domain proteins to see if this removes erroneous non GIMAP hits
+AIG1_CDD_GIMAP_no_Pkc_STK <- AIG1_CDD_GIMAP %>% group_by(protein_id) %>% filter(all(!grepl("PKc",ignore.case = TRUE, Short.name) | !grepl("PKc",ignore.case = TRUE, Short.name))) 
+View(unique(AIG1_CDD_GIMAP_no_Pkc_STK$product))
+
+# compare to both gimap and non gimap lists
+setdiff(AIG1_CDD_GIMAP_only$protein_id, AIG1_CDD_GIMAP_no_Pkc_STK$protein_id) #0 none we wanted were remove
+setdiff(AIG1_CDD_GIMAP_no_Pkc_STK$protein_id, AIG1_CDD_GIMAP_only$protein_id) # 184 remain that weren't removed
+
+
 
 #### SESSION INFO ####
 sessionInfo()
