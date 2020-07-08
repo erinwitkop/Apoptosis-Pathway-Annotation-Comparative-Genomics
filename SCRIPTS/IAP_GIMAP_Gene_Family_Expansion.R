@@ -20,7 +20,7 @@ library(alakazam)
 library(phylotools)
 library(viridis)
 library(ggpubr)
-library(forcats)
+library(forcats) 
 library(cowplot)
 #install.packages("remotes") 
 #remotes::install_github("YuLab-SMU/ggtree")
@@ -1545,11 +1545,208 @@ IAP_Interproscan_all_domain_plot <- ggplot() +
 
 #### CHARACTERIZE TYPE 1 AND TYPE II BIR IAP REPEATS ####
 
-# This information will be used to cluster the proteins by similarity
+# Fill with fasta protein sequences for each IAP can be found in
+# ("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_HMMER_Interpro_XP_list_all_rm_dup.fa")
+
+# Export the BIR cd00022, also used for coordinates for the model organism domain types 
+BIR_XP_gff_Interpro_Domains_only_cd00022 <- BIR_XP_gff_Interpro_Domains_only %>% filter(Name =="cd00022")
+
+# Add position column with the position of the BIR domain named, add Name column
+BIR_XP_gff_Interpro_Domains_only_cd00022$alias <- str_trim(BIR_XP_gff_Interpro_Domains_only_cd00022$alias, side="both")
+
+BIR_XP_gff_Interpro_Domains_only_cd00022 <- BIR_XP_gff_Interpro_Domains_only_cd00022 %>% 
+  arrange(protein_id, start) %>% #arrange values by start 
+  group_by(protein_id) %>% # group_by protein id
+  mutate(Domain_Number = paste(signature_desc, row_number(), sep="")) %>% 
+  ungroup() %>%
+  mutate(Name=paste(protein_id, Domain_Number, alias, sep="_"))
+# Add name column with concatenated protein_id and the BIR domain position
+# remember that this file has the Mizuhopecten yessoensis sequences collapsed 
+
+# Export the file in BED format 
+write.table(BIR_XP_gff_Interpro_Domains_only_cd00022[,c("protein_id","start","end","Name")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_Interpro_Domains_only_cd00022.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+
+## IN bluewaves, get the BIR sequence for each domain, make multiple sequence alignment in MAFFTT
+## Load Sequence file from bluewaves back into R and search for subsequences of interest 
+BIR_domain_model_MY_CV_CG <- phylotools::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq.fa")
+
+# Locate string pattern for each type
+#Type I = K/76 or R/76, H77, V/80 or L/80, C/84; Type II = E/76 or Q/76, H77, W/80 or H/80, C/84 
+class(BIR_domain_model_MY_CV_CG$seq.text) # character
+
+# Locate Type I and Type II 
+# Use case_when for conditional mutate
+BIR_domain_model_MY_CV_CG_type  <- BIR_domain_model_MY_CV_CG %>%
+mutate(Type = case_when(
+grepl("KH..V...C", seq.text) ~ "T1",
+grepl("KH..L...C", seq.text) ~ "T1",
+grepl("RH..V...C", seq.text)  ~ "T1",
+grepl("RH..L...C", seq.text)  ~ "T1",
+grepl("EEW", seq.text)  ~ "T2_v2",
+grepl("EH..W...C", seq.text) ~ "T2",
+grepl("EH..H...C", seq.text) ~ "T2",
+grepl("QH..W...C", seq.text) ~ "T2",
+grepl("QH..H...C", seq.text) ~ "T2",
+TRUE ~ NA_character_)) # final line is a catch all for things that don't match 
+# quite a few NA's 
+
+## View RAxML BIR only tree
+BIR_IAP_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_model_prot_IAP_prot_BIR_seq_MSA_RAxML")
+BIR_IAP_raxml
+
+# Convert to tibble tree dataframe object with tidytree to add external data
+BIR_IAP_raxml_tibble <- as_tibble(BIR_IAP_raxml)
+
+# Add type 1 and type II as found above 
+colnames(BIR_domain_model_MY_CV_CG_type)[1] <- "label"
+BIR_IAP_raxml_tibble <- left_join(BIR_IAP_raxml_tibble, BIR_domain_model_MY_CV_CG_type)
+
+# Convert to treedata
+BIR_IAP_raxml_treedata <- as.treedata(BIR_IAP_raxml_tibble)
+
+# Plot tree
+BIR_IAP_raxml_tree <- 
+  ggtree(BIR_IAP_raxml_treedata, aes(color=Type), branch.length = "none") + 
+  geom_tiplab(aes(label=label), size = 2.0) + 
+     #Edit theme
+  theme(legend.position = "bottom", 
+        legend.text = element_text(face = "italic", size=6, family="sans"),
+        legend.title = element_text(size=12, family="sans")) +
+  xlim(NA,70) + 
+  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3.0, fontface="bold") + # allows for subset
+  guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
+
+# View tree with Multiple alignment side by side 
+msaplot(BIR_IAP_raxml_tree, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa",
+        window = c(53,84), offset=9)
+
+#### PLOT IAP DOMAIN TREE WITH THE TYPE 1 AND TYPE 2 designations ####
+
+# Join domain type with label and full domains
+colnames(BIR_XP_gff_Interpro_Domains_only_cd00022)[16] <-"Domain_Name"
+# Join by start and end to make specific for domain
+BIR_XP_gff_Interpro_Domains_only_BIR_type <- left_join(BIR_XP_gff_Interpro_Domains_only, BIR_XP_gff_Interpro_Domains_only_cd00022[,c("protein_id","Domain_Name", "start","end")], by = c("protein_id","start","end"))
+colnames(BIR_domain_model_MY_CV_CG_type)[1] <- "Domain_Name"
+BIR_XP_gff_Interpro_Domains_only_BIR_type <- left_join(BIR_XP_gff_Interpro_Domains_only_BIR_type, BIR_domain_model_MY_CV_CG_type[,c("Domain_Name","Type")])
+
+# Mutate type to fill in NAs with Dbxref, but still keep T2 and T1 for BIR domains
+BIR_XP_gff_Interpro_Domains_only_BIR_type <- BIR_XP_gff_Interpro_Domains_only_BIR_type %>%
+  mutate(Type = case_when(
+   is.na(.$Type) ~ as.character(Dbxref), 
+    TRUE ~ as.character(.$Type))) 
+
+# Set factor level order of the nodes set levels in reverse order
+BIR_XP_gff_Interpro_Domains_only_BIR_type$node <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type$node, levels = unique(BIR_XP_gff_Interpro_Domains_only_BIR_type$node))
+BIR_XP_gff_Interpro_Domains_only_BIR_type$Type <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type$Type, 
+                                                         levels = c("\"InterPro:IPR001370\"",
+                                                                    "\"InterPro:IPR022103\"",
+                                                                    "T2",
+                                                                    "\"InterPro:IPR036322\"",
+                                                                    "\"InterPro:IPR019775\"",
+                                                                    "cd16713",
+                                                                    "\"InterPro:IPR013083\"",
+                                                                    "\"InterPro:IPR001841\"",
+                                                                    "\"InterPro:IPR000608\"",
+                                                                    "\"InterPro:IPR016135\"",
+                                                                    "\"InterPro:IPR015940\"",
+                                                                    "cd14321",
+                                                                    "\"InterPro:IPR032171\"",
+                                                                    "\"InterPro:IPR027417\"",
+                                                                    "G3DSA:1.10.533.10",
+                                                                    "\"InterPro:IPR003131\"",
+                                                                    "cd18316",
+                                                                    "\"InterPro:IPR011333\"",
+                                                                    "\"InterPro:IPR000210\"",
+                                                                    "\"InterPro:IPR011047\"",
+                                                                    "\"InterPro:IPR038765\""))
 
 
-
-
+### Plot select domains 
+# Remove some domains from plotting to increase ability to see important ones 
+IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() + 
+  # plot length of each protein as line
+  geom_segment(data =BIR_XP_gff_Interpro_Domains_fullprot,
+               aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
+  # add boxes with geom_rect 
+  geom_rect(data=BIR_XP_gff_Interpro_Domains_only_BIR_type,
+            aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Type)) +
+  #add labels
+  labs(y = NULL, x = "Protein Domain Position (aa)") +
+  # add text labels
+  #geom_text(data=BIR_XP_gff_Interpro_Domains_fullprot,aes(x= end, y = node, label=alias),
+  #          size=2.0, hjust=-.15, check_overlap = TRUE) + 
+  # text theme
+  theme_bw() + 
+  # plot theme
+  theme(axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black"),
+        legend.position = "bottom",
+        legend.box = "vertical",
+        legend.text = element_text(size=8, family="sans"),
+        legend.title = element_text(size=12, family="sans"))+
+  # Change y axis ticks
+  scale_x_continuous(breaks=c(0,500,1000,1500,2000,3000), expand = c(0,0)) + 
+  # Change domain labels 
+  scale_fill_manual(values=c("#7269da",
+                             "#4ec2d7",
+                             "#7ed6da",
+                             "#cd6137",
+                             "#d27b3d",
+                             "#d04d8f",
+                             "#89599b",
+                             "#c058c6",
+                             "#d393d4",
+                             "#50803d",
+                             "#a6b348",
+                             "#85c967",
+                             "#d54787",
+                             "#55b793",
+                             "#dadd48",
+                             "grey",
+                             "grey",
+                             "grey",
+                             "grey",
+                             "grey",
+                             "grey",
+                             "grey"), 
+                    name="Functional Domains",
+                    breaks=c("\"InterPro:IPR001370\"",
+                             "\"InterPro:IPR022103\"",
+                             "T2",
+                             "\"InterPro:IPR036322\"",
+                             "\"InterPro:IPR019775\"",
+                             "cd16713",
+                             "\"InterPro:IPR013083\"",
+                             "\"InterPro:IPR001841\"",
+                             "\"InterPro:IPR000608\"",
+                             "\"InterPro:IPR016135\"",
+                             "\"InterPro:IPR015940\"",
+                             "cd14321",
+                             "\"InterPro:IPR032171\"",
+                             "\"InterPro:IPR027417\"",
+                             "G3DSA:1.10.533.10"),
+                    labels=c("BIR repeat",
+                             "Baculoviral IAP repeat-containing protein 6",
+                             "BIR Type II domain",
+                             "WD40-repeat-containing domain superfamily",
+                             "WD40 repeat, conserved site",
+                             "RING-HC_BIRC2_3_7",
+                             "Zinc finger, RING/FYVE/PHD-type",
+                             "Zinc finger, RING-type",
+                             "Ubiquitin-conjugating enzyme E2",
+                             "Ubiquitin-conjugating enzyme/RWD-like",
+                             "Ubiquitin-associated domain",
+                             "UBA_IAPs",
+                             "C-terminal of Roc (COR) domain,",
+                             "P-loop containing nucleoside triphosphate hydrolase",
+                             "Death domain, Fas")) +
+  # change number of legend columns and put the legend title on top
+  guides(fill=guide_legend(ncol=3, title.position="top"))
 
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
 load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_vir_apop_LFC_IAP.Rdata")
@@ -1941,8 +2138,8 @@ C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP[!(is
 ## Plot DESeq2 alongside tree and domain structure
 
 # Use cowplot to extract legends and then add separately
-IAP_Interproscan_domain_plot_legend <- cowplot::get_legend(IAP_Interproscan_domain_plot)
-IAP_Interproscan_domain_plot_no_legend <- IAP_Interproscan_domain_plot + theme(legend.position='none')
+IAP_Interproscan_domain_plot_legend <- cowplot::get_legend(IAP_Interproscan_domain_plot_BIR_type_domain_subset)
+IAP_Interproscan_domain_plot_no_legend <- IAP_Interproscan_domain_plot_BIR_type_domain_subset + theme(legend.position='none')
 
 IAP_MY_CV_CG_raxml_treedata_vertical_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical)
 IAP_MY_CV_CG_raxml_treedata_vertical_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical + theme(legend.position='none')
@@ -2151,8 +2348,30 @@ C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C
           size = 10, face = "bold")) +
   guides(fill=guide_legend(ncol=3, title.position="top"))
 
+# Use the no legend version to get legend for removing panels
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=protein_id, fill=avg_vst_counts_per_treatment)) + 
+  geom_tile() + 
+  scale_fill_viridis_c(name = "Avg. Read Count", 
+                       # limits = c(-11,10),
+                       breaks = c(0,0.5,1,2,3,4,6,8,11,12), 
+                       option="plasma",
+                       guide=guide_legend(), na.value = "transparent") +
+  facet_grid(.~Experiment, scales="free",space="free", drop= TRUE) + 
+  labs(x=NULL, y =NULL) +
+  theme(axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.text.x.bottom = element_text(size=10, family="sans", face = "bold"),
+        #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
+        legend.position = "none", 
+        panel.background = element_rect(fill = "transparent"),
+        panel.grid.major.x = element_line(size=0.2, color="gray"),
+        panel.grid.major.y = element_line(size=0.2, color="gray"),
+        strip.text.x = element_text(
+          size = 10, face = "bold")) +
+  guides(fill=guide_legend(ncol=3, title.position="top"))
+
 # drop NA column with gtable (see https://stackoverflow.com/questions/40141684/suppress-na-column-when-faceting)
-Cvir_const_IAP_gt <- ggplot_gtable(ggplot_build(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED))
+Cvir_const_IAP_gt <- ggplot_gtable(ggplot_build(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend))
 #find column to drop
 gtable_show_layout(Cvir_const_IAP_gt) # drop 13
 Cvir_const_IAP_gt2 <- Cvir_const_IAP_gt[,-13]
@@ -2229,8 +2448,30 @@ C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C
           size = 10, face = "bold")) +
   guides(fill=guide_legend(ncol=3, title.position="top"))
 
+# Plot without legend to use when removing NAs
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- ggplot(C_gig_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
+  geom_tile() + 
+  scale_fill_viridis_c(name = "Avg. Read Count", 
+                       # limits = c(-11,10),
+                       breaks = c(0,0.5,1,2,3,4,6,8,11,12,13,14), 
+                       option="plasma",
+                       guide=guide_legend(), na.value = "transparent") +
+  facet_grid(.~Experiment, scales="free",space="free", drop= TRUE) + 
+  labs(x=NULL, y =NULL) +
+  theme(axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.text.x.bottom = element_text(size=10, family="sans", face = "bold"),
+        #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
+        legend.position = "none",
+        panel.background = element_rect(fill = "transparent"),
+        panel.grid.major.x = element_line(size=0.2, color="gray"),
+        panel.grid.major.y = element_line(size=0.2, color="gray"),
+        strip.text.x = element_text(
+          size = 10, face = "bold")) +
+  guides(fill=guide_legend(ncol=3, title.position="top"))
+
 # drop NA column with gtable (see https://stackoverflow.com/questions/40141684/suppress-na-column-when-faceting)
-Cgig_const_IAP_gt <- ggplot_gtable(ggplot_build(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED))
+Cgig_const_IAP_gt <- ggplot_gtable(ggplot_build(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend))
 #find column to drop
 gtable_show_layout(Cgig_const_IAP_gt) # drop 15
 Cgig_const_IAP_gt2 <- Cgig_const_IAP_gt[,-15]
@@ -2257,16 +2498,18 @@ Cgig_IAP_tr_LFC_const_plus_legend <- plot_grid(Cgig_IAP_tr_LFC_const , Cgig_IAP_
 
 ### Plot tree, LFC plot, consitutive expression, side by side -COLLAPSED
 # Use cowplot to extract legends and then add separately
-C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm)
-C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm + theme(legend.position='none')
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED)
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED)
 
-C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm)
-C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm + theme(legend.position='none')
+C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_gig_apop_LFC_IAP_tile_plot_COLLAPSED)
+C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_gig_apop_LFC_IAP_tile_plot_COLLAPSED + theme(legend.position = "none")
+
+C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED)
+C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_vir_apop_LFC_IAP_tile_plot_COLLAPSED + theme(legend.position = "none")
 
 # set the yaxis
 IAP_tree_sety_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend)
-IAP_const_sety_collapsed_no_legend <- C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend + aplot::ylim2(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend)
-
+IAP_const_sety_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend)
 
 Cvir_IAP_COLLAPSED_tr_LFC_const <- plot_grid(IAP_tree_sety_collapsed_no_legend, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend, IAP_const_sety_collapsed_no_legend, ncol=3, align='h', axis='b')
 Cvir_IAP_COLLAPSED_tr_LFC_const_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_legend, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend,
@@ -2278,10 +2521,20 @@ Cgig_IAP_COLLAPSED_tr_LFC_const_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_
                                           ncol = 3, align="hv")
 Cgig_IAP_COLLAPSED_tr_LFC_const_plus_legend <- plot_grid(Cgig_IAP_COLLAPSED_tr_LFC_const , Cgig_IAP_COLLAPSED_tr_LFC_const_legend , ncol=1, rel_heights =c(1, 0.3))
 
-
 ### Plot collapsed tree with LFC side by side
 
+IAP_Tree_LFC_Cvir_Cgig <- plot_grid(IAP_tree_sety_collapsed_no_legend, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend, C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend,  ncol=3, axis='b')
+IAP_Tree_LFC_Cvir_Cgig_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_legend,C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_legend,
+                                           ncol = 3, align="hv")
+IAP_Tree_LFC_Cvir_Cgig_plus_legend <- plot_grid(IAP_Tree_LFC_Cvir_Cgig, IAP_Tree_LFC_Cvir_Cgig_legend,  ncol=1, rel_heights =c(1, 0.3))
+
 ### Plot collapsed tree with const. expression side by side
+
+IAP_Tree_const_Cvir_Cgig <- plot_grid(IAP_const_sety_collapsed_no_legend, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm, C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm,  ncol=3, align='h', axis='b')
+IAP_Tree_const_Cvir_Cgig_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend,C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend,
+                                             C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend,
+                                           ncol = 3, align="hv")
+IAP_Tree_const_Cvir_Cgig_plus_legend <- plot_grid(IAP_Tree_LFC_Cvir_Cgig, IAP_Tree_LFC_Cvir_Cgig_legend,  ncol=1, rel_heights =c(1, 0.3))
 
 
 #### PLOT FULL GIMAP PROTEIN TREE ####
