@@ -1583,7 +1583,6 @@ grepl("KH..V...C", seq.text) ~ "T1",
 grepl("KH..L...C", seq.text) ~ "T1",
 grepl("RH..V...C", seq.text)  ~ "T1",
 grepl("RH..L...C", seq.text)  ~ "T1",
-grepl("EEW", seq.text)  ~ "T2_v2",
 grepl("EH..W...C", seq.text) ~ "T2",
 grepl("EH..H...C", seq.text) ~ "T2",
 grepl("QH..W...C", seq.text) ~ "T2",
@@ -1591,7 +1590,70 @@ grepl("QH..H...C", seq.text) ~ "T2",
 TRUE ~ NA_character_)) # final line is a catch all for things that don't match 
 # quite a few NA's 
 
-## View RAxML BIR only tree
+# Add in Species information (change some column names first for joining)
+BIR_XP_gff_Interpro_Domains_only_cd00022_species <- BIR_XP_gff_Interpro_Domains_only_cd00022
+colnames(BIR_XP_gff_Interpro_Domains_only_cd00022_species)[16] <-"seq.name"
+IAP_collapsed_tibble_species <- IAP_collapsed_tibble[,c("label","Species")]
+colnames(IAP_collapsed_tibble_species)[1] <- "protein_id"
+
+BIR_domain_model_MY_CV_CG_type <- left_join(BIR_domain_model_MY_CV_CG_type,BIR_XP_gff_Interpro_Domains_only_cd00022_species[,c("seq.name","protein_id")])
+BIR_domain_model_MY_CV_CG_type <- left_join(BIR_domain_model_MY_CV_CG_type, IAP_collapsed_tibble_species)                                           
+
+# Export all the non Type 1 or Type II proteins to rerun alignment and Tree in MAFFT in order to better view multiple alignment patterns
+BIR_domain_model_MY_CV_CG_non_T1_T2 <- BIR_domain_model_MY_CV_CG_type %>% filter(is.na(Type)) %>% distinct(seq.name, .keep_all = TRUE)
+#phylotools::dat2fasta(BIR_domain_model_MY_CV_CG_non_T1_T2[,c("seq.name","seq.text")],
+#            outfile="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_non_T1_T2.fa")
+
+## Export only the C. vir and C. gigas non type I or Type II BIR repeats and run multiple alignment. This will allow me to View consensus percentages of AA for just C. vir and C. gig repeats
+BIR_domain_model_MY_CV_CG_non_T1_T2_Cvir_Cgig <- BIR_domain_model_MY_CV_CG_type %>% filter(is.na(Type) & Species != "Mizuhopecten_yessoensis") %>% distinct(seq.name, .keep_all = TRUE)
+#phylotools::dat2fasta(BIR_domain_model_MY_CV_CG_non_T1_T2_Cvir_Cgig[,c("seq.name","seq.text")],
+#                      outfile="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_non_T1_T2_Cvir_Cgig.fa")
+
+## Export only the C. vir and C. gigas ALL BIR repeats and run multiple alignment. This will allow me to View consensus percentages of AA for ALL C. vir and C. gig repeats
+BIR_domain_model_MY_CV_CG_Cvir_Cgig <- BIR_domain_model_MY_CV_CG_type %>% filter(Species != "Mizuhopecten_yessoensis") %>% distinct(seq.name, .keep_all = TRUE)
+#phylotools::dat2fasta(BIR_domain_model_MY_CV_CG_Cvir_Cgig[,c("seq.name","seq.text")],
+#                      outfile="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_Cvir_Cgig.fa")
+
+
+# How many Conserved Type II domains in C gigas and C virginica?
+BIR_domain_model_MY_CV_CG_type_distinct <- BIR_domain_model_MY_CV_CG_type %>%   distinct(seq.name, .keep_all = TRUE)
+BIR_domain_model_MY_CV_CG_type_distinct %>% 
+  group_by(Type, Species) %>% 
+  count() 
+
+##### Based on alignments, adding more sequence patterns to look for 
+BIR_domain_model_MY_CV_CG_type_updated  <- BIR_domain_model_MY_CV_CG_type_distinct %>%
+  mutate(Type = case_when(
+    grepl("KH..V...C", seq.text) ~ "T1",   # Conserved model org Type 1
+    grepl("KH..L...C", seq.text) ~ "T1",  # Conserved model org Type 1
+    grepl("RH..V...C", seq.text)  ~ "T1",  # Conserved model org Type 1
+    grepl("RH..L...C", seq.text)  ~ "T1",  # Conserved model org Type 1
+    grepl("H..L...C", seq.text) ~ "T1", # this pattern should be called conserved Type I
+    grepl("EH..W...C", seq.text) ~ "T2",  # Conserved model org Type 2 
+    grepl("EH..H...C", seq.text) ~ "T2",  # Conserved model org Type 2 
+    grepl("QH..W...C", seq.text) ~ "T2",  # Conserved model org Type 2 
+    grepl("QH..H...C", seq.text) ~ "T2",  # Conserved model org Type 2 
+    grepl("SFCC", seq.text) ~ "Non_Zinc_binding", # lacks C for zinc binding
+    grepl("TFCC", seq.text) ~ "Non_Zinc_binding", # lacks C for zinc binding 
+    grepl("EH..GSR.C",seq.text) ~ "T3", # new type with Glycine and no proline
+    grepl("EH..YKP",seq.text) ~ "T2-like_1",
+    grepl("EHKN.FP",seq.text) ~ "T2-like_2",
+    grepl("H.NMSP",seq.text) ~ "T1-like_1",
+    grepl("IHRQQSP", seq.text) ~ "T1-like_2",
+    grepl("TS.I.AIH..ISP", seq.text) ~ "T1_like_3",
+    grepl("VHKENSP",seq.text) ~ "T1_like_4",
+    TRUE ~ NA_character_)) # final line is a catch all for things that don't match 
+# fewer NAs 
+# Which C. vir and C. gig domains have still not been typed?
+BIR_domain_model_MY_CV_CG_type_updated_not_ID <- BIR_domain_model_MY_CV_CG_type_updated %>% filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas") %>% filter(is.na(Type))
+# Remove from multiple alignment to improve visualization
+BIR_domain_model_MY_CV_CG_non_T1_T2_Cvir_Cgig_MSA <- phylotools::read.fasta(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_non_T1_T2_Cvir_Cgig_MSA.fa")
+BIR_domain_model_MY_CV_CG_type_updated_not_ID_MSA <- left_join(BIR_domain_model_MY_CV_CG_type_updated_not_ID[c("seq.name","Type")], BIR_domain_model_MY_CV_CG_non_T1_T2_Cvir_Cgig_MSA)
+#dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_not_ID_MSA[,c("seq.name","seq.text")], outfile="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_non_T1_T2_Cvir_Cgig_MSA_notID.fa")
+# Viewing now in UGENE
+
+# Ran RAxML
+## View RAxML All BIR tree 
 BIR_IAP_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_model_prot_IAP_prot_BIR_seq_MSA_RAxML")
 BIR_IAP_raxml
 
@@ -1599,13 +1661,13 @@ BIR_IAP_raxml
 BIR_IAP_raxml_tibble <- as_tibble(BIR_IAP_raxml)
 
 # Add type 1 and type II as found above 
-colnames(BIR_domain_model_MY_CV_CG_type)[1] <- "label"
-BIR_IAP_raxml_tibble <- left_join(BIR_IAP_raxml_tibble, BIR_domain_model_MY_CV_CG_type)
+colnames(BIR_domain_model_MY_CV_CG_type_updated)[1] <- "label"
+BIR_IAP_raxml_tibble <- left_join(BIR_IAP_raxml_tibble, BIR_domain_model_MY_CV_CG_type_updated)
 
 # Convert to treedata
 BIR_IAP_raxml_treedata <- as.treedata(BIR_IAP_raxml_tibble)
 
-# Plot tree
+# Plot tree with Type 1 and II disctinctions
 BIR_IAP_raxml_tree <- 
   ggtree(BIR_IAP_raxml_treedata, aes(color=Type), branch.length = "none") + 
   geom_tiplab(aes(label=label), size = 2.0) + 
@@ -1620,6 +1682,35 @@ BIR_IAP_raxml_tree <-
 # View tree with Multiple alignment side by side 
 msaplot(BIR_IAP_raxml_tree, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa",
         window = c(53,84), offset=9)
+
+### View the BIR tree of IAP domains that didn't match consensus Type 1 and Type II above 
+BIR_IAP_non_T2_T1_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_domain_model_MY_CV_CG_non_T1_T2_MSA")
+BIR_IAP_non_T2_T1_raxml
+
+# Convert to tibble
+BIR_IAP_non_T2_T1_raxml_tibble <- as.tibble(BIR_IAP_non_T2_T1_raxml)
+
+# Convert to treedata
+BIR_IAP_non_T2_T1_raxml_treedata <- as.treedata(BIR_IAP_non_T2_T1_raxml_tibble)
+
+# Plot tree
+BIR_IAP_non_T2_T1_raxml_tree <- 
+  ggtree(BIR_IAP_non_T2_T1_raxml_treedata, branch.length = "none") + 
+  geom_tiplab(aes(label=label), size = 2.0) + 
+  #Edit theme
+  theme(legend.position = "bottom", 
+        legend.text = element_text(face = "italic", size=6, family="sans"),
+        legend.title = element_text(size=12, family="sans")) +
+  xlim(NA,70) + 
+  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3.0, fontface="bold") + # allows for subset
+  guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
+
+# View tree with Multiple alignment side by side 
+msaplot(BIR_IAP_non_T2_T1_raxml_tree, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_non_T1_T2_MSA.fa",
+ offset=9)
+
+
+
 
 #### PLOT IAP DOMAIN TREE WITH THE TYPE 1 AND TYPE 2 designations ####
 
