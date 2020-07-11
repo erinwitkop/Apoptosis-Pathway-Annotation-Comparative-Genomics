@@ -1688,12 +1688,12 @@ BIR_IAP_raxml_treedata <- as.treedata(BIR_IAP_raxml_tibble)
 # Plot tree with Type 1 and II disctinctions
 BIR_IAP_raxml_tree <- 
   ggtree(BIR_IAP_raxml_treedata, aes(color=Type, fill=Type), branch.length = "none") + 
-  geom_tiplab(aes(label=Type), size = 2.2) + 
+  geom_tiplab(aes(label=label), size = 2.2) + 
      #Edit theme
   theme(legend.position = "bottom", 
         legend.text = element_text(size=10, family="sans"),
         legend.title = element_text(size=12, family="sans")) +
-  #xlim(NA,70) + 
+  #xlim(NA,34) + 
   # add circle for 90-100 instead of bootstrap values
   geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
   # add triangle for 70-89 instead of bootstrap values
@@ -1752,14 +1752,13 @@ BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Docum
 BIR_IAP_all_MSA_treeorder <- ggmsa(BIR_IAP_all_MSA, start = 53, end = 85, 
       color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
       none_bg = TRUE, # keeps only the letters and not the full color background
-      posHighligthed = c(57,60, 67, 77,79,80,82,84) # specify specific positions to highlight in the alignment 
-     #  seq_name = TRUE # checked that the order is correct so I fixed this 
+      posHighligthed = c(57,60, 67, 77,79,80,82,84), # specify specific positions to highlight in the alignment 
+       seq_name = TRUE # checked that the order is correct so I fixed this 
       ) + # add the sequence name so I can check its plotting in the right order
      # increase text size
-   theme(text = element_text(size=10)) +
-     # reduce white space in margin 
-     xlim(NA,50)
-BIR_IAP_all_MSA_treeorder
+   theme(text = element_text(size=10),
+         plot.margin = unit(c(0, 0, 0, 0), "cm")) #remove margins
+
 ### View the BIR tree of IAP domains that didn't match consensus Type 1 and Type II above ###
 #BIR_IAP_non_T2_T1_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_domain_model_MY_CV_CG_non_T1_T2_MSA")
 #BIR_IAP_non_T2_T1_raxml
@@ -1788,6 +1787,7 @@ BIR_IAP_all_MSA_treeorder
 ### Plot RAxML tree with the MSA using cowplot and aplot
 
 BIR_tree <- BIR_IAP_raxml_tree + aplot::ylim2(BIR_IAP_all_MSA_treeorder)
+
 # plot tree and the alignment
 plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="hv", axis ="b")
 # Remove in between white space in plot 
@@ -1829,8 +1829,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type <- BIR_XP_gff_Interpro_Domains_only_BI
     TRUE ~ as.character(.$Type))) 
 
 # Set factor level order of the nodes set levels in reverse order
-BIR_XP_gff_Interpro_Domains_only_BIR_type$node <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type$node, levels = unique(BIR_XP_gff_Interpro_Domains_only_BIR_type$node))
-
+BIR_XP_gff_Interpro_Domains_only_BIR_type$node <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type$node, levels = unique(BIR_XP_gff_Interpro_Domains_only_BIR_type$node)
 
 
 BIR_XP_gff_Interpro_Domains_only_BIR_type$Type <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type$Type, 
