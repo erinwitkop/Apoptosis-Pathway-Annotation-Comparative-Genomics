@@ -29,6 +29,7 @@ library(aplot)
 library(RColorBrewer)
 library(gtable)
 library(grid)
+library(ggmsa)
 setwd("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics")
 
 #### IMPORT GENOMES AND ANNOTATIONS #####
@@ -1064,14 +1065,27 @@ save(IAP_raxml_treedata, file="/Users/erinroberts/Documents/PhD_Research/Chapter
 
 # Plot circular tree
 IAP_raxml_treedata_circular_product <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
-  geom_tiplab2(aes(label=product,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-130,130)  
-
-IAP_raxml_treedata_circular_product + scale_color_discrete(name = "Species", labels = c("Aplysia californica", 
-"Biomphalaria glabrata", "Crassostrea gigas", "Crassostrea virginica","Elysia chlorotica","Lottia gigantea","Mizuhopecten yessoensis","Octopus bimaculoides",
-"Octopus vulgaris", "Pomacea canaliculata","NA"))
-
-#Figure out how to change the colors later
+  geom_tiplab2(aes(label=alias,angle=angle), size =1.8, offset=.5) + # geom_tiplab2 flips the labels correctly
+  #Edit theme
+theme(legend.position = "bottom", 
+      legend.text = element_text(face = "italic", size=8, family="sans"),
+      legend.title = element_text(size=12, family="sans")) +
+  #xlim(-100,100)  +
+  # fix legend appearance
+  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")) ) + # need to override aes to get rid of "a"
+  scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32",  "#a68340",
+                                                 "#a3c763", "#c257b0", "#c083d0","#59a1cf","#c2134a","#ead76b"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis", 
+"Elysia_chlorotica","Lottia_gigantea", "Octopus_bimaculoides", "Octopus_vulgaris", "Pomacea_canaliculata", "Biomphalaria_glabrata","Aplysia_californica"),
+                      labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis", 
+                                 "Elysia chlorotica","Lottia gigantea", "Octopus bimaculoides", "Octopus vulgaris", "Pomacea canaliculata", "Biomphalaria glabrata", "Aplysia californica")) 
+ 
+# Export plot to file for summary powerpoint - July 12th, 2020 
+ggsave(filename = "IAP_full_protein_circular_tree.tiff", plot=IAP_raxml_treedata_circular_product, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 10 ,
+       height = 10,
+       units = "in",
+       dpi=300)
 
 # Plot normal tree to use with heatmap
 IAP_raxml_treedata_tree_product <- ggtree(IAP_raxml_treedata, aes(color=Species)) + 
@@ -1688,12 +1702,12 @@ BIR_IAP_raxml_treedata <- as.treedata(BIR_IAP_raxml_tibble)
 # Plot tree with Type 1 and II disctinctions
 BIR_IAP_raxml_tree <- 
   ggtree(BIR_IAP_raxml_treedata, aes(color=Type, fill=Type), branch.length = "none") + 
-  geom_tiplab(aes(label=label), size = 2.2) + 
+  geom_tiplab(aes(label=Type), size = 2.2) + 
      #Edit theme
   theme(legend.position = "bottom", 
         legend.text = element_text(size=10, family="sans"),
         legend.title = element_text(size=12, family="sans")) +
-  #xlim(NA,34) + 
+  xlim(NA,35) + 
   # add circle for 90-100 instead of bootstrap values
   geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
   # add triangle for 70-89 instead of bootstrap values
@@ -1723,12 +1737,11 @@ BIR_IAP_raxml_tree <-
                                  "T2-like 4","T2-like 5","T3","T4","Unique"))
 
 # View tree with Multiple alignment side by side 
-msaplot(BIR_IAP_raxml_tree, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa", 
-        offset=9, window = c(59,80))
+#msaplot(BIR_IAP_raxml_tree, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa", 
+#        offset=9, window = c(59,80))
 
 # View MSA with ggmsa because there are more options for viewing sequence color and its easier than trying to make a geom_rect object again
 # https://cran.r-project.org/web/packages/ggmsa/vignettes/ggmsa.html#visualizing-multiple-sequence-alignments
-library(ggmsa)
 # Load AAmultiple alignment using biostrings
 #BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa", format = "fasta")
 BIR_IAP_all_MSA <- phylotools::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa")
@@ -1741,7 +1754,7 @@ BIR_IAP_raxml_treedata_tip = subset(BIR_IAP_raxml_treedata_tip, isTip)
 BIR_IAP_raxml_treedata_tip_order <- BIR_IAP_raxml_treedata_tip$label[order(BIR_IAP_raxml_treedata_tip$y, decreasing=TRUE)]
 
 # order MSA vector object using tip order 
-BIR_IAP_all_MSA <- BIR_IAP_all_MSA[match(BIR_IAP_all_MSA[,1], BIR_IAP_raxml_treedata_tip_order),] 
+BIR_IAP_all_MSA <- BIR_IAP_all_MSA[match(rev(BIR_IAP_raxml_treedata_tip_order), BIR_IAP_all_MSA[,1]),] # reverse the order to make it match when plotting 
 
 # export back to then reload in correct order
 dat2fasta(BIR_IAP_all_MSA, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA_treeorder.fa")
@@ -1752,8 +1765,8 @@ BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Docum
 BIR_IAP_all_MSA_treeorder <- ggmsa(BIR_IAP_all_MSA, start = 53, end = 85, 
       color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
       none_bg = TRUE, # keeps only the letters and not the full color background
-      posHighligthed = c(57,60, 67, 77,79,80,82,84), # specify specific positions to highlight in the alignment 
-       seq_name = TRUE # checked that the order is correct so I fixed this 
+      posHighligthed = c(57,60, 67, 76, 77,80,82,84) # specify specific positions to highlight in the alignment 
+       # seq_name = TRUE # checked that the order is correct so I fixed this 
       ) + # add the sequence name so I can check its plotting in the right order
      # increase text size
    theme(text = element_text(size=10),
@@ -1797,7 +1810,6 @@ ggsave(filename = "BIR_tree_MSA_plot.tiff", plot=last_plot(), device="tiff",
        height = 25,
        units = "in",
        dpi=300)
-# save as Tiff and edit margins in inkscape to bring closer 
 
 #### PLOT IAP DOMAIN TREE WITH THE TYPE 1 AND TYPE 2 designations ####
 
@@ -1808,34 +1820,100 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type <- left_join(BIR_XP_gff_Interpro_Domai
 
 # Join in the Type after recoding to reduce the number of levels, keeping T1, T1-like, T2, T2-like T3, T4
 BIR_domain_model_MY_CV_CG_type_updated_Type_reduced <- BIR_domain_model_MY_CV_CG_type_updated
-BIR_domain_model_MY_CV_CG_type_updated_Type_reduced$Type <- recode(BIR_domain_model_MY_CV_CG_type_updated_recoded$Type,
-                                                              "T1-like_1"="T1-like", 
-                                                              "T1-like_2"="T1-like",
-                                                              "T1_like_3"="T1-like",
-                                                              "T1_like_4"="T1-like",      
-                                                              "T2-like_1"="T2-like",
-                                                              "T2-like_2"="T2-like" ,
-                                                              "T2_like_3"="T2-like",
-                                                              "T2_like_4"="T2-like",
-                                                              "T2_like_5"="T2-like")
+BIR_domain_model_MY_CV_CG_type_updated_Type_reduced$Type <- recode(BIR_domain_model_MY_CV_CG_type_updated_Type_reduced$Type,
+                                                              "T1-like_1"="T1", 
+                                                              "T1-like_2"="T1",
+                                                              "T1_like_3"="T1",
+                                                              "T1_like_4"="T1",      
+                                                              "T2-like_1"="T2",
+                                                              "T2-like_2"="T2" ,
+                                                              "T2_like_3"="T2",
+                                                              "T2_like_4"="T2",
+                                                              "T2_like_5"="T2")
 
-colnames(BIR_domain_model_MY_CV_CG_type_updated)[1] <- "Domain_Name"
-BIR_XP_gff_Interpro_Domains_only_BIR_type <- left_join(BIR_XP_gff_Interpro_Domains_only_BIR_type, BIR_domain_model_MY_CV_CG_type_updated[,c("Domain_Name","Type")])
+colnames(BIR_domain_model_MY_CV_CG_type_updated_Type_reduced)[1] <- "Domain_Name"
+BIR_XP_gff_Interpro_Domains_only_BIR_type <- left_join(BIR_XP_gff_Interpro_Domains_only_BIR_type, BIR_domain_model_MY_CV_CG_type_updated_Type_reduced[,c("Domain_Name","Type","Species")])
 
 # Mutate type to fill in NAs with Dbxref, but still keep T2 and T1 for BIR domains
 BIR_XP_gff_Interpro_Domains_only_BIR_type <- BIR_XP_gff_Interpro_Domains_only_BIR_type %>%
   mutate(Type = case_when(
-   is.na(.$Type) ~ as.character(Dbxref), 
+    Dbxref != "\"InterPro:IPR001370\"" & is.na(.$Type) ~ as.character(Dbxref), # exclude the non classified BIR domains because these are covering up my other colors 
     TRUE ~ as.character(.$Type))) 
-
-# Set factor level order of the nodes set levels in reverse order
-BIR_XP_gff_Interpro_Domains_only_BIR_type$node <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type$node, levels = unique(BIR_XP_gff_Interpro_Domains_only_BIR_type$node)
+# this leaves some NA lines for type but thats okay they will be removed when plotting 
 
 
-BIR_XP_gff_Interpro_Domains_only_BIR_type$Type <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type$Type, 
-                                                         levels = c("\"InterPro:IPR001370\"",
-                                                                    "\"InterPro:IPR022103\"",
-                                                                    "T2", "T1","T1-like", "T2-like", "T3"
+# Add in generic BIR for proteins where there is now no BIR repeat, meaning that the BIR repeat was no identified with CDD database but with just other interproscan tools
+BIR_XP_gff_Interpro_Domains_only_BIR_type %>% filter()
+# fixing this later!
+
+# shorten the full protein line by 3300
+BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened <- BIR_XP_gff_Interpro_Domains_fullprot %>%
+  mutate(end = case_when(
+    grepl("BIRC6",alias) & end >= 3000 ~ as.numeric(.$end - 3300),
+    TRUE ~ as.numeric(end)
+  ))
+
+#  Reduce 2 BIR6 introns region, the first large region by 2500 base pairs and the second by 800  
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened <-   BIR_XP_gff_Interpro_Domains_only_BIR_type  %>% 
+  # shorten for those domains where the start position is greater than 3000 (these are the only domains affected)
+  ## fix start and end in separate mutates 
+  mutate(start = case_when(
+    grepl("BIRC6",alias) & start >= 3000 ~ as.numeric(.$start - 2500),
+    TRUE ~ as.numeric(start)
+  )) %>% 
+  mutate(end = case_when(
+    grepl("BIRC6",alias) & end >= 3000 ~ as.numeric(.$end - 2500),
+    TRUE ~ as.numeric(end)
+  )) %>% 
+  # mutate again to shorten the second region 
+  mutate(start = case_when(
+    grepl("BIRC6",alias) & start >= 1500 ~ as.numeric(.$start - 800),
+    TRUE ~ as.numeric(start)
+  )) %>% 
+  mutate(end = case_when(
+    grepl("BIRC6",alias) & end >= 1500 ~ as.numeric(.$end - 800),
+    TRUE ~ as.numeric(end)
+  ))
+
+# Add in two sets of railroad tracks 
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened %>% filter(grepl("BIRC6",alias)) %>%
+  distinct(protein_id, alias, height_start, height_end) # get the list of protein IDs to add lines for 
+BIRC6_railroad <- data.frame(protein_id = c("XP_022331415.1","XP_022331413.1","XP_022331412.1","XP_022331414.1","XP_022331416.1",
+                                            "XP_022332917.1","XP_022332915.1","XP_022332914.1","XP_022332916.1","XP_022332918.1",
+                                            "XP_019925481.1","XP_019925480.1","XP_011436597.1","XP_019925483.1","XP_019925482.1",
+                                            "XP_021363252.1","XP_022331415.1","XP_022331413.1","XP_022331412.1","XP_022331414.1",
+                                            "XP_022331416.1","XP_022332917.1","XP_022332915.1","XP_022332914.1","XP_022332916.1",
+                                            "XP_022332918.1","XP_019925481.1","XP_019925480.1","XP_011436597.1","XP_019925483.1","XP_019925482.1","XP_021363252.1"),
+                             alias = c("BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like",
+                                       "BIRC6","BIRC6","BIRC6","BIRC6","BIRC6","BIRC6-like","BIRC6-like","BIRC6-like",
+                                       "BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like","BIRC6-like",
+                                       "BIRC6","BIRC6","BIRC6","BIRC6","BIRC6","BIRC6-like"),
+                            start = c(960 ,960 ,960 ,960 ,960 ,960,960 ,960 ,960 ,960 ,960 ,960 ,960 ,960 ,960 ,960, 1220,1220,1220,1220,1220,1220,
+                                      1220,1220,1220,1220,1220,1220,1220,1220,1220,1220), 
+                            end = c(962 ,962 ,962 ,962 ,962 ,962,962 ,962 ,962 ,962 ,962 ,962 ,962 ,962 ,962 ,962 ,1223,1223,1223,1223,1223,1223,
+                                    1223,1223,1223,1223,1223,1223,1223,1223,1223,1223), 
+                            height_start = c(101.75 ,100.75 ,99.75 ,98.75 ,97.75 ,96.75 ,95.75 ,94.75 ,93.75 ,92.75 ,91.75 ,90.75 ,89.75 ,88.75 ,
+                                             87.75 ,86.75 ,101.75,100.75,99.75 ,98.75 ,97.75 ,96.75 ,95.75 ,94.75 ,93.75 ,92.75 ,91.75 ,90.75 ,89.75 ,
+                                             88.75 ,87.75 ,86.75),
+                            height_end = c(102.5,101.5,100.5,99.5,98.5,97.5,96.5,95.5,94.5,93.5,92.5,91.5,90.5,89.5,88.5,87.5,102.5,101.5,100.5,
+                                           99.5,98.5,97.5,96.5,95.5,94.5,93.5,92.5,91.5,90.5,89.5,88.5,87.5),
+                            Type = c("Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened",
+                            "Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened",
+                            "Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened",
+                            "Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened",
+                            "Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened","Intron_shortened",
+                            "Intron_shortened","Intron_shortened","Intron_shortened"))
+
+# Add in new rows 
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill <- rbind.fill(BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened, BIRC6_railroad)
+
+# Set factor level order of the nodes set levels in reverse order (already set)
+#BIR_XP_gff_Interpro_Domains_only_BIR_type$node <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type$node, levels = unique(BIR_XP_gff_Interpro_Domains_only_BIR_type$node))
+
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill$Type <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill$Type, 
+                                                         levels = c( "\"InterPro:IPR022103\"",
+                                                                    "Non_Zinc_binding", "T1","T2","T3","T4","Unique",  
+                                                                    "Intron_shortened",
                                                                     "\"InterPro:IPR036322\"",
                                                                     "\"InterPro:IPR019775\"",
                                                                     "cd16713",
@@ -1853,17 +1931,17 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type$Type <- factor(BIR_XP_gff_Interpro_Dom
                                                                     "\"InterPro:IPR011333\"",
                                                                     "\"InterPro:IPR000210\"",
                                                                     "\"InterPro:IPR011047\"",
-                                                                    "\"InterPro:IPR038765\""))
-
+                                                                    "\"InterPro:IPR038765\"",
+                                                                    "\"InterPro:IPR001370\""))
 
 ### Plot select domains 
 # Remove some domains from plotting to increase ability to see important ones 
 IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() + 
   # plot length of each protein as line
-  geom_segment(data =BIR_XP_gff_Interpro_Domains_fullprot,
+  geom_segment(data =BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened,
                aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
   # add boxes with geom_rect 
-  geom_rect(data=BIR_XP_gff_Interpro_Domains_only_BIR_type,
+  geom_rect(data=BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill,
             aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Type)) +
   #add labels
   labs(y = NULL, x = "Protein Domain Position (aa)") +
@@ -1884,17 +1962,24 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
         legend.text = element_text(size=8, family="sans"),
         legend.title = element_text(size=12, family="sans"))+
   # Change y axis ticks
-  scale_x_continuous(breaks=c(0,500,1000,1500,2000,3000), expand = c(0,0)) + 
+  scale_x_continuous(breaks=c(0,500,1000,1500,2000,2500), expand = c(0,0)) + 
   # Change domain labels 
-  scale_fill_manual(values=c("#7269da",
-                             "#4ec2d7",
-                             "#7ed6da",
+  scale_fill_manual(values=c( 
+                             "#5db8de",
+                             "#b2dbfe",
+                             "#5ba6a6",
+                             "#524ed4",
+                             "#b6eee2",
+                             "#53e1a1",
+                             "#d393d4",
+                             # "Non_Zinc_binding", "T1","T2","T3","T4","Unique",
+                             "black",
                              "#cd6137",
                              "#d27b3d",
                              "#d04d8f",
                              "#89599b",
                              "#c058c6",
-                             "#d393d4",
+                             "#8aaa75",
                              "#50803d",
                              "#a6b348",
                              "#85c967",
@@ -1907,11 +1992,12 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
                              "grey",
                              "grey",
                              "grey",
+                             "grey",
                              "grey"), 
                     name="Functional Domains",
-                    breaks=c("\"InterPro:IPR001370\"",
-                             "\"InterPro:IPR022103\"",
-                             "T2",
+                    breaks=c("\"InterPro:IPR022103\"",
+                             "Non_Zinc_binding", "T1","T2","T3","T4","Unique",
+                             "Intron_shortened",
                              "\"InterPro:IPR036322\"",
                              "\"InterPro:IPR019775\"",
                              "cd16713",
@@ -1924,9 +2010,9 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
                              "\"InterPro:IPR032171\"",
                              "\"InterPro:IPR027417\"",
                              "G3DSA:1.10.533.10"),
-                    labels=c("BIR repeat",
-                             "Baculoviral IAP repeat-containing protein 6",
-                             "BIR Type II domain",
+                    labels=c("Baculoviral IAP repeat-containing protein 6",
+                             "Non_Zinc_binding BIR", "BIR T1","BIR T2","BIR T3","BIR T4","Unique BIR",
+                             "Intron shortened",
                              "WD40-repeat-containing domain superfamily",
                              "WD40 repeat, conserved site",
                              "RING-HC_BIRC2_3_7",
@@ -2376,6 +2462,14 @@ IAP_tr_dom_collapsed_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_co
                                     ncol = 2, align="hv")
 IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_legend, ncol=1, rel_heights =c(1, 0.3))
 
+# Export plot with tree and domains aligned 
+ggsave(filename = "IAP_tr_dom_plus_legend_plot.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 15 ,
+       height = 25,
+       units = "in",
+       dpi=300)
+
 # C gig plots (not collapsed)
 Cgig_IAP_tr_dom_LFC <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, C_gig_apop_LFC_IAP_tile_plot_no_legend, ncol=3, align='h',
                                    labels = c('A', 'B', 'C'), label_size = 12)
@@ -2530,7 +2624,7 @@ C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C
   labs(x=NULL, y =NULL) +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.text.x.bottom = element_text(size=10, family="sans", face = "bold"),
+        axis.text.x.bottom = element_text(size=8, family="sans", face = "bold"),
         #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
         legend.position = "right", 
         legend.title = element_text(size=12, family="sans"), 
@@ -2538,12 +2632,12 @@ C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C
         panel.background = element_rect(fill = "transparent"),
         panel.grid.major.x = element_line(size=0.2, color="gray"),
         panel.grid.major.y = element_line(size=0.2, color="gray"),
-        strip.text.x = element_text(
-          size = 10, face = "bold")) +
+        strip.text.x = element_blank()) +
+        #strip.text.x = element_text(
+        #  size = 10, face = "bold")) +
   guides(fill=guide_legend(ncol=3, title.position="top"))
 
-# Use the no legend version to get legend for removing panels
-C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=protein_id, fill=avg_vst_counts_per_treatment)) + 
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend_facet_label <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=protein_id, fill=avg_vst_counts_per_treatment)) + 
   geom_tile() + 
   scale_fill_viridis_c(name = "Avg. Read Count", 
                        # limits = c(-11,10),
@@ -2554,15 +2648,38 @@ C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <
   labs(x=NULL, y =NULL) +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.text.x.bottom = element_text(size=10, family="sans", face = "bold"),
+        axis.text.x.bottom = element_text(size=8, family="sans", face = "bold"),
         #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
         legend.position = "none", 
         panel.background = element_rect(fill = "transparent"),
         panel.grid.major.x = element_line(size=0.2, color="gray"),
         panel.grid.major.y = element_line(size=0.2, color="gray"),
-        strip.text.x = element_text(
-          size = 10, face = "bold")) +
+  strip.text.x = element_text(
+    size = 10, face = "bold")) +
   guides(fill=guide_legend(ncol=3, title.position="top"))
+
+# Use the no legend version to get legend for removing panels
+#C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=protein_id, fill=avg_vst_counts_per_treatment)) + 
+#  geom_tile() + 
+#  scale_fill_viridis_c(name = "Avg. Read Count", 
+#                       # limits = c(-11,10),
+#                       breaks = c(0,0.5,1,2,3,4,6,8,11,12), 
+#                       option="plasma",
+#                       guide=guide_legend(), na.value = "transparent") +
+#  facet_grid(.~Experiment, scales="free",space="free", drop= TRUE) + 
+#  labs(x=NULL, y =NULL) +
+#  theme(axis.ticks.y = element_blank(), 
+#        axis.text.y = element_blank(),
+#        axis.text.x.bottom = element_text(size=8, family="sans", face = "bold"),
+#        #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
+#        legend.position = "none", 
+#        panel.background = element_rect(fill = "transparent"),
+#        panel.grid.major.x = element_line(size=0.2, color="gray"),
+#        panel.grid.major.y = element_line(size=0.2, color="gray"),
+#        strip.text.x = element_blank()) +
+#        #strip.text.x = element_text(
+#        #  size = 10, face = "bold")) +
+#  guides(fill=guide_legend(ncol=3, title.position="top"))
 
 # drop NA column with gtable (see https://stackoverflow.com/questions/40141684/suppress-na-column-when-faceting)
 Cvir_const_IAP_gt <- ggplot_gtable(ggplot_build(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend))
@@ -2571,38 +2688,6 @@ gtable_show_layout(Cvir_const_IAP_gt) # drop 13
 Cvir_const_IAP_gt2 <- Cvir_const_IAP_gt[,-13]
 #save plot as ggplot object
 C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- as.ggplot(Cvir_const_IAP_gt2)
-
-# plot heatmap of vst counts for each treatment - not collapsed
-#C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot <- ggplot(C_gig_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
-#  geom_tile() + 
-#  scale_fill_viridis_c(name = "Avg. Read Count", 
-#                       #limits = c(-11,10),
-#                       breaks = c(0,0.5,1,2,3,4,6,8,10,11,12), 
-#                       option="plasma", 
-#                       guide=guide_legend(), na.value = "transparent") +
-#  labs(x="Treatment", y =NULL) +
-#  theme(#axis.ticks.y = element_blank(), 
-#    #axis.text.y = element_blank(),
-#    axis.text.x.top = element_text(size=8, family="sans"),
-#    axis.title.x.top = element_text(size=12, family="sans"),
-#    legend.position = "bottom",
-#    legend.title = element_text(size=12, family="sans"), 
-#    legend.text = element_text(size=8, family="sans"),
-#    panel.background = element_rect(fill = "transparent"),
-#    panel.grid.major.x = element_line(size=0.2, color="gray"),
-#    panel.grid.major.y = element_line(size=0.2, color="gray")) +
-#  # put in the product name
-#  # put X limits in the same order as limits from the LFC plots 
-#  scale_x_discrete(limits = c( "Zhang_Control","V_aes_V_alg1_V_alg2","V_tub_V_ang","LPS_M_lut","Rubio_Control","Vcrass_J2_8","Vcrass_J2_9","Vtasma_LGP32",
-#                               "Vtasma_LMG20012T","Time0_control","6h_control","6h_OsHV1","12h_control","12h_OsHV1","24h_control","24h_OsHV1","48h_control",
-#                               "48h_OsHV1","120hr_control","120hr_OsHV1","AF21_Resistant_control_0h","AF21_Resistant_6h","AF21_Resistant_12h","AF21_Resistant_24h",
-#                               "AF21_Resistant_48h","AF21_Resistant_60h","AF21_Resistant_72h","AF11_Susceptible_control_0h","AF11_Susceptible_6h","AF11_Susceptible_12h","AF11_Susceptible_24h","AF11_Susceptible_48h","AF11_Susceptible_60h","AF11_Susceptible_72h"), 
-#                   labels= c("Zhang\n Control","Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nControl","Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir",
-#                             "He Time 0\n Control","He 6hr\n Control", "He OsHv-1\n 6hr","He 12hr\n Control","He OsHv-1\n 12hr", "He 24hr\n Control","He OsHv-1\n24hr",
-#                             "He 48hr\n Control","He OsHv-1\n48hr","He 120hr\n Control", "He OsHv-1\n 120hr","deLorg\nOsHV-1\n Res.Con 0hr","deLorg\nOsHV-1\n Res. 6hr","deLorg\nOsHV-1\n Res. 12hr","deLorg\nOsHV-1\n Res. 24hr" ,"deLorg\nOsHV-1\n Res. 48hr",
-#                             "deLorg\nOsHV-1\n Res. 60hr","deLorg\nOsHV-1\n Res. 72hr" ,"deLorg\nOsHV-1\n Sus. Con 0hr","deLorg\nOsHV-1\n Sus. 6hr", "deLorg\nOsHV-1\n Sus. 12hr","deLorg\nOsHV-1\n Sus. 24hr","deLorg\nOsHV-1\n Sus. 48hr" ,
-#                             "deLorg\nOsHV-1\n Sus. 60hr","deLorg\nOsHV-1\n Sus. 72hr"), position="top") +
-#  guides(fill=guide_legend(ncol=3, title.position="top"))
 
 # Edit factor levels for C. gig
 C_gig_vst_common_df_all_mat_limma_IAP_XP$Experiment <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$Experiment, levels = c("Zhang", "Rubio","He","deLorgeril_Susceptible", "deLorgeril_Resistant"), 
@@ -2630,7 +2715,7 @@ C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C
   labs(x=NULL, y =NULL) +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.text.x.bottom = element_text(size=10, family="sans", face = "bold"),
+        axis.text.x.bottom = element_text(size=8, family="sans", face = "bold"),
         #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
         legend.position = "right",
         legend.title = element_text(size=12, family="sans"), 
@@ -2638,12 +2723,34 @@ C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C
         panel.background = element_rect(fill = "transparent"),
         panel.grid.major.x = element_line(size=0.2, color="gray"),
         panel.grid.major.y = element_line(size=0.2, color="gray"),
-        strip.text.x = element_text(
-          size = 10, face = "bold")) +
+        strip.text.x = element_blank()) +
+        #strip.text.x = element_text(
+        #  size = 10, face = "bold")) +
   guides(fill=guide_legend(ncol=3, title.position="top"))
 
 # Plot without legend to use when removing NAs
-C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- ggplot(C_gig_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
+#C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- ggplot(C_gig_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
+#  geom_tile() + 
+#  scale_fill_viridis_c(name = "Avg. Read Count", 
+#                       # limits = c(-11,10),
+#                       breaks = c(0,0.5,1,2,3,4,6,8,11,12,13,14), 
+#                       option="plasma",
+#                       guide=guide_legend(), na.value = "transparent") +
+#  facet_grid(.~Experiment, scales="free",space="free", drop= TRUE) + 
+#  labs(x=NULL, y =NULL) +
+#  theme(axis.ticks.y = element_blank(), 
+#        axis.text.y = element_blank(),
+#        axis.text.x.bottom = element_text(size=10, family="sans", face = "bold"),
+#        #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
+#        legend.position = "none",
+#        panel.background = element_rect(fill = "transparent"),
+#        panel.grid.major.x = element_line(size=0.2, color="gray"),
+#        panel.grid.major.y = element_line(size=0.2, color="gray"),
+#        strip.text.x = element_text(
+#          size = 10, face = "bold")) +
+#  guides(fill=guide_legend(ncol=3, title.position="top"))
+
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend_facet_label <- ggplot(C_gig_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
   geom_tile() + 
   scale_fill_viridis_c(name = "Avg. Read Count", 
                        # limits = c(-11,10),
@@ -2654,7 +2761,7 @@ C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <
   labs(x=NULL, y =NULL) +
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.text.x.bottom = element_text(size=10, family="sans", face = "bold"),
+        axis.text.x.bottom = element_text(size=8, family="sans", face = "bold"),
         #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
         legend.position = "none",
         panel.background = element_rect(fill = "transparent"),
@@ -2695,6 +2802,9 @@ Cgig_IAP_tr_LFC_const_plus_legend <- plot_grid(Cgig_IAP_tr_LFC_const , Cgig_IAP_
 C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED)
 C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED)
 
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED + theme(legend.position = "none")
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED + theme(legend.position = "none")
+
 C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_gig_apop_LFC_IAP_tile_plot_COLLAPSED)
 C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_gig_apop_LFC_IAP_tile_plot_COLLAPSED + theme(legend.position = "none")
 
@@ -2705,6 +2815,7 @@ C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_vir_apop_LFC_IAP_tile_plot
 IAP_tree_sety_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend)
 IAP_const_sety_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend)
 
+# this doesn't seem to work correctly for when the second plot has faceting, trying it the other way
 Cvir_IAP_COLLAPSED_tr_LFC_const <- plot_grid(IAP_tree_sety_collapsed_no_legend, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend, IAP_const_sety_collapsed_no_legend, ncol=3, align='h', axis='b')
 Cvir_IAP_COLLAPSED_tr_LFC_const_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_legend, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend,
                                           ncol = 3, align="hv")
@@ -2716,19 +2827,67 @@ Cgig_IAP_COLLAPSED_tr_LFC_const_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_
 Cgig_IAP_COLLAPSED_tr_LFC_const_plus_legend <- plot_grid(Cgig_IAP_COLLAPSED_tr_LFC_const , Cgig_IAP_COLLAPSED_tr_LFC_const_legend , ncol=1, rel_heights =c(1, 0.3))
 
 ### Plot collapsed tree with LFC side by side
+# need to remove facet_grid text to get plotting to work, will add back in labels in postprocessing
+Cvir_LFC_nostrp <- C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend + theme(strip.text.x = element_blank())
+Cgig_LFC_nostrp <- C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend + theme(strip.text.x = element_blank())
+tree_test <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(Cvir_LFC_nostrp)
 
-IAP_Tree_LFC_Cvir_Cgig <- plot_grid(IAP_tree_sety_collapsed_no_legend, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend, C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend,  ncol=3, axis='b')
+IAP_Tree_LFC_Cvir_Cgig <- plot_grid(tree_test, Cvir_LFC_nostrp , Cgig_LFC_nostrp,  ncol=3, align="h", axis="b" )
 IAP_Tree_LFC_Cvir_Cgig_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_legend,C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_legend,
                                            ncol = 3, align="hv")
 IAP_Tree_LFC_Cvir_Cgig_plus_legend <- plot_grid(IAP_Tree_LFC_Cvir_Cgig, IAP_Tree_LFC_Cvir_Cgig_legend,  ncol=1, rel_heights =c(1, 0.3))
 
-### Plot collapsed tree with const. expression side by side
+# Export to file full plot
+ggsave(filename = "IAP_tr_LFC_Cvir_Cgig_plot.tiff", plot=IAP_Tree_LFC_Cvir_Cgig_plus_legend, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 30 ,
+       height = 15,
+       units = "in",
+       dpi=300)
 
-IAP_Tree_const_Cvir_Cgig <- plot_grid(IAP_const_sety_collapsed_no_legend, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm, C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm,  ncol=3, align='h', axis='b')
-IAP_Tree_const_Cvir_Cgig_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend,C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend,
+# export to file the LFC plots without the tree so I can get the grouping labels
+# Export to file 
+Cvir_LFC <- C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend +  theme(legend.text = element_text(size=14), face= "bold")
+Cgig_LFC <- C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend + theme(legend.text = element_text(size=14), face= "bold")
+
+IAP_LFC_Cvir_Cgig <- plot_grid(Cvir_LFC, Cgig_LFC,  ncol=2, align="h", axis="b" )
+ggsave(filename = "IAP_LFC_Cvir_Cgig_plot.tiff", plot=IAP_LFC_Cvir_Cgig, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 20 ,
+       height = 15,
+       units = "in",
+       dpi=300)
+
+### Plot collapsed tree with const. expression side by side
+tree_test2 <-  IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend)
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend
+
+
+IAP_Tree_const_Cvir_Cgig <- plot_grid(tree_test2, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend, 
+                                      C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend,  ncol=3, align='h', axis='b')
+IAP_Tree_const_Cvir_Cgig_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend,
                                              C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_legend,
                                            ncol = 3, align="hv")
-IAP_Tree_const_Cvir_Cgig_plus_legend <- plot_grid(IAP_Tree_LFC_Cvir_Cgig, IAP_Tree_LFC_Cvir_Cgig_legend,  ncol=1, rel_heights =c(1, 0.3))
+IAP_Tree_const_Cvir_Cgig_plus_legend <- plot_grid(IAP_Tree_const_Cvir_Cgig, IAP_Tree_const_Cvir_Cgig_legend,  ncol=1, rel_heights =c(1, 0.3))
+
+# Export to file full plot
+ggsave(filename = "IAP_tr_const_Cvir_Cgig_plot.tiff", plot=IAP_Tree_const_Cvir_Cgig_plus_legend, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 40 ,
+       height = 15,
+       units = "in",
+       dpi=300)
+
+# export LFCs with the facet labels
+IAP_Tree_const_Cvir_Cgig_labels <- plot_grid(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend_facet_label, 
+                                      C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend_facet_label,  ncol=2, align='h', axis='b')
+ggsave(filename = "IAP_Tree_const_Cvir_Cgig_label_only.tiff", plot=IAP_Tree_const_Cvir_Cgig_labels, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 40 ,
+       height = 15,
+       units = "in",
+       dpi=300)
 
 
 #### PLOT FULL GIMAP PROTEIN TREE ####
