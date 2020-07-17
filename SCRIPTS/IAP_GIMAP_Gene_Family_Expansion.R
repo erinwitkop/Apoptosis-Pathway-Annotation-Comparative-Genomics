@@ -10,7 +10,6 @@ library(phylotools)
 library(treeio)
 library(tidytree)
 library(ggimage)
-library(plyr)
 library(tidyverse)
 library(tidytext)
 library(rtracklayer)
@@ -1004,6 +1003,28 @@ IAP_gene_remove <- c("LOC111111659",
                      "LOC111114070")
 BIR_XP_gff_species_join_haplotig_collapsed <- BIR_XP_gff_species_join[(!BIR_XP_gff_species_join$gene %in%  IAP_gene_remove),]
 
+### Get Gene list after collapsing IAP genes ####
+All_mollusc_IAP_gene_list_after_haplotig_collapsed <- BIR_XP_gff_species_join_haplotig_collapsed %>%
+  ungroup() %>%
+  mutate(gene_locus_tag = case_when(
+    is.na(.$gene) ~ locus_tag, 
+    TRUE ~ gene)) %>% 
+  distinct(gene_locus_tag, Species) %>% 
+  count(Species) %>%
+  arrange(desc(n))
+# Use this table for paper
+
+# How many total proteins and total uncharacterized for C. virginica
+BIR_XP_gff_species_join_haplotig_collapsed %>%
+  ungroup() %>%
+  mutate(gene_locus_tag = case_when(
+    is.na(.$gene) ~ locus_tag, 
+    TRUE ~ gene)) %>% 
+  filter(Species == "Crassostrea_virginica") %>% 
+  #grepl("uncharacterized", product)) %>%
+count() %>% 
+  arrange(desc(n)) # 39 uncharacterized
+
 # Create collapsed data frame from the original MAFFT list where all the exact identical protein sequences from genes were removed (when CD-Hit was run only removing 100% identical sequences)
 BIR_dup_seq_rm_kept_haplotig_collapsed <- BIR_dup_seq_rm_kept[(! BIR_dup_seq_rm_kept$gene %in%  IAP_gene_remove),]
 
@@ -1015,8 +1036,9 @@ BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG <- BIR_dup_seq_rm_kept_haplotig_
 write.table(unique(BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG$protein_id), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG.txt",
             quote=FALSE, row.names=FALSE, col.names=FALSE)
 
-#### EXPORT PROTEIN LIST OF IAP AND GIMAP COLLAPSED GENES FOR DESEQ COMPARISON ####
+### EXPORT PROTEIN LIST OF IAP AND GIMAP COLLAPSED GENES FOR DESEQ COMPARISON ###
 
+#### PLOT IAP GENE TABLE WITH FULL SPECIES TREE ####
 
 
 #### PLOT FULL IAP PROTEIN TREE ####
@@ -1063,7 +1085,7 @@ IAP_raxml_treedata <- as.treedata(IAP_raxml_tibble)
 # save treedata
 save(IAP_raxml_treedata, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_raxml_treedata.Rdata")
 
-# Plot circular tree
+## Plot circular protein tree to use for paper ##
 IAP_raxml_treedata_circular_product <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
   geom_tiplab2(aes(label=alias,angle=angle), size =1.8, offset=.5) + # geom_tiplab2 flips the labels correctly
   #Edit theme
@@ -1071,6 +1093,12 @@ theme(legend.position = "bottom",
       legend.text = element_text(face = "italic", size=8, family="sans"),
       legend.title = element_text(size=12, family="sans")) +
   #xlim(-100,100)  +
+  # add circle for 90-100 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  # add triangle for 70-89 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  # add upside down traingle for 50-69 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
   # fix legend appearance
   guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")) ) + # need to override aes to get rid of "a"
   scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32",  "#a68340",
@@ -1087,20 +1115,36 @@ ggsave(filename = "IAP_full_protein_circular_tree.tiff", plot=IAP_raxml_treedata
        units = "in",
        dpi=300)
 
-# Plot normal tree to use with heatmap
-IAP_raxml_treedata_tree_product <- ggtree(IAP_raxml_treedata, aes(color=Species)) + 
-  geom_tiplab(aes(label=product)) + 
-  theme(legend.position = "right", legend.text = element_text(face = "italic"))  
+## Plot circular gene tree to use for paper ##
+IAP_raxml_treedata_circular_gene <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
+  geom_tiplab2(aes(label=gene_locus_tag,angle=angle), size =1.8, offset=.5) + # geom_tiplab2 flips the labels correctly
+  #Edit theme
+  theme(legend.position = "bottom", 
+        legend.text = element_text(face = "italic", size=8, family="sans"),
+        legend.title = element_text(size=12, family="sans")) +
+  #xlim(-100,100)  +
+  # fix legend appearance
+  # add circle for 90-100 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  # add triangle for 70-89 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  # add upside down traingle for 50-69 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")) ) + # need to override aes to get rid of "a"
+  scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32",  "#a68340",
+                                                 "#a3c763", "#c257b0", "#c083d0","#59a1cf","#c2134a","#ead76b"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis", 
+                                                                                                                                             "Elysia_chlorotica","Lottia_gigantea", "Octopus_bimaculoides", "Octopus_vulgaris", "Pomacea_canaliculata", "Biomphalaria_glabrata","Aplysia_californica"),
+                      labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis", 
+                                 "Elysia chlorotica","Lottia gigantea", "Octopus bimaculoides", "Octopus vulgaris", "Pomacea canaliculata", "Biomphalaria glabrata", "Aplysia californica")) 
 
-# Plot normal tree with gene labels
-ggtree(IAP_raxml_treedata, aes(color=Species)) + 
-  geom_tiplab(aes(label=gene_locus_tag)) + 
-  theme(legend.position = "right", legend.text = element_text(face = "italic"))  
+# Export plot to file for summary powerpoint - July 12th, 2020 
+ggsave(filename = "IAP_full_gene_circular_tree.tiff", plot=IAP_raxml_treedata_circular_gene, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 10 ,
+       height = 10,
+       units = "in",
+       dpi=300)
 
-# Plot Protein tree
-ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
-  geom_tiplab2(aes(label=alias,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
-  theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-80,80)  
 
 # PLOT AS GENE TREES TO SEARCH FOR POTENTIAL ARTIFACTS
 IAP_raxml_treedata_circular_gene <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
@@ -1301,6 +1345,56 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <-
   scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
                       labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
   guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
+
+# Plot collapsed tree with Gene labels
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_gene <- 
+  ggtree(IAP_MY_CV_CG_raxml_treedata_collapsed, aes(color=Species, fill=Species),  branch.length = "none") + 
+  geom_tiplab(aes(label=gene), fontface="bold", size =2.0, offset=0) + # geom_tiplab2 flips the labels correctly
+  # add circle for 90-100 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  # add triangle for 70-89 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  # add upside down traingle for 50-69 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  # Add shape for tips removed (see IAP_shape_node above)
+  geom_point2(aes(subset=(node==12)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==13)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==36)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==37)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==48)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==91)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==92)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==97)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==108)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==109)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==113)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==120)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==137)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==138)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==139)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==140)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==141)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==142)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==143)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==147)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==150)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==179)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
+  #Edit theme
+  theme(legend.position = "bottom", 
+        legend.text = element_text(face = "italic", size=8, family="sans"),
+        legend.title = element_text(size=12, family="sans")) +
+  #geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 2.0, fontface="bold") + # allows for subset
+  xlim(-70,31.8) + #change scaling so branch lengths are smaller and all alias labels are showing
+  scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
+                      labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
+  guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
+
+ggsave(filename = "IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_gene.tiff", plot=IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_gene, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 15 ,
+       height = 25,
+       units = "in",
+       dpi=300)
 
 #### PLOT IAP DOMAIN STRUCTURE AND COMBINE WITH TREE ####
 # Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
@@ -1682,7 +1776,6 @@ BIR_domain_model_MY_CV_CG_type_updated_stats <- BIR_domain_model_MY_CV_CG_type_u
 #dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_not_ID_MSA[,c("seq.name","seq.text")], outfile="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_non_T1_T2_Cvir_Cgig_MSA_notID.fa")
 # Viewing now in UGENE
 
-# Ran RAxML
 ## View RAxML All BIR tree 
 BIR_IAP_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_model_prot_IAP_prot_BIR_seq_MSA_RAxML")
 BIR_IAP_raxml
@@ -1696,81 +1789,87 @@ class(BIR_domain_model_MY_CV_CG_type_updated$label)
 class(BIR_IAP_raxml_tibble$label)
 BIR_IAP_raxml_tibble <- left_join(BIR_IAP_raxml_tibble, BIR_domain_model_MY_CV_CG_type_updated[,c("Species","label","Type")])
 
+# Make a shortened species column
+BIR_IAP_raxml_tibble$Species_shortened <- recode(BIR_IAP_raxml_tibble$Species, "Crassostrea_gigas"="C. gigas",
+                                                 "Crassostrea_virginica"="C. virginica", "Mizuhopecten_yessoensis"="M. yessoensis",
+                                                 "Homo_sapiens"="H. sapiens")
+
 # Convert to treedata
 BIR_IAP_raxml_treedata <- as.treedata(BIR_IAP_raxml_tibble)
 
 # Plot tree with Type 1 and II disctinctions
 BIR_IAP_raxml_tree <- 
   ggtree(BIR_IAP_raxml_treedata, aes(color=Type, fill=Type), branch.length = "none") + 
-  geom_tiplab(aes(label=Type), size = 2.2) + 
+  geom_tiplab(aes(label=label), size = 2.3, offset = 0.1) + 
      #Edit theme
-  theme(legend.position = "bottom", 
+  theme(legend.position = c(0.25, 0.96), 
         legend.text = element_text(size=10, family="sans"),
         legend.title = element_text(size=12, family="sans")) +
-  xlim(NA,35) + 
+  xlim(NA,45) + 
   # add circle for 90-100 instead of bootstrap values
   geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
   # add triangle for 70-89 instead of bootstrap values
   geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
   # add upside down traingle for 50-69 instead of bootstrap values
   geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
-    guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")) ) + # need to override aes to get rid of "a" 
+  # change position of legend title and spread across columns 
+  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = ""))) + # need to override aes to get rid of "a" 
   # change colors for species to match other trees 
-  scale_colour_manual(name = "Type", values=c("#d14e3a",
-                                              "#65c95d",
-                                              "#cb958a",
-                                              "#c4d648",
-                                              "#9944cd",
-                                              "#c6933b",
-                                              "#7095b9",
-                                              "#77cebd",
-                                              "#bcca90",
-                                              "#753a32",
-                                              "#ca96cd",
-                                              "#4a6139",
-                                              "#6257b3",
-                                              "#422d4f",
-                                              "#c6458b"), na.value="grey46",
+  scale_colour_manual(name = "Type", values=c("#d14e3a", # "Non_Zinc_binding", 
+                                              "#65c95d", # "T1",
+                                              "#cb958a", # "T1-like_1", 
+                                              "#c4d648", # "T1-like_2",
+                                              "#9944cd", # "T1_like_3",
+                                              "#c6933b", # "T1_like_4",
+                                              "#7095b9", # "T2",
+                                              "#77cebd", # "T2-like_1",
+                                              "#bcca90", # "T2-like_2" ,
+                                              "#753a32", # "T2_like_3",       
+                                              "#ca96cd", # "T2_like_4",
+                                              "#4a6139", # "T2_like_5",
+                                              "#6257b3", # "T3",
+                                              "#422d4f", # "T4",
+                                              "#c6458b"),# "Unique"
+                                              na.value="grey46",
                       breaks=c("Non_Zinc_binding", "T1","T1-like_1", "T1-like_2","T1_like_3","T1_like_4","T2","T2-like_1","T2-like_2" ,"T2_like_3",       
                                "T2_like_4","T2_like_5","T3","T4","Unique"),
-                      labels = c("Non Zinc binding", "Type 1","T1-like 1", "T1-like 2","T1-like 3","T1-like 4","T2","T2-like 1","T2-like 2" ,"T2-like 3",       
-                                 "T2-like 4","T2-like 5","T3","T4","Unique"))
+                      labels = c("Non Zinc-binding", "Type 1","Type 1-like 1", "Type 1-like 2","Type 1-like 3","Type 1-like 4","Type 2","Type 2-like 1","Type 2-like 2" ,"Type 2-like 3",       
+                                 "Type 2-like 4","Type 2-like 5","Type 3","Type 4","Uncharacterized/\nModel Organism BIR"))
 
-# View tree with Multiple alignment side by side 
-#msaplot(BIR_IAP_raxml_tree, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa", 
-#        offset=9, window = c(59,80))
+## ggsave BIR tree only
+#ggsave(filename = "BIR_tree_type.tiff", plot=BIR_IAP_raxml_tree, device="tiff",
+#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+#       width = 10 ,
+#       height = 25,
+#       units = "in",
+#       dpi=300)
 
-# View MSA with ggmsa because there are more options for viewing sequence color and its easier than trying to make a geom_rect object again
-# https://cran.r-project.org/web/packages/ggmsa/vignettes/ggmsa.html#visualizing-multiple-sequence-alignments
-# Load AAmultiple alignment using biostrings
-#BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa", format = "fasta")
-BIR_IAP_all_MSA <- phylotools::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa")
-
-# Reorder the multiple alignment to be the order from the RAxML tree 
-# get tip order of tree 
-# Get the node order from original GIMAP tree
-BIR_IAP_raxml_treedata_tip  <- fortify(BIR_IAP_raxml_treedata )
-BIR_IAP_raxml_treedata_tip = subset(BIR_IAP_raxml_treedata_tip, isTip)
-BIR_IAP_raxml_treedata_tip_order <- BIR_IAP_raxml_treedata_tip$label[order(BIR_IAP_raxml_treedata_tip$y, decreasing=TRUE)]
-
-# order MSA vector object using tip order 
-BIR_IAP_all_MSA <- BIR_IAP_all_MSA[match(rev(BIR_IAP_raxml_treedata_tip_order), BIR_IAP_all_MSA[,1]),] # reverse the order to make it match when plotting 
-
-# export back to then reload in correct order
-dat2fasta(BIR_IAP_all_MSA, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA_treeorder.fa")
-
-# reload as AAMultipleAlignment object 
-BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA_treeorder.fa", format = "fasta")
-
-BIR_IAP_all_MSA_treeorder <- ggmsa(BIR_IAP_all_MSA, start = 53, end = 85, 
-      color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
-      none_bg = TRUE, # keeps only the letters and not the full color background
-      posHighligthed = c(57,60, 67, 76, 77,80,82,84) # specify specific positions to highlight in the alignment 
-       # seq_name = TRUE # checked that the order is correct so I fixed this 
-      ) + # add the sequence name so I can check its plotting in the right order
-     # increase text size
-   theme(text = element_text(size=10),
-         plot.margin = unit(c(0, 0, 0, 0), "cm")) #remove margins
+# Plot tree with Type 1 and II disctinctions and fill with species
+ggtree(BIR_IAP_raxml_treedata, 
+       #aes(color=Type, fill=Type), 
+       branch.length = "none") + 
+  geom_tiplab(aes(label=Species_shortened), size = 2.3, offset = 0.1) + 
+  #Edit theme
+  theme(legend.position = c(0.25, 0.96), 
+        legend.text = element_text(size=10, family="sans"),
+        legend.title = element_text(size=12, family="sans")) +
+  xlim(NA,45) + 
+  # add circle for 90-100 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  # add triangle for 70-89 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  # add upside down traingle for 50-69 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  # change position of legend title and spread across columns 
+  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")))  # need to override aes to get rid of "a" 
+  
+## ggsave BIR tree only
+ggsave(filename = "BIR_tree_type_species.tiff", plot=last_plot(), device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 10 ,
+       height = 25,
+       units = "in",
+       dpi=300)
 
 ### View the BIR tree of IAP domains that didn't match consensus Type 1 and Type II above ###
 #BIR_IAP_non_T2_T1_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_domain_model_MY_CV_CG_non_T1_T2_MSA")
@@ -1797,19 +1896,69 @@ BIR_IAP_all_MSA_treeorder <- ggmsa(BIR_IAP_all_MSA, start = 53, end = 85,
 #msaplot(BIR_IAP_non_T2_T1_raxml_tree, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_non_T1_T2_MSA.fa",
 # offset=9)
 
-### Plot RAxML tree with the MSA using cowplot and aplot
+## GENERATE MSA FIGURE  ##
+# View MSA with ggmsa because there are more options for viewing sequence color and its easier than trying to make a geom_rect object again
+# https://cran.r-project.org/web/packages/ggmsa/vignettes/ggmsa.html#visualizing-multiple-sequence-alignments
+# ggtree author mentions usage of this package: https://github.com/GuangchuangYu/ggtree-current-protocols, however, my plot grid way makes it 
+    # easier to use
 
-BIR_tree <- BIR_IAP_raxml_tree + aplot::ylim2(BIR_IAP_all_MSA_treeorder)
+# Load AAmultiple alignment using biostrings
+#BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa", format = "fasta")
+BIR_IAP_all_MSA <- phylotools::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa")
 
-# plot tree and the alignment
-plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="hv", axis ="b")
-# Remove in between white space in plot 
-ggsave(filename = "BIR_tree_MSA_plot.tiff", plot=last_plot(), device="tiff",
+# Reorder the multiple alignment to be the order from the RAxML tree 
+# get tip order of tree 
+# Get the node order from original GIMAP tree
+BIR_IAP_raxml_treedata_tip  <- fortify(BIR_IAP_raxml_treedata )
+BIR_IAP_raxml_treedata_tip = subset(BIR_IAP_raxml_treedata_tip, isTip)
+BIR_IAP_raxml_treedata_tip_order <- BIR_IAP_raxml_treedata_tip$label[order(BIR_IAP_raxml_treedata_tip$y, decreasing=TRUE)]
+
+# order MSA vector object using tip order 
+BIR_IAP_all_MSA <- BIR_IAP_all_MSA[match(rev(BIR_IAP_raxml_treedata_tip_order), BIR_IAP_all_MSA[,1]),] # reverse the order to make it match when plotting 
+
+# export back to then reload in correct order
+dat2fasta(BIR_IAP_all_MSA, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA_treeorder.fa")
+
+# reload as AAMultipleAlignment object 
+BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA_treeorder.fa", format = "fasta")
+
+# Plot MSA with ggmsa
+BIR_IAP_all_MSA_treeorder <- ggmsa(BIR_IAP_all_MSA, start = 53, end = 85, 
+      color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
+      none_bg = TRUE, # keeps only the letters and not the full color background
+      posHighligthed = c(57,60, 67, 76, 77,80,82,84), # specify specific positions to highlight in the alignment 
+      seq_name = FALSE) +  # checked that the order is correct so I fixed this, add the sequence name so I can check its plotting in the right order
+     # increase text size
+   theme(text = element_text(size=10),
+         plot.margin = unit(c(0, 0, 0, 0), "cm")) #remove margins
+
+## save msa only
+ggsave(filename = "BIR_type_MSA_plot.tiff", plot=BIR_IAP_all_MSA_treeorder, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-       width = 15 ,
+       width = 10 ,
        height = 25,
        units = "in",
        dpi=300)
+
+
+## Plotting the tree with the MSA side by side (decided to not go this route because axis didn't line up well with this method)
+# Plot tree with same axis spacing as the MSA
+BIR_tree <- BIR_IAP_raxml_tree +
+  aplot::ylim2(BIR_IAP_all_MSA_treeorder)
+  
+# plot tree and the alignment using plot_grid 
+BIR_tree_type_MSA <- plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="hv", axis ="b",
+                               labels = c("A","B"))
+
+# Remove in between white space in plot 
+#ggsave(filename = "BIR_tree_MSA_plot.tiff", plot=last_plot(), device="tiff",
+#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+#       width = 16 ,
+#       height = 25,
+#       units = "in",
+#       dpi=300)
+
+# In inkscape you can see the x axis are not well lined up due to extra space in the MSA. Doing some post processing in Inkscape
 
 #### PLOT IAP DOMAIN TREE WITH THE TYPE 1 AND TYPE 2 designations ####
 
@@ -1935,11 +2084,30 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill$Type <- factor(BIR
                                                                     "\"InterPro:IPR001370\""))
 
 ### Plot select domains 
+# get rows we want to add star to - these do not have a type designation
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_with_Type <- 
+  BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>% 
+  filter(!is.na(Type)) %>% 
+  distinct(protein_id)
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_no_Type <- BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill[!(BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill$protein_id %in% 
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_with_Type$protein_id), ] %>% distinct(protein_id)
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_no_Type
+# Get coordinates for adding star
+BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_coord <- BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened[BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened$protein_id %in% BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_no_Type$protein_id,] %>%
+  select(protein_id, end, node)
+
 # Remove some domains from plotting to increase ability to see important ones 
 IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() + 
   # plot length of each protein as line
   geom_segment(data =BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened,
                aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
+  # add stars for all lines where there is not a "Type" listed  - meaning that these have BIR domains found by interproscan but not CDD search
+  # do this after the initial geom_segment so that the levels are preserved below for the domains
+  geom_point(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened[BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened$protein_id %in% BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_no_Type$protein_id,],
+             aes(x=as.numeric(end), y = as.numeric(node)),
+             color="black",
+             size=6,
+             shape= "*") +
   # add boxes with geom_rect 
   geom_rect(data=BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill,
             aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Type)) +
@@ -1983,7 +2151,7 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
                              "#50803d",
                              "#a6b348",
                              "#85c967",
-                             "#d54787",
+                             "#b77853",
                              "#55b793",
                              "#dadd48",
                              "grey",
@@ -2011,22 +2179,27 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
                              "\"InterPro:IPR027417\"",
                              "G3DSA:1.10.533.10"),
                     labels=c("Baculoviral IAP repeat-containing protein 6",
-                             "Non_Zinc_binding BIR", "BIR T1","BIR T2","BIR T3","BIR T4","Unique BIR",
-                             "Intron shortened",
+                             "Non-Zinc-binding BIR", "BIR Type 1","BIR Type 2","BIR Type 3","BIR Type 4","Uncharacterized BIR",
+                             "Intron not to scale",
                              "WD40-repeat-containing domain superfamily",
                              "WD40 repeat, conserved site",
-                             "RING-HC_BIRC2_3_7",
+                             "RING-HC BIRC2/3/7",
                              "Zinc finger, RING/FYVE/PHD-type",
                              "Zinc finger, RING-type",
                              "Ubiquitin-conjugating enzyme E2",
                              "Ubiquitin-conjugating enzyme/RWD-like",
                              "Ubiquitin-associated domain",
-                             "UBA_IAPs",
+                             "Ubiquitin-association domain of IAPs",
                              "C-terminal of Roc (COR) domain,",
                              "P-loop containing nucleoside triphosphate hydrolase",
                              "Death domain, Fas")) +
   # change number of legend columns and put the legend title on top
-  guides(fill=guide_legend(ncol=3, title.position="top"))
+  guides(fill=guide_legend(ncol=3, title.position="top")) 
+
+### Statistics for looking at Domains ###
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
+  count(Species)
+
 
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
 load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_vir_apop_LFC_IAP.Rdata")
@@ -2189,7 +2362,7 @@ C_gig_apop_LFC_IAP_full_XP$node <- factor(C_gig_apop_LFC_IAP_full_XP$node, level
 #  guides(fill=guide_legend(ncol=4, title.position="top"))
 
 C_vir_apop_LFC_IAP_full_XP$experiment <- factor(C_vir_apop_LFC_IAP_full_XP$experiment, levels=c("Hatchery_Probiotic_RI",  "Lab_Pro_RE22","ROD", "Dermo", "NA"), 
-                                                labels= c("Hatchery\nProbiotic RI",  "Lab Probiotic\nRE22","ROD", "Dermo", "NA"))
+                                                labels= c("Hatchery\nProbiotic RI",  "Lab Probiotic\n or RE22","ROD", "Dermo", "NA"))
 C_vir_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_vir_apop_LFC_IAP_full_XP$group_by_sim, levels=c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
                           "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
                           "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ),
@@ -2452,15 +2625,29 @@ Cvir_IAP_tr_dom_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend,
                                         ncol = 2, align="hv")
 Cvir_IAP_tr_dom_plus_legend <- plot_grid(Cvir_IAP_tr_dom, Cvir_IAP_tr_dom_legend, ncol=1, rel_heights =c(1, 0.3))
 
-# Cvir_Cgig MY collapsed tree and domains
+# C gig plots (not collapsed)
+Cgig_IAP_tr_dom_LFC <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, C_gig_apop_LFC_IAP_tile_plot_no_legend, ncol=3, align='h',
+                                   labels = c('A', 'B', 'C'), label_size = 12)
+Cgig_IAP_tr_dom_LFC_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, IAP_Interproscan_domain_plot_legend,C_gig_apop_LFC_IAP_tile_plot_legend, 
+                                          ncol = 3, align="hv")
+Cgig_IAP_tr_dom_LFC_plus_legend <- plot_grid(Cgig_IAP_tr_dom_LFC, Cgig_IAP_tr_dom_LFC_legend, ncol=1, rel_heights =c(1, 0.3))
+
+
+### Cvir_Cgig MY collapsed tree and domains ##
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed)
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + theme(legend.position='none')
 p3_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(IAP_Interproscan_domain_plot_no_legend)
 
 IAP_tr_dom_collapsed <- plot_grid(p3_collapsed_no_legend, IAP_Interproscan_domain_plot_no_legend, ncol=2, align='h')
 IAP_tr_dom_collapsed_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, IAP_Interproscan_domain_plot_legend,
-                                    ncol = 2, align="hv")
+                                         ncol = 2, align="hv")
+
+# Create combined figure for publication
 IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_legend, ncol=1, rel_heights =c(1, 0.3))
+
+# Add transparent boxes on tree and domains 
+
+
 
 # Export plot with tree and domains aligned 
 ggsave(filename = "IAP_tr_dom_plus_legend_plot.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
@@ -2470,12 +2657,6 @@ ggsave(filename = "IAP_tr_dom_plus_legend_plot.tiff", plot=IAP_tr_dom_plus_legen
        units = "in",
        dpi=300)
 
-# C gig plots (not collapsed)
-Cgig_IAP_tr_dom_LFC <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, C_gig_apop_LFC_IAP_tile_plot_no_legend, ncol=3, align='h',
-                                   labels = c('A', 'B', 'C'), label_size = 12)
-Cgig_IAP_tr_dom_LFC_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, IAP_Interproscan_domain_plot_legend,C_gig_apop_LFC_IAP_tile_plot_legend, 
-                                          ncol = 3, align="hv")
-Cgig_IAP_tr_dom_LFC_plus_legend <- plot_grid(Cgig_IAP_tr_dom_LFC, Cgig_IAP_tr_dom_LFC_legend, ncol=1, rel_heights =c(1, 0.3))
 
 #### PLOT CONSTITUTIVELY EXPRESSED IAPS ####
 
@@ -2600,7 +2781,7 @@ C_vir_vst_common_df_all_mat_limma_IAP_XP$Experiment <- recode_factor(C_vir_vst_c
                                                               "Dermo_Susceptible"="Dermo",
                                                               "Dermo_Tolerant"="Dermo")
 C_vir_vst_common_df_all_mat_limma_IAP_XP$Experiment <- factor(C_vir_vst_common_df_all_mat_limma_IAP_XP$Experiment, levels=c("Hatchery_Probiotic", "Pro_RE22","ROD","Dermo", "NA"),
-                                                              labels=c("Hatchery\nProbiotic RI",  "Lab Probiotic\nRE22","ROD", "Dermo","NA"))
+                                                              labels=c("Hatchery\nProbiotic RI",  "Lab Probiotic\n or RE22","ROD", "Dermo","NA"))
 
 C_vir_vst_common_df_all_mat_limma_IAP_XP$Condition <- factor(C_vir_vst_common_df_all_mat_limma_IAP_XP$Condition, levels=c("Untreated_control","Bacillus_pumilus_RI0695", "Pro_RE22_Control_no_treatment", "Bacillus_pumilus_RI06_95_exposure_6h","Bacillus_pumilus_RI06_95_exposure_24h",
                                                                                                 "Phaeobacter_inhibens_S4_exposure_6h", "Phaeobacter_inhibens_S4_exposure_24h", "Vibrio_coralliilyticus_RE22_exposure_6h",
@@ -2889,6 +3070,52 @@ ggsave(filename = "IAP_Tree_const_Cvir_Cgig_label_only.tiff", plot=IAP_Tree_cons
        units = "in",
        dpi=300)
 
+#### IAP STATS LFC, CONST, DOMAINS ####
+
+# Combine tables to get stats about which domain types are present 
+# First combine LFC and const
+C_vir_apop_LFC_IAP_full_XP_stats <- C_vir_apop_LFC_IAP_full_XP %>% 
+  filter(!is.na(Species)) %>%
+  mutate(Data_Type = "LFC") %>% select(protein_id, experiment, Species,alias, Data_Type)
+C_gig_apop_LFC_IAP_full_XP_stats <- C_gig_apop_LFC_IAP_full_XP %>% 
+filter(!is.na(Species)) %>%
+mutate(Data_Type = "LFC") %>% select(protein_id, experiment, Species,alias, Data_Type)
+C_vir_vst_common_df_all_mat_limma_IAP_XP_stats <- C_vir_vst_common_df_all_mat_limma_IAP_XP  %>% 
+filter(!is.na(Species)) %>%
+  mutate(Data_Type = "Const") %>% select(protein_id, Experiment, Species,alias, Data_Type)
+colnames(C_vir_vst_common_df_all_mat_limma_IAP_XP_stats)[2] <- "experiment"
+C_gig_vst_common_df_all_mat_limma_IAP_XP_stats <- C_gig_vst_common_df_all_mat_limma_IAP_XP %>% 
+filter(!is.na(Species)) %>%
+  mutate(Data_Type = "Const") %>% select(protein_id, Experiment, Species,alias, Data_Type)
+colnames(C_gig_vst_common_df_all_mat_limma_IAP_XP_stats)[2] <- "experiment"
+
+# Rbind all together
+LFC_cont_comb <- rbind(C_vir_apop_LFC_IAP_full_XP_stats, C_gig_apop_LFC_IAP_full_XP_stats, C_vir_vst_common_df_all_mat_limma_IAP_XP_stats,
+                       C_gig_vst_common_df_all_mat_limma_IAP_XP_stats)
+# check experiment levels
+levels(factor(LFC_cont_comb$experiment))
+
+#Combine domain info into 1
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_type_comb <- BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
+  group_by(protein_id) %>% 
+  filter(!is.na(Type)) %>% 
+  arrange(start) %>% 
+  mutate(Type_comb = paste(unique(Type), collapse="_")) %>% 
+  ungroup() %>% 
+  distinct( protein_id, Type_comb, alias)
+  
+# join all together
+LFC_cont_comb_BIR_Type <- left_join(LFC_cont_comb, BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_type_comb) %>% 
+  distinct()
+
+# Explore different groupings 
+LFC_cont_comb_BIR_Type %>% group_by(Type_comb, Data_Type, experiment) %>% count() %>% 
+  ggplot(aes(x=Data_Type, y = n, fill = Type_comb, size = 4)) + 
+  geom_col(position="dodge") + 
+  theme(axis.text.x = element_text(hjust= 1, angle=90),
+        legend.position = "bottom") + 
+  facet_grid(.~experiment) + 
+  guides(fill=guide_legend(ncol=3, title.position="top"))
 
 #### PLOT FULL GIMAP PROTEIN TREE ####
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
@@ -3548,12 +3775,6 @@ C_vir_vst_common_df_all_mat_limma_GIMAP
 Mollusc_Species_Tree_text <-"((Octopus_bimaculoides:0.0710909,Octopus_sinensis:0.056727)N1:0.21781,((Mizuhopecten_yessoensis:0.315015,(Crassostrea_gigas:0.0955031,C_virginica:0.0982277)N5:0.236348)N3:0.0835452,(Lottia_gigantea:0.31253,(Pomacea_canaliculata:0.34807,(Elysia_chlorotica:0.303751,(Biomphalaria_glabrata:0.296022,Aplysia_californica:0.248891)N8:0.0608488)N7:0.129889)N6:0.0520687)N4:0.0492055)N2:0.21781)N0;"
 Mollusc_Species_Tree <- read.newick(text=Mollusc_Species_Tree_text)
 Mollusc_Species_tibble <- as.tibble(Mollusc_Species_Tree)
-
-# Join with GIMAP gene counts (in case I want to add to plotting later)
-colnames(Mollusc_Species_tibble)[4] <- "Species"
-Mollusc_Species_tibble_GIMAP_genes <- left_join(Mollusc_Species_tibble, AIG1_XP_ALL_gff_GIMAP_species_gene_locus_tag_count)
-colnames(Mollusc_Species_tibble_GIMAP_genes)[5] <- "GIMAP gene Count"
-colnames(Mollusc_Species_tibble_GIMAP_genes)[4] <- "label"
 
 Mollusc_Species_Treedata <- as.treedata(Mollusc_Species_tibble)
 
