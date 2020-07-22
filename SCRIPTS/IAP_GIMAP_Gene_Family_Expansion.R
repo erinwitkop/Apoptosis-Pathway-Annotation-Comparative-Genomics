@@ -31,6 +31,7 @@ library(gridExtra)
 library(egg)
 library(grid)
 library(ggmsa)
+library(ggtext)
 setwd("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics")
 
 #### IMPORT GENOMES AND ANNOTATIONS #####
@@ -1351,56 +1352,6 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <-
                       labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
   guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
 
-# Plot collapsed tree with Gene labels
-IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_gene <- 
-  ggtree(IAP_MY_CV_CG_raxml_treedata_collapsed, aes(color=Species, fill=Species),  branch.length = "none") + 
-  geom_tiplab(aes(label=gene), fontface="bold", size =3.0, offset=0.1) + # geom_tiplab2 flips the labels correctly
-  # add circle for 90-100 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
-  # add triangle for 70-89 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
-  # add upside down traingle for 50-69 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
-  # Add shape for tips removed (see IAP_shape_node above)
-  geom_point2(aes(subset=(node==12)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==13)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==36)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==37)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==48)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==91)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==92)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==97)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==108)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==109)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==113)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==120)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==137)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==138)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==139)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==140)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==141)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==142)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==143)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==147)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==150)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==179)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32') +
-  #Edit theme
-  theme(legend.position = "bottom", 
-        legend.text = element_text(face = "italic", size=, family="sans"),
-        legend.title = element_text(size=12, family="sans")) +
-  #geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 2.0, fontface="bold") + # allows for subset
-  xlim(-70,31.8) + #change scaling so branch lengths are smaller and all alias labels are showing
-  scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
-                      labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
-  guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
-
-#ggsave(filename = "IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_gene.tiff", plot=IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_gene, device="tiff",
-#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-#       width = 15 ,
-#       height = 25,
-#       units = "in",
-#       dpi=300)
-
 #### PLOT IAP DOMAIN STRUCTURE AND COMBINE WITH TREE ####
 # Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
 # Get only the Interproscan domains for my proteins of interest
@@ -1995,7 +1946,6 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type <- BIR_XP_gff_Interpro_Domains_only_BI
     TRUE ~ as.character(.$Type))) 
 # this leaves some NA lines for type but thats okay they will be removed when plotting 
 
-
 # Add in generic BIR for proteins where there is now no BIR repeat, meaning that the BIR repeat was no identified with CDD database but with just other interproscan tools
 BIR_XP_gff_Interpro_Domains_only_BIR_type %>% filter()
 # fixing this later!
@@ -2088,7 +2038,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill$Type <- factor(BIR
                                                                     "\"InterPro:IPR038765\"",
                                                                     "\"InterPro:IPR001370\""))
 
-### Plot select domains 
+#### Plot select domains with Domain Information ###
 # get rows we want to add star to - these do not have a type designation
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_with_Type <- 
   BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>% 
@@ -2101,7 +2051,43 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_no_Type
 BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_coord <- BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened[BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened$protein_id %in% BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_no_Type$protein_id,] %>%
   select(protein_id, end, node)
 
-# Remove some domains from plotting to increase ability to see important ones 
+## Join domain structure designations and use to create dataframe for plotting shading
+IAP_domain_structure <- read_csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_Domain_Structure_groups.csv")
+class(BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened$protein_id)
+BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect <- left_join(BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened, IAP_domain_structure)
+
+# Join with height for each protein domain
+BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect <- left_join(BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect, 
+unique(BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill[,c("protein_id","height_start","height_end")]))
+
+# find xmin and xmax for plot
+min(BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened$start) # 1
+max(BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened$end) # 1832
+
+# get domain rect coordinates
+BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect <- BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect %>%
+  # group by number
+  group_by(Number) %>%
+  # keep min height start and max height end within each group
+  mutate(min_start_per_group = min(height_start),
+            max_end_per_group = max(height_end)) %>% 
+  filter(!is.na(Domain_Name)) %>% 
+  # keep distinct rows
+  distinct(Number, min_start_per_group, max_end_per_group,
+           Domain_Name, Color_group, Bold_group) %>%
+  ungroup() %>%
+  mutate(xmin = 1,
+         xmax = 2150) # extend a bit to allow room for plotting text 
+
+# Create geom text dataframe
+BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text <- BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect %>%
+  # plot text at midpoint in each group, which would be the mean value
+  mutate(y_difference = (max_end_per_group - min_start_per_group)/2,
+         y_midpoint =  min_start_per_group + y_difference,
+         text_name = 1950,
+         text_number = 2120) 
+
+## Create main plot
 IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() + 
   # plot length of each protein as line
   geom_segment(data =BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened,
@@ -2113,15 +2099,12 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
              color="black",
              size=6,
              shape= "*") +
-  # add boxes with geom_rect 
-  geom_rect(data=BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill,
+  # add protein domain boxes with geom_rect 
+  geom_rect(data=BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill,inherit.aes = FALSE,
             aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Type)) +
   #add labels
   labs(y = NULL, x = "Protein Domain Position (aa)") +
-  # add text labels
-  #geom_text(data=BIR_XP_gff_Interpro_Domains_fullprot,aes(x= end, y = node, label=alias),
-  #          size=2.0, hjust=-.15, check_overlap = TRUE) + 
-  # text theme
+  # add theme
   theme_bw() + 
   # plot theme
   theme(axis.ticks.y = element_blank(), 
@@ -2132,11 +2115,12 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
         axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black"),
         legend.position = "bottom",
         legend.box = "vertical",
-        legend.text = element_text(size=12, family="sans"),
-        legend.title = element_text(size=14, family="sans"),
-        axis.text.x=element_text(size=12))+
+        legend.text = element_text(size=14, family="sans"),
+        legend.title = element_text(size=16, family="sans"),
+        axis.text.x=element_text(size=14, family="sans"),
+        axis.title.x.bottom = element_text(size=16, family="sans")) +
   # Change y axis ticks
-  scale_x_continuous(breaks=c(0,500,1000,1500,2000,2500), expand = c(0,0)) + 
+  scale_x_continuous(breaks=c(0,500,1000,1500,1800), expand = c(0,0)) + 
   # Change domain labels 
   scale_fill_manual(values=c( 
                              "#5db8de",
@@ -2160,7 +2144,7 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
                              "#b77853",
                              "#55b793",
                              "#dadd48",
-                             "grey",
+                             "grey", # dummy values
                              "grey",
                              "grey",
                              "grey",
@@ -2202,8 +2186,53 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
   # change number of legend columns and put the legend title on top
   guides(fill=guide_legend(ncol=3, title.position="top")) 
 
-### Statistics for looking at Domains ###
+# add shading domain group boxes and text
+IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text <- 
+  IAP_Interproscan_domain_plot_BIR_type_domain_subset + 
+  geom_rect(data=BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect, inherit.aes=FALSE,
+          aes(ymin=min_start_per_group ,ymax=max_end_per_group,xmin=xmin,xmax=xmax,
+              group=Color_group), 
+          # fill works if you put outside of aes and inlude the colors in the data itseld
+              fill = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect$Color_group,
+          color = "gray86", # add border color
+          size=0.2, # set border line thickness 
+          alpha=0.1)  + # make translucent 
+  # add text for domain name
+ geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
+           aes(x=text_name, y = y_midpoint, label = Domain_Name, family= "sans", fontface = Bold_group)) + 
+  # add text for Number
+  geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
+            aes(x=text_number, y = y_midpoint, label = Number, family= "sans", fontface = Bold_group))  
 
+### Plot collapsed tree with the domain plot ##
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed)
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + 
+  theme(legend.position='none')
+
+IAP_MY_CV_CG_tree <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(IAP_Interproscan_domain_plot_no_legend)
+IAP_Interproscan_domain_plot_no_legend <- IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text + theme(legend.position='none')
+IAP_Interproscan_domain_plot_legend <- cowplot::get_legend(IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text)
+
+IAP_tr_dom_collapsed <- plot_grid(IAP_MY_CV_CG_tree, IAP_Interproscan_domain_plot_no_legend, ncol=2, align='h', rel_widths = c(1,0.8)) +
+  # Add some space at top for labels
+  theme(plot.margin = unit(c(1,0.0,0.0,0.0), "cm")) 
+IAP_tr_dom_collapsed_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, IAP_Interproscan_domain_plot_legend,
+  nrow = 1, align="hv", rel_widths  =c(0.6, 0.7,1)) 
+
+## Create combined figure for publication
+IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_legend,  ncol=1, rel_heights  = c(0.8, 0.1)) +
+  # add labels for plot components
+  draw_plot_label(c("A","B","C"), x= c(0.38, 0.56, 0.93), y = c(1,1,1), size = 20)
+
+# Export plot with tree and domains aligned 
+ggsave(filename = "IAP_tr_dom_plus_legend_plot.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 31,
+       height = 27,
+       units = "in",
+       dpi=300)
+
+### Statistics for looking at Domains ###
 # Number of proteins with a certain number of BIR domains
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   filter(Species == "Crassostrea_gigas" | Species == "Crassostrea_virginica",
@@ -2297,101 +2326,23 @@ C_vir_apop_LFC_IAP_full_XP <- full_join(C_vir_apop_LFC_IAP, IAP_MY_CV_CG_raxml_t
 C_vir_apop_LFC_IAP_full_XP <- full_join(IAP_MY_CV_CG_raxml_treedata_tip_order, C_vir_apop_LFC_IAP_full_XP)
 C_gig_apop_LFC_IAP_full_XP <- full_join(IAP_MY_CV_CG_raxml_treedata_tip_order, C_gig_apop_LFC_IAP_full_XP)
 
+# Add in grouping designations for domain structure groups 
+
 # Set factor level order of the nodes set levels in reverse order
 C_vir_apop_LFC_IAP_full_XP$protein_id <- factor(C_vir_apop_LFC_IAP_full_XP$protein_id, levels = rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)))
 C_gig_apop_LFC_IAP_full_XP$protein_id <- factor(C_gig_apop_LFC_IAP_full_XP$protein_id, levels = rev(unique(C_gig_apop_LFC_IAP_full_XP$protein_id)))
 C_vir_apop_LFC_IAP_full_XP$node <- factor(C_vir_apop_LFC_IAP_full_XP$node, levels = rev(unique(C_vir_apop_LFC_IAP_full_XP$node)))
 C_gig_apop_LFC_IAP_full_XP$node <- factor(C_gig_apop_LFC_IAP_full_XP$node, levels = rev(unique(C_gig_apop_LFC_IAP_full_XP$node)))
 
-# Plot LFC data
-# plot below uses the full non collapsed Mizuhopecten code
-#C_vir_apop_LFC_IAP_tile_plot <- ggplot(C_vir_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y = protein_id, fill=log2FoldChange, na.rm= TRUE)) + 
-#  geom_tile()  + 
-#  #scale_fill_viridis_c(breaks = seq(min(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm = TRUE),max(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm=TRUE),length.out = 15), 
-#  #                  option="magma", guide=guide_legend()) +
-# scale_fill_viridis_c(name = "Log2 Fold Change", 
-#                       limits = c(-11,10),
-#                       breaks = c(-10,-5,-1,0.5,1,3,5,7,10), 
-#                       option="plasma",
-#                      guide=guide_legend(), na.value = "transparent") +
-#  labs(x="Treatment", y =NULL) +
-#  theme(axis.ticks.y = element_blank(), 
-#        axis.text.y = element_blank(),
-#        axis.text.x.top = element_text(size=8, family="sans"),
-#        #axis.text.y.left = element_text(family ="sans"),
-#        axis.title = element_text(size=12, family="sans"),
-#        legend.position = "bottom",
-#        legend.title = element_text(size=12, family="sans"), 
-#        legend.text = element_text(size=8, family="sans"),
-#        panel.background = element_rect(fill = "transparent"),
-#        panel.grid.major.x = element_line(size=0.2, color="gray"),
-#        panel.grid.major.y = element_line(size=0.2, color="gray")) +
-#  # remove NA row from the list (get list from rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)))
-#  scale_y_discrete(limits=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
-#                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
-#                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
-#                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
-#                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
-#                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
-#                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
-#                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
-#                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
-#                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
-#                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
-#                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
-#                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
-#                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
-#                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
-#                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
-#                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
-#                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
-#                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
-#                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
-#                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
-#                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
-#                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
-#                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
-#                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1"),
-#                   labels=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
-#                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
-#                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
-#                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
-#                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
-#                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
-#                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
-#                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
-#                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
-#                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
-#                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
-#                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
-#                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
-#                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
-#                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
-#                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
-#                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
-#                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
-#                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
-#                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
-#                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
-#                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
-#                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
-#                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
-#                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
-#  scale_x_discrete(limits = c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
-#                              "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
-#                              "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ), 
-#                   labels= c("Hatchery\n Probiotic RI" ,"Lab RI 6hr", "Lab RI 24hr", "Lab S4 6hr","Lab S4 24hr", "Lab RE22" ,
-#                             "ROD Sus.\n seed","ROD Res.\n seed", "Dermo\n Sus. 36hr", "Dermo\n Sus. 7d", "Dermo\n Sus. 28d","Dermo\n Tol. 36hr",   
-#                             "Dermo\n Tol. 7d","Dermo\n Tol. 28d"), position="top") +
-#  guides(fill=guide_legend(ncol=4, title.position="top"))
 
+# Plot LFC data
 C_vir_apop_LFC_IAP_full_XP$experiment <- factor(C_vir_apop_LFC_IAP_full_XP$experiment, levels=c("Hatchery_Probiotic_RI",  "Lab_Pro_RE22","ROD", "Dermo", "NA"), 
                                                 labels= c("Hatchery\nPro. RI",  "Lab Pro. S4, RI\n or RE22","ROD", "Dermo", "NA"))
 C_vir_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_vir_apop_LFC_IAP_full_XP$group_by_sim, levels=c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
                           "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
                           "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ),
-                          labels= c("RI" ,"RI 6hr", "RI 24hr", "S4 6hr","S4 24hr", "RE22" ,"Sus.\nROD","Res.\nROD", "Sus. 36hr", "Sus. 7d", "Sus. 28d","Tol. 36hr",   
-                      "Tol. 7d","Tol. 28d"))
+                          labels= c("RI" ,"RI 6h", "RI 24h", "S4 6h","S4 24h", "RE22" ,"S. ROD","R. ROD", "S. 36h", "S. 7d", "S. 28d","T. 36h",   
+                      "T. 7d","T. 28d"))
 
 C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP[!(is.na(C_vir_apop_LFC_IAP_full_XP$experiment)),], aes(x=group_by_sim, y = protein_id, fill=log2FoldChange, na.rm= TRUE)) + 
   geom_tile()  + 
@@ -2403,10 +2354,13 @@ C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP[!(is
                        option="plasma",
                        guide=guide_legend(), na.value = "transparent") +
   facet_grid(.~experiment, scales="free",space="free", drop=TRUE) + 
-  labs(x=NULL, y =NULL) +
+  labs(x="Treatment", y = NULL,
+       title = "*C. virginica* Experiment") +
   theme_minimal() + 
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
+        axis.title = element_text(size=20, family="sans"),
+        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.5),
         axis.text.x.bottom = element_text(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
         legend.position = "bottom",
         legend.title = element_text(size=16, family="sans"), 
@@ -2417,7 +2371,7 @@ C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP[!(is
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.text.x = element_text(
-          size = 16, face = "bold"),
+          size = 16, face = "bold", family="sans"),
         strip.background = element_rect(colour = "white", fill="white")) +
   guides(fill=guide_legend(ncol=3, title.position="top")) +
   # remove NA row from the list (get list from rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)))
@@ -2463,98 +2417,14 @@ Cvir_LFC_collapsed %>% distinct(protein_id) %>% count() # 29 to plot
 
 rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)) # 184 levels correct
 
-#C_gig_apop_LFC_IAP_tile_plot <- ggplot(C_gig_apop_LFC_IAP_full_XP, aes(x=group_by_sim, y=protein_id, fill=log2FoldChange)) + 
-#  geom_tile() + 
-#  #scale_fill_viridis_c(breaks = seq(min(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm = TRUE),max(C_gig_apop_LFC_GIMAP$log2FoldChange, na.rm=TRUE),length.out = 15), 
-#  #                     option="plasma", guide=guide_legend()) +
-#  #scale_fill_gradientn(colors = viridis_pal, limits=c(-10, 10),breaks = c(-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10),
-#  #                     guide=guide_legend(), na.value = "transparent") + 
-#  scale_fill_viridis_c(name = "Log2 Fold Change", 
-#                       limits = c(-11,10),
-#                       breaks = c(-10,-8,-6,-4,-2,-1,0,0.5,1,2,3,4,6,8,10), 
-#                       option="plasma",
-#                       guide=guide_legend(), na.value = "transparent") +
-#  labs(x="Treatment", y =NULL) +
-#  theme(axis.ticks.y = element_blank(), 
-#        axis.text.y = element_blank(),
-#        axis.text.x.top = element_text(size=8, family="sans"),
-#        axis.title.x.top = element_text(size=12, family="sans"),
-#        legend.position = "bottom",
-#        legend.title = element_text(size=12, family="sans"), 
-#        legend.text = element_text(size=8, family="sans"),
-#        panel.background = element_rect(fill = "transparent"),
-#        panel.grid.major.x = element_line(size=0.2, color="gray"),
-#        panel.grid.major.y = element_line(size=0.2, color="gray")) +
-#  # remove NA row from the list 
-#  scale_y_discrete(limits=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
-#                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
-#                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
-#                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
-#                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
-#                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
-#                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
-#                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
-#                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
-#                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
-#                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
-#                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
-#                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
-#                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
-#                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
-#                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
-#                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
-#                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
-#                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
-#                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
-#                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
-#                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
-#                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
-#                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
-#                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1"),
-#                   labels=c("XP_011431980.1", "XP_022287996.1", "XP_022287997.1", "XP_021341279.1", "XP_021361235.1", "XP_011428387.1", "XP_011428384.1", "XP_022288977.1", "XP_019919109.1",
-#                            "XP_019919110.1", "XP_022292970.1", "XP_022294409.1", "XP_022294410.1", "XP_021369350.1", "XP_011452303.1", "XP_022312791.1", "XP_022311552.1", "XP_011441452.1", "XP_022300945.1",
-#                            "XP_022311926.1", "XP_022311074.1", "XP_019920103.1", "XP_021350197.1", "XP_021348821.1", "XP_021348694.1", "XP_021348738.1", "XP_021348726.1", "XP_021348708.1", "XP_011416423.1",
-#                            "XP_022295668.1", "XP_022291030.1", "XP_022287919.1", "XP_022287917.1", "XP_022287913.1", "XP_022287914.1", "XP_022287912.1", "XP_021356418.1", "XP_022293362.1", "XP_011455007.1",
-#                            "XP_019927576.1", "XP_011449366.1", "XP_022320574.1", "XP_022320313.1", "XP_022287287.1", "XP_022287292.1", "XP_021355384.1", "XP_021355271.1", "XP_021355401.1", "XP_021362910.1",
-#                            "XP_021372726.1", "XP_021365179.1", "XP_022287983.1", "XP_022287991.1", "XP_021355347.1", "XP_021369365.1", "XP_021369367.1", "XP_021369368.1", "XP_021345058.1", "XP_021365107.1",
-#                            "XP_021365105.1", "XP_021365108.1", "XP_021360744.1", "XP_021365119.1", "XP_021365123.1", "XP_022293034.1", "XP_011418793.1", "XP_011418791.1", "XP_021365162.1", "XP_021365133.1",
-#                            "XP_021365080.1", "XP_021345059.1", "XP_021365267.1", "XP_021365270.1", "XP_021365271.1", "XP_021365115.1", "XP_021365111.1", "XP_021365102.1", "XP_021365101.1", "XP_021365104.1",
-#                            "XP_021365103.1", "XP_021366455.1", "XP_021358000.1", "XP_021344072.1", "XP_021369394.1", "XP_011435625.1", "XP_022315256.1", "XP_021363603.1", "XP_021363604.1", "XP_021363602.1",
-#                            "XP_011435383.1", "XP_021363252.1", "XP_021363251.1", "XP_021363250.1", "XP_019925482.1", "XP_019925483.1", "XP_011436597.1", "XP_019925480.1", "XP_019925481.1", "XP_022332918.1",
-#                            "XP_022332916.1", "XP_022332914.1", "XP_022332915.1", "XP_022332917.1", "XP_022331416.1", "XP_022331414.1", "XP_022331412.1", "XP_022331413.1", "XP_022331415.1", "XP_022305768.1",
-#                            "XP_021365097.1", "XP_021365090.1", "XP_021365088.1", "XP_021365092.1", "XP_021365096.1", "XP_021365087.1", "XP_021365095.1", "XP_021353464.1", "XP_021347758.1", "XP_021347771.1",
-#                            "XP_021347769.1", "XP_011427116.1", "XP_022291629.1", "XP_022293782.1", "XP_022295018.1", "XP_022335805.1", "XP_022336007.1", "XP_021355270.1", "XP_021355393.1", "XP_021376860.1",
-#                            "XP_021344946.1", "XP_022293068.1", "XP_022292343.1", "XP_022292342.1", "XP_022293067.1", "XP_019922713.1", "XP_019922711.1", "XP_019922715.1", "XP_019920663.1", "XP_019922714.1",
-#                            "XP_019922712.1", "XP_011455592.1", "XP_022291483.1", "XP_011452445.1", "XP_011412926.1", "XP_022322280.1", "XP_022322279.1", "XP_022322278.1", "XP_021345008.1", "XP_021347773.1",
-#                            "XP_021348428.1", "XP_021348651.1", "XP_021348683.1", "XP_021348674.1", "XP_021348634.1", "XP_021348609.1", "XP_021348626.1", "XP_021348453.1", "XP_021348804.1", "XP_021348768.1",
-#                            "XP_021348755.1", "XP_021351200.1", "XP_021351195.1", "XP_022337137.1", "XP_021366760.1", "XP_011436809.1", "XP_011445382.1", "XP_022292415.1", "XP_022292412.1", "XP_022291345.1",
-#                            "XP_019929019.1", "XP_011433586.1", "XP_019921695.1", "XP_019921696.1", "XP_011423762.1", "XP_011423764.1", "XP_011427115.1", "XP_022291924.1", "XP_022293780.1", "XP_022295543.1",
-#                            "XP_022290906.1", "XP_021360358.1", "XP_011433457.1", "XP_022292108.1", "XP_022288420.1", "XP_021349549.1", "XP_021362786.1", "XP_021344945.1", "XP_021376848.1", "XP_021376851.1",
-#                            "XP_021376849.1", "XP_022292341.1", "XP_022291916.1", "XP_019922709.1", "XP_019922710.1", "XP_021368762.1", "XP_021365893.1", "XP_021364626.1", "XP_021363655.1", "XP_021363656.1",
-#                            "XP_021362783.1", "XP_011444161.1", "XP_022289969.1", "XP_022288685.1", "XP_022288684.1", "XP_022288686.1", "XP_021372320.1", "XP_021345068.1", "XP_021369363.1", "XP_022288032.1",
-#                            "XP_011437420.1", "XP_022288056.1", "XP_022287930.1", "XP_022287929.1", "XP_011437418.1", "XP_019925758.1", "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1",
-#                            "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1", "XP_022295029.1", "XP_022293847.1", "XP_022295527.1",
-#                            "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1", "XP_019924100.1", "XP_019919899.1",
-#                            "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
-#  scale_x_discrete(limits = c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
-#                              "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
-#                              "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
-#                   labels= c("Zhang\n V. alg","Zhang\n V.tub\n V. ang","Zhang\n LPS\nM. Lut", "Rubio\nV. crass\n J2_8\n NVir","Rubio\nV. crass\n J2_9\n Vir" ,"Rubio\nV. tasma\n LGP32\n Vir","Rubio\nV. tasma\n LMG20012T\n NVir","He OsHv-1\n 6hr",
-#                             "He OsHv-1\n 12hr", "He OsHv-1\n24hr", "He OsHv-1\n48hr", "He OsHv-1\n 120hr","deLorgeril\nOsHV-1\n Res. 6hr","deLorgeril\nOsHV-1\n Res. 12hr","deLorgeril\nOsHV-1\n Res. 24hr" ,"deLorgeril\nOsHV-1\n Res. 48hr",
-#                             "deLorgeril\nOsHV-1\n Res. 60hr","deLorgeril\nOsHV-1\n Res. 72hr" ,"deLorgeril\nOsHV-1\n Sus. 6hr", "deLorgeril\nOsHV-1\n Sus. 12hr","deLorgeril\nOsHV-1\n Sus. 24hr","deLorgeril\nOsHV-1\n Sus. 48hr" ,
-#                             "deLorgeril\nOsHV-1\n Sus. 60hr","deLorgeril\nOsHV-1\n Sus. 72hr"), position="top") +
-#  guides(fill=guide_legend(ncol=3, title.position="top"))
-
-
-
 # Change factor level order of experiment for ggplot 
 C_gig_apop_LFC_IAP_full_XP$experiment <-  factor(C_gig_apop_LFC_IAP_full_XP$experiment, levels = c("Zhang", "Rubio","He","deLorgeril_sus", "deLorgeril_res","NA"), 
-       labels = c("Zhang\nVibrio spp." ,"Rubio\nVibrio spp." , "He OsHV-1" ,"de Lorgeril\nSus. OsHV-1", "de Lorgeril\nRes. OsHV-1","de Lorgeril\nRes. OsHV-1"))
+       labels = c("Zhang\n*Vibrio* spp." ,"Rubio\n*Vibrio* spp." , "He OsHV-1" ,"de Lorgeril\nSus. OsHV-1", "de Lorgeril\nRes. OsHV-1","de Lorgeril\nRes. OsHV-1"))
 
 C_gig_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_gig_apop_LFC_IAP_full_XP$group_by_sim, levels= c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
            "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
            "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
-labels= c("V. alg","V.tub\n V. ang","LPS\nM. Lut", "V. cras\nNVir","V. cras\nVir" ,"V. tas\nVir","V. tas\nNVir","6hr",
+labels= c("*V. alg*","*V.tub\n V. ang*","LPS *M. Lut*", "*V. cras* NVir","*V. cras* Vir" ,"*V. tas* Vir","*V. tas* NVir","6hr",
           "12hr", "24hr", "48hr", "120hr","6hr","12hr","24hr" ,"48hr",
           "60hr", "72hr" ,"6hr",  "12hr","24hr","48hr" ,
           "60hr", "72hr"))
@@ -2572,11 +2442,13 @@ C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP[!(is
                        guide=guide_legend(), na.value = "transparent") +
   # add facet to plot 
   facet_grid(.~experiment, scales="free",space="free", drop=TRUE) + 
-  labs(x=NULL, y =NULL) +
+  labs(x="Treatment", y ="*C. gigas* Experiment") +
   theme_minimal() + 
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
+        axis.title= ggtext::element_markdown(size = 20),
         axis.text.x.bottom = element_text(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
+        axis.text.x.bottom = ggtext::element_markdown(),
         legend.position = "bottom",
         legend.title = element_text(size=16, family="sans"), 
         legend.text = element_text(size=14, family="sans"),
@@ -2625,71 +2497,6 @@ C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP[!(is
                             "XP_022295029.1", "XP_022293847.1", "XP_022295527.1", "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1",
                             "XP_019924100.1", "XP_019919899.1", "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
   guides(fill=guide_legend(ncol=3, title.position="top"))
-
-## Plot DESeq2 alongside tree and domain structure
-
-# Use cowplot to extract legends and then add separately
-IAP_Interproscan_domain_plot_legend <- cowplot::get_legend(IAP_Interproscan_domain_plot_BIR_type_domain_subset)
-IAP_Interproscan_domain_plot_no_legend <- IAP_Interproscan_domain_plot_BIR_type_domain_subset + theme(legend.position='none')
-
-IAP_MY_CV_CG_raxml_treedata_vertical_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical)
-IAP_MY_CV_CG_raxml_treedata_vertical_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical + theme(legend.position='none')
-p3_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_no_legend + aplot::ylim2(IAP_Interproscan_domain_plot_no_legend)
-
-C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED)
-C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_vir_apop_LFC_IAP_tile_plot_COLLAPSED + theme(legend.position='none')
-
-C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_legend <- cowplot::get_legend(C_gig_apop_LFC_IAP_tile_plot_COLLAPSED)
-C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_gig_apop_LFC_IAP_tile_plot_COLLAPSED + theme(legend.position='none')
-
-# Now plots are aligned vertically with the legend in one row underneath
-#C vir plot (not collapsed)
-Cvir_IAP_tr_dom_LFC <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, C_vir_apop_LFC_IAP_tile_plot_no_legend, ncol=3, align='h',
-                                   labels = c('A', 'B', 'C'), label_size = 12)
-Cvir_IAP_tr_dom_LFC_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, IAP_Interproscan_domain_plot_legend,C_vir_apop_LFC_IAP_tile_plot_legend, 
-                                          ncol = 3, align="hv")
-Cvir_IAP_tr_dom_LFC_plus_legend <- plot_grid(Cvir_IAP_tr_dom_LFC, Cvir_IAP_tr_dom_LFC_legend, ncol=1, rel_heights =c(1, 0.3))
-
-# Cvir only tree and domains (not collapsed)
-Cvir_IAP_tr_dom <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, ncol=2, align='h')
-Cvir_IAP_tr_dom_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, IAP_Interproscan_domain_plot_legend,
-                                        ncol = 2, align="hv")
-Cvir_IAP_tr_dom_plus_legend <- plot_grid(Cvir_IAP_tr_dom, Cvir_IAP_tr_dom_legend, ncol=1, rel_heights =c(1, 0.3))
-
-# C gig plots (not collapsed)
-Cgig_IAP_tr_dom_LFC <- plot_grid(p3_no_legend, IAP_Interproscan_domain_plot_no_legend, C_gig_apop_LFC_IAP_tile_plot_no_legend, ncol=3, align='h',
-                                   labels = c('A', 'B', 'C'), label_size = 12)
-Cgig_IAP_tr_dom_LFC_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_legend, IAP_Interproscan_domain_plot_legend,C_gig_apop_LFC_IAP_tile_plot_legend, 
-                                          ncol = 3, align="hv")
-Cgig_IAP_tr_dom_LFC_plus_legend <- plot_grid(Cgig_IAP_tr_dom_LFC, Cgig_IAP_tr_dom_LFC_legend, ncol=1, rel_heights =c(1, 0.3))
-
-
-### Cvir_Cgig MY collapsed tree and domains ##
-IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed)
-IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + theme(legend.position='none')
-p3_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(IAP_Interproscan_domain_plot_no_legend)
-
-IAP_tr_dom_collapsed <- plot_grid(p3_collapsed_no_legend, IAP_Interproscan_domain_plot_no_legend, ncol=2, align='h')
-IAP_tr_dom_collapsed_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, IAP_Interproscan_domain_plot_legend,
-                                         ncol = 2, align="hv")
-
-## Create combined figure for publication
-IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_legend, ncol=1, rel_heights =c(1, 0.3))
-
-# Export plot with tree and domains aligned 
-#ggsave(filename = "IAP_tr_dom_plus_no_legend_plot.tiff", plot=IAP_tr_dom_collapsed , device="tiff",
-#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-#       width = 15 ,
-#       height = 25,
-#       units = "in",
-#       dpi=300)
-#ggsave(filename = "IAP_tr_dom_legend_plot.tiff", plot=IAP_tr_dom_collapsed_legend, device="tiff",
-#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-#       width = 25 ,
-#       height = 5,
-#       units = "in",
-#       dpi=300)
-
 
 #### PLOT CONSTITUTIVELY EXPRESSED IAPS ####
 
@@ -2788,10 +2595,10 @@ C_vir_vst_common_df_all_mat_limma_IAP_XP$Condition <- factor(C_vir_vst_common_df
                                                                                                 "ROD_Res_Control","ROD_Res_Challenge","ROD_Sus_Control","ROD_Sus_Challenge","Dermo_Sus_36h_Control","Dermo_Sus_28d_Control",
                                                                                                 "Dermo_Sus_7d_Control","Dermo_Sus_36h_Injected","Dermo_Sus_7d_Injected","Dermo_Sus_28d_Injected","Dermo_Tol_36h_Control",
                                                                                                 "Dermo_Tol_7d_Control","Dermo_Tol_28d_Control","Dermo_Tol_36h_Injected","Dermo_Tol_7d_Injected","Dermo_Tol_28d_Injected"),
-                                                  labels=c("RI Con." , "RI", "RE22\nControl","RI\n6h", "RI\n24h", "S4\n6h","S4\n24h", "RE22" ,
-                                                           "Sus.\nCon.", "Sus.\nROD", "Res.\nCon.","Res.\nROD", "Sus Con\n36h", "Sus Con\n7d", "Sus Con\n28d", 
-                                                           "Sus Pm\n36h", "Sus Pm\n7d", "Sus Pm\n28d", "Tol Con\n36h", "Tol Con\n7d","Tol Con\n28d",
-                                                           "Tol Pm\n36h", "Tol Pm\n7d", "Tol Pm\n 28d"))
+                                                  labels=c("Control" , "RI", "Control","RI 6h", "RI 24h", "S4 6h","S4 24h", "RE22" ,
+                                                           "S. Con", "S. ROD", "R. Con","R. ROD", "S. Con. 36h", "S. Con. 7d", "S. Con 28d", 
+                                                           "S. Pm 36h", "S. Pm 7d", "S. Pm 28d", "T. Con 36h", "T. Con 7d","T. Con 28d",
+                                                           "T. Pm 36h", "T. Pm 7d", "T. Pm 28d"))
 # Plot IAP collapsed
 # Fix scale (check yellow)
 C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=protein_id, fill=avg_vst_counts_per_treatment)) + 
@@ -2858,11 +2665,11 @@ C_gig_vst_common_df_all_mat_limma_IAP_XP$Condition <- factor(C_gig_vst_common_df
                                                                               "Vtasma_LMG20012T","Time0_control","6h_control","6h_OsHV1","12h_control","12h_OsHV1","24h_control","24h_OsHV1","48h_control",
                                                                               "48h_OsHV1","120hr_control","120hr_OsHV1","AF21_Resistant_control_0h","AF21_Resistant_6h","AF21_Resistant_12h","AF21_Resistant_24h",
                                                                               "AF21_Resistant_48h","AF21_Resistant_60h","AF21_Resistant_72h","AF11_Susceptible_control_0h","AF11_Susceptible_6h","AF11_Susceptible_12h","AF11_Susceptible_24h","AF11_Susceptible_48h","AF11_Susceptible_60h","AF11_Susceptible_72h"), 
-                                                                  labels= c("Con.","V. alg","V.tub\n V. ang","LPS\nM. Lut", "Con.","V. cras\nNVir","V. cras\nVir" ,"V. tas\nVir","V. tas\nNVir",
-                                                                            "0hr\nCon.","6hr\nCon.", "6hr\nOsHv-1","12hr\nCon.","12hr\nOsHv-1", "24hr\nCon.","24hr\nOsHv-1",
-                                                                            "48hr\nCon.","48hr\nOsHv-1","120hr\nCon.", "120hr\nOsHv-1","0hr\nCon.","6hr\nOsHv-1","12hr\nOsHv-1","24hr\nOsHv-1" ,"48hr\nOsHv-1",
-                                                                            "60hr\nOsHv-1","72hr\nOsHv-1" ,"0hr\nCon.","6hr\nOsHv-1", "12hr\nOsHv-1","24hr\nOsHv-1","48hr\nOsHv-1" ,
-                                                                            "60hr\nOsHv-1","72hr\nOsHv-1"))
+                                                                  labels= c("Con","V. alg","V.tub, V. ang","LPS, M. Lut", "Con","V. cras NVir","V. cras Vir" ,"V. tas Vir","V. tas NVir",
+                                                                            "0h Con","6h Con", "6h OsHv-1","12h Con","12h OsHv-1", "24h Con","24h OsHv-1",
+                                                                            "48h Con","48h OsHv-1","120h Con", "120h OsHv-1","0h Con","6h OsHv-1","12h OsHv-1","24h OsHv-1" ,"48h OsHv-1",
+                                                                            "60h OsHv-1","72h OsHv-1" ,"0h Con","6h OsHv-1", "12h OsHv-1","24h OsHv-1","48h OsHv-1" ,
+                                                                            "60h OsHv-1","72h OsHv-1"))
 # check nrow
 C_gig_vst_common_df_all_mat_limma_IAP_XP %>% distinct(protein_id) %>% count() # 184 correct
 
