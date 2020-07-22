@@ -1208,76 +1208,6 @@ IAP_MY_CV_CG_raxml_tibble$alias <- gsub("uncharacterized protein", "",IAP_MY_CV_
 # Convert to treedata object to store tree plus outside data
 IAP_MY_CV_CG_raxml_treedata <- as.treedata(IAP_MY_CV_CG_raxml_tibble)
 
-# Plot fan tree
-#ggtree(IAP_MY_CV_CG_raxml_treedata, layout="fan", aes(color=Species),  branch.length = "none") + 
-#  geom_tiplab2(aes(label=alias), size =2.2, offset=0) + # geom_tiplab2 flips the labels correctly
-#  theme(legend.position = "right", legend.text = element_text(face = "italic")) +
-#  geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 3, fontface="bold") # allows for subset
-
-# Plot vertical tree and edit colors
-IAP_MY_CV_CG_raxml_treedata_vertical <- 
-  ggtree(IAP_MY_CV_CG_raxml_treedata, aes(color=Species, fill=Species),  branch.length = "none") + 
-  geom_tiplab(aes(label=alias), fontface="bold", size =2.0, offset=0) + # geom_tiplab2 flips the labels correctly
-  # add circle for 90-100 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
-  # add triangle for 70-89 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
-  # add upside down traingle for 50-69 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
-  #Edit theme
-  theme(legend.position = "bottom", 
-        legend.text = element_text(face = "italic", size=8, family="sans"),
-        legend.title = element_text(size=12, family="sans")) +
-  #geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 2.0, fontface="bold") + # allows for subset
-  xlim(-70,31.8) + #change scaling so branch lengths are smaller and all alias labels are showing
-  scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
-                      labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
-  guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
-
-# Collapse Mizuhopecten-only parent nodes manually (for comparison)
-IAP_MY_CV_CG_raxml_treedata_vertical_coll <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical, node=485) +  # collapse using parent number of first protein
-           geom_point2(aes(subset=(node==485)), shape=22, size=0.8, color = '#c55d32',fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll2 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll, node=397) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==397)), shape=22, size=0.8, color = '#c55d32',fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll3 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll2, node=437) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==437)), shape=22, size=0.8, color = '#c55d32',fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll4 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll3, node=266) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==266)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll5 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll4, node=312) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==312)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll6 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll5, node=369) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==369)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll7 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll6, node=372) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==372)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll8 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll7, node=306) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==306)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll9 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll8, node=304) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==304)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll10 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll9, node=416) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==416)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll11 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll10, node=322) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==322)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll12 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll11, node=451) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==451)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll13 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll12, node=456) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==456)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll14 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll13, node=432) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==432)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll15 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll14, node=434) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==434)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll16 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll15, node=404) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==404)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll17 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll16, node=408) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==408)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll18 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll17, node=384) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==384)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll19 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll18, node=385) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==385)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll20 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll19, node=265) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==265)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-IAP_MY_CV_CG_raxml_treedata_vertical_coll21 <- collapse(IAP_MY_CV_CG_raxml_treedata_vertical_coll20, node=302) + # collapse using parent number of first protein 
-  geom_point2(aes(subset=(node==302)), shape=22, size=0.8, color = '#c55d32', fill='#c55d32')
-
 # Drop tips to collapse Mizuhopecten tips (done by manually looking at tree and keeping the outgroup for each group)
 IAP_to_drop <- c("236","237","238","239","240","205","206","115","116","117","120","121","122","200","201",
                  "196","185","186","187","194","190","192","183","179","189","161","162","141","142","146","143",
@@ -2052,6 +1982,7 @@ BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_coord <- BIR_XP_gff_Interpro
   select(protein_id, end, node)
 
 ## Join domain structure designations and use to create dataframe for plotting shading
+# Join with domain structure designatins to add annotation
 IAP_domain_structure <- read_csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_Domain_Structure_groups.csv")
 class(BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened$protein_id)
 BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect <- left_join(BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened, IAP_domain_structure)
@@ -2077,7 +2008,7 @@ BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect <- BIR_XP_gff_In
            Domain_Name, Color_group, Bold_group) %>%
   ungroup() %>%
   mutate(xmin = 1,
-         xmax = 2150) # extend a bit to allow room for plotting text 
+         xmax = 2300) # extend a bit to allow room for plotting text 
 
 # Create geom text dataframe
 BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text <- BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect %>%
@@ -2085,7 +2016,7 @@ BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text <- BIR_XP_gff_In
   mutate(y_difference = (max_end_per_group - min_start_per_group)/2,
          y_midpoint =  min_start_per_group + y_difference,
          text_name = 1950,
-         text_number = 2120) 
+         text_number = 2200) 
 
 ## Create main plot
 IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() + 
@@ -2199,10 +2130,12 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text <-
           alpha=0.1)  + # make translucent 
   # add text for domain name
  geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
-           aes(x=text_name, y = y_midpoint, label = Domain_Name, family= "sans", fontface = Bold_group)) + 
+           aes(x=text_name, y = y_midpoint, label = Domain_Name, family= "sans", fontface = Bold_group),
+           size = 6) + 
   # add text for Number
   geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
-            aes(x=text_number, y = y_midpoint, label = Number, family= "sans", fontface = Bold_group))  
+            aes(x=text_number, y = y_midpoint, label = Number, family= "sans", fontface = Bold_group),
+            size = 6)  
 
 ### Plot collapsed tree with the domain plot ##
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed)
@@ -2213,21 +2146,21 @@ IAP_MY_CV_CG_tree <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + 
 IAP_Interproscan_domain_plot_no_legend <- IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text + theme(legend.position='none')
 IAP_Interproscan_domain_plot_legend <- cowplot::get_legend(IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text)
 
-IAP_tr_dom_collapsed <- plot_grid(IAP_MY_CV_CG_tree, IAP_Interproscan_domain_plot_no_legend, ncol=2, align='h', rel_widths = c(1,0.8)) +
+IAP_tr_dom_collapsed <- plot_grid(NULL,IAP_MY_CV_CG_tree, IAP_Interproscan_domain_plot_no_legend, ncol=3, align='h', rel_widths = c(0.2, 0.7,0.8)) +
   # Add some space at top for labels
   theme(plot.margin = unit(c(1,0.0,0.0,0.0), "cm")) 
 IAP_tr_dom_collapsed_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, IAP_Interproscan_domain_plot_legend,
-  nrow = 1, align="hv", rel_widths  =c(0.6, 0.7,1)) 
+  nrow = 1, align="hv", rel_widths  =c(0.7, 0.7,1)) 
 
 ## Create combined figure for publication
 IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_legend,  ncol=1, rel_heights  = c(0.8, 0.1)) +
   # add labels for plot components
-  draw_plot_label(c("A","B","C"), x= c(0.38, 0.56, 0.93), y = c(1,1,1), size = 20)
+  draw_plot_label(c("A","B","C"), x= c(0.38, 0.53, 0.9), y = c(1,1,1), size = 30)
 
 # Export plot with tree and domains aligned 
 ggsave(filename = "IAP_tr_dom_plus_legend_plot.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-       width = 31,
+       width = 34,
        height = 27,
        units = "in",
        dpi=300)
