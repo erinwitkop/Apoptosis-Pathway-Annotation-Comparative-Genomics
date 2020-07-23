@@ -1306,7 +1306,7 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <-
   geom_cladelabel(353, label="18", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
   geom_cladelabel(359, label="19", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
   geom_cladelabel(188, label="20", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(366, label="21", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(366, label="21", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black', extend = 0.5) +
   #Edit theme
   theme(legend.position = "bottom", 
         legend.text = element_text(face = "italic", size=14, family="sans"),
@@ -1725,13 +1725,13 @@ for(j in 1:dim(BIR_IAP_raxml_tibble_color)[1]){
 }
 
 # ggsave BIR tree only
-ggsave(filename = "BIR_tree_type.tiff", plot=BIR_IAP_raxml_tree, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-       width = 15 ,
-       height = 25,
-       units = "in",
-       dpi=300)
-
+#ggsave(filename = "BIR_tree_type.tiff", plot=BIR_IAP_raxml_tree, device="tiff",
+#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+#       width = 15 ,
+#       height = 25,
+#       units = "in",
+#       dpi=300)
+#
 ### View the BIR tree of IAP domains that didn't match consensus Type 1 and Type II above ###
 #BIR_IAP_non_T2_T1_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_domain_model_MY_CV_CG_non_T1_T2_MSA")
 #BIR_IAP_non_T2_T1_raxml
@@ -1797,8 +1797,8 @@ BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Docum
 
 ## Plotting the tree with the MSA side by side (though it doesn't align well)
 # MSA with same axis spacing as the tree
-BIR_tree <- BIR_IAP_raxml_tree +
-aplot::ylim2(BIR_IAP_all_MSA_treeorder)
+#BIR_tree <- BIR_IAP_raxml_tree +
+#aplot::ylim2(BIR_IAP_all_MSA_treeorder)
 
 # plot tree and the alignment using plot_grid 
 #BIR_tree_type_MSA <- plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="hv", axis ="b",
@@ -1908,7 +1908,7 @@ BIRC6_railroad <- data.frame(protein_id = c("XP_022331415.1","XP_022331413.1","X
                             "Intron_shortened","Intron_shortened","Intron_shortened"))
 
 # Add in new rows 
-BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill <- rbind.fill(BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened, BIRC6_railroad)
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill <- plyr::rbind.fill(BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened, BIRC6_railroad)
 
 # Set factor level order of the nodes set levels in reverse order (already set)
 #BIR_XP_gff_Interpro_Domains_only_BIR_type$node <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type$node, levels = unique(BIR_XP_gff_Interpro_Domains_only_BIR_type$node))
@@ -1977,15 +1977,15 @@ BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect <- BIR_XP_gff_In
            Domain_Name, Color_group, Bold_group) %>%
   ungroup() %>%
   mutate(xmin = 1,
-         xmax = 2300) # extend a bit to allow room for plotting text 
+         xmax = 2200) # extend a bit to allow room for plotting text 
 
 # Create geom text dataframe
 BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text <- BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect %>%
   # plot text at midpoint in each group, which would be the mean value
   mutate(y_difference = (max_end_per_group - min_start_per_group)/2,
          y_midpoint =  min_start_per_group + y_difference,
-         text_name = 1950,
-         text_number = 2200) 
+         text_name = 1970,
+         text_number = 2400) 
 
 ## Create main plot
 IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() + 
@@ -2017,8 +2017,8 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
         legend.box = "vertical",
         legend.text = element_text(size=14, family="sans"),
         legend.title = element_text(size=16, family="sans"),
-        axis.text.x=element_text(size=14, family="sans"),
-        axis.title.x.bottom = element_text(size=16, family="sans")) +
+        axis.text.x=element_text(size=18, family="sans"),
+        axis.title.x.bottom = element_text(size=18, family="sans")) +
   # Change y axis ticks
   scale_x_continuous(breaks=c(0,500,1000,1500,1800), expand = c(0,0)) + 
   # Change domain labels 
@@ -2100,11 +2100,11 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text <-
   # add text for domain name
  geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
            aes(x=text_name, y = y_midpoint, label = Domain_Name, family= "sans", fontface = Bold_group),
-           size = 6) + 
-  # add text for Number
-  geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
-            aes(x=text_number, y = y_midpoint, label = Number, family= "sans", fontface = Bold_group),
-            size = 6)  
+           size = 7)  
+  # add text for Number, DECIDED TO REMOVE THE NUMBERS FROM HERE AND JUST KEEP WITH THE TREE PLOT
+  #geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
+  #          aes(x=text_number, y = y_midpoint, label = Number, family= "sans", fontface = Bold_group),
+  #          size = 6)  
 
 ###  Export and arrange domain plot with tree
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed)
@@ -2126,8 +2126,8 @@ IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_l
   # add labels for plot components
   draw_plot_label(c("A","B","C"), x= c(0.38, 0.53, 0.9), y = c(1,1,1), size = 30, family = "sans")
 
-# Export plot with tree and domains aligned 
-ggsave(filename = "IAP_tr_dom_plus_legend_plot.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
+## Export plot with tree and domains aligned : USE THIS FOR PUBLICATION
+ggsave(filename = "IAP_tr_dom_plus_legend_plot_07232020.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
        width = 34,
        height = 27,
