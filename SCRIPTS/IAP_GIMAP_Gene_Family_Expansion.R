@@ -1238,8 +1238,22 @@ length(IAP_shape_node)
 # check nrows
 IAP_collapsed_tibble %>% filter(!is.na(label)) %>% count() # 184 lines to plot 
 
+## Get node order so that I can correctly find the nodes to annotate for the domain structure groups 
+# Get the node order from collapsed IAP tree
+IAP_MY_CV_CG_raxml_treedata_tip  <- fortify(IAP_MY_CV_CG_raxml_treedata_collapsed) # not changing code from here down
+IAP_MY_CV_CG_raxml_treedata_tip <- subset(IAP_MY_CV_CG_raxml_treedata_tip, isTip)
+IAP_MY_CV_CG_raxml_treedata_tip_order <- IAP_MY_CV_CG_raxml_treedata_tip$label[order(IAP_MY_CV_CG_raxml_treedata_tip$y, decreasing=TRUE)]
+
+# Join in Domain annotation document in order to get the node number for geom_strip
+IAP_domain_structure <- read_csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_Domain_Structure_groups.csv")
+IAP_domain_structure_label <- IAP_domain_structure
+colnames(IAP_domain_structure_label)[1] <- "label" # change the name
+IAP_domain_structure_node <-  left_join(IAP_MY_CV_CG_raxml_tibble[,c("label","node")], IAP_domain_structure_label)
+# reorder the nodes based on tree to correctly call nodes for each group
+IAP_domain_structure_node <- IAP_domain_structure_node[match(IAP_MY_CV_CG_raxml_treedata_tip_order, IAP_domain_structure_node$label),]
+
+
 # Plot collapsed tree
-# Plot vertical tree and edit colors
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <- 
   ggtree(IAP_MY_CV_CG_raxml_treedata_collapsed, aes(color=Species, fill=Species),  branch.length = "none") + 
   geom_tiplab(aes(label=alias), fontface="bold", size =3.5, offset=0) + # geom_tiplab2 flips the labels correctly
@@ -1272,6 +1286,28 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <-
   geom_point2(aes(subset=(node==147)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
   geom_point2(aes(subset=(node==150)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
   geom_point2(aes(subset=(node==179)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
+  ## Add clade labels for the 21 domain groups  domain groups using the internal node number
+  geom_cladelabel(261, label="1",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(254, label="2",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(233, label="3",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(228, label="4",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(217, label="5",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(211, label="6",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(207, label="7",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(198, label="8",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(201, label="9",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(311, label="10", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(308, label="11", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(291, label="12", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(304, label="13", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(329, label="14", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(340, label="15", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(343, label="16", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(347, label="17", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(353, label="18", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(359, label="19", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(188, label="20", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(185, label="21", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
   #Edit theme
   theme(legend.position = "bottom", 
         legend.text = element_text(face = "italic", size=14, family="sans"),
@@ -1281,6 +1317,9 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <-
   scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
                       labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
   guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
+
+# find internal node number to use for the clade labels above 
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + geom_text2(aes(subset=!isTip, label=node), hjust=-.3)
 
 #### PLOT IAP DOMAIN STRUCTURE AND COMBINE WITH TREE ####
 # Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
@@ -1629,14 +1668,14 @@ BIR_domain_model_MY_CV_CG_type_updated  <- BIR_domain_model_MY_CV_CG_type_distin
     grepl("QH..H...C", seq.text) ~ "T2",  # Conserved model org Type 2 
     grepl("SFCC", seq.text) ~ "Non_Zinc_binding", # lacks C for zinc binding
     grepl("TFCC", seq.text) ~ "Non_Zinc_binding", # lacks C for zinc binding 
-    grepl("EH..GSR.C",seq.text) ~ "T3", # new type with Glycine and no proline
+    grepl("EH..GSR.C",seq.text) ~ "TX", # new type with Glycine and no proline
     grepl("EH..YKP",seq.text) ~ "T2-like_1",
     grepl("EHKN.FP",seq.text) ~ "T2-like_2",
     grepl("H.NMSP",seq.text) ~ "T1-like_1",
     grepl("IHRQQSP", seq.text) ~ "T1-like_2",
     grepl("TS.I.AIH..ISP", seq.text) ~ "T1_like_3",
     grepl("VHKENSP",seq.text) ~ "T1_like_4",
-    grepl("CYSCHVVHEGW", seq.text) ~ "T4",
+    grepl("CYSCHVVHEGW", seq.text) ~ "TY",
     grepl("RL..FK",seq.text) ~ "T2_like_3", 
     grepl("EHLDK", seq.text) ~ "T2_like_4",
     grepl("EH.KY", seq.text) ~ "T2_like_5",
@@ -1679,25 +1718,60 @@ BIR_IAP_raxml_tibble <- left_join(BIR_IAP_raxml_tibble, BIR_domain_model_MY_CV_C
 BIR_IAP_raxml_tibble$Species_shortened <- recode(BIR_IAP_raxml_tibble$Species, "Crassostrea_gigas"="C. gigas",
                                                  "Crassostrea_virginica"="C. virginica", "Mizuhopecten_yessoensis"="M. yessoensis",
                                                  "Homo_sapiens"="H. sapiens")
+# add color to tibble in order to plot geom_hilight below
+BIR_type_color <- data.frame(color= c("#d14e3a", 
+                                      "#65c95d", 
+                                      "#cb958a", 
+                                      "#c4d648", 
+                                      "#9944cd", 
+                                      "#c6933b", 
+                                      "#7095b9", 
+                                      "#77cebd", 
+                                      "#bcca90", 
+                                      "#753a32", 
+                                      "#ca96cd", 
+                                      "#4a6139", 
+                                      "#6257b3", 
+                                      "#422d4f", 
+                                      "#c6458b"),
+                             Type = c("Non_Zinc_binding", 
+                                      "T1",
+                                      "T1-like_1", 
+                                      "T1-like_2",
+                                      "T1_like_3",
+                                      "T1_like_4",
+                                      "T2",
+                                      "T2-like_1",
+                                      "T2-like_2" ,
+                                      "T2_like_3",       
+                                      "T2_like_4",
+                                      "T2_like_5",
+                                      "TX",
+                                      "TY",
+                                      "Unique"))
+BIR_IAP_raxml_tibble_color <- left_join(BIR_IAP_raxml_tibble, BIR_type_color)
 
 # Convert to treedata
 BIR_IAP_raxml_treedata <- as.treedata(BIR_IAP_raxml_tibble)
 
-# Plot tree with Type 1 and II disctinctions
+### PLOT BIR TYPE TREE WITH MSA ####
 BIR_IAP_raxml_tree <- 
   ggtree(BIR_IAP_raxml_treedata, aes(color=Type, fill=Type), branch.length = "none") + 
+  # label with the label
   geom_tiplab(aes(label=label), size = 2.3, offset = 0.1) + 
+  # add label with species
+  geom_tiplab(aes(label=Species_shortened), size = 2.3, offset = 6.3, color = "black", fontface = "italic") +
      #Edit theme
   theme(legend.position = c(0.25, 0.96), 
         legend.text = element_text(size=10, family="sans"),
         legend.title = element_text(size=12, family="sans")) +
   xlim(NA,45) + 
   # add circle for 90-100 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=2.0) +
   # add triangle for 70-89 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=2.0) +
   # add upside down traingle for 50-69 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=2.0) +
   # change position of legend title and spread across columns 
   guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = ""))) + # need to override aes to get rid of "a" 
   # change colors for species to match other trees 
@@ -1713,44 +1787,35 @@ BIR_IAP_raxml_tree <-
                                               "#753a32", # "T2_like_3",       
                                               "#ca96cd", # "T2_like_4",
                                               "#4a6139", # "T2_like_5",
-                                              "#6257b3", # "T3",
-                                              "#422d4f", # "T4",
+                                              "#6257b3", # "TX",
+                                              "#422d4f", # "TY",
                                               "#c6458b"),# "Unique"
                                               na.value="grey46",
                       breaks=c("Non_Zinc_binding", "T1","T1-like_1", "T1-like_2","T1_like_3","T1_like_4","T2","T2-like_1","T2-like_2" ,"T2_like_3",       
-                               "T2_like_4","T2_like_5","T3","T4","Unique"),
+                               "T2_like_4","T2_like_5","TX","TY","Unique"),
                       labels = c("Non Zinc-binding", "Type 1","Type 1-like 1", "Type 1-like 2","Type 1-like 3","Type 1-like 4","Type 2","Type 2-like 1","Type 2-like 2" ,"Type 2-like 3",       
-                                 "Type 2-like 4","Type 2-like 5","Type 3","Type 4","Uncharacterized/\nModel Organism BIR"))
+                                 "Type 2-like 4","Type 2-like 5","Type X","Type Y","Uncharacterized/\nModel Organism BIR")) 
+
+# Use loop to clade label highlight to each node 
+for(j in 1:dim(BIR_IAP_raxml_tibble_color)[1]){
+  #Then add each clade label
+  BIR_IAP_raxml_tree <- BIR_IAP_raxml_tree + geom_hilight(node=BIR_IAP_raxml_tibble_color$node[j], offset = .25, fill = BIR_IAP_raxml_tibble_color$color[j], alpha=.2, extend = 6.2)
+}
+
+  # add geom_hilight to draw boxes around each clade grouping, use below the internal node number
+  geom_hilight(node=449, fill="#7095b9", alpha=.2, extend = 6.2) + 
+  geom_hilight(node=464, fill="#7095b9", alpha=.2, extend = 6.2) +
+  geom_hilight(node = 178, "#c6458b", alpha=.2, extend = 6.2)
+
+# find internal node number in order to fill in the geom_hilight above 
+BIR_IAP_raxml_tree + geom_text2(aes(subset=!isTip, label=node), hjust=-.3)
+
+# Add plot labels
+BIR_IAP_raxml_tree_label <- draw_plot_label(BIR_IAP_raxml_tree, c("A","B"), x= c(0,2), y= c(1,1), size = 30, family = "sans")
+# not working because cannot coerce ggtree object 
 
 # ggsave BIR tree only
-#ggsave(filename = "BIR_tree_type.tiff", plot=BIR_IAP_raxml_tree, device="tiff",
-#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-#       width = 10 ,
-#       height = 25,
-#       units = "in",
-#       dpi=300)
-
-# Plot tree with Type 1 and II disctinctions and fill with species
-ggtree(BIR_IAP_raxml_treedata, 
-       #aes(color=Type, fill=Type), 
-       branch.length = "none") + 
-  geom_tiplab(aes(label=Species_shortened), size = 2.3, offset = 0.1) + 
-  #Edit theme
-  theme(legend.position = c(0.25, 0.96), 
-        legend.text = element_text(size=10, family="sans"),
-        legend.title = element_text(size=12, family="sans")) +
-  xlim(NA,45) + 
-  # add circle for 90-100 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
-  # add triangle for 70-89 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
-  # add upside down traingle for 50-69 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
-  # change position of legend title and spread across columns 
-  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")))  # need to override aes to get rid of "a" 
-  
-## ggsave BIR tree only
-ggsave(filename = "BIR_tree_type_species.tiff", plot=last_plot(), device="tiff",
+ggsave(filename = "BIR_tree_type.tiff", plot=BIR_IAP_raxml_tree, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
        width = 10 ,
        height = 25,
@@ -1946,7 +2011,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill <- rbind.fill(BIR_
 
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill$Type <- factor(BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill$Type, 
                                                          levels = c( "\"InterPro:IPR022103\"",
-                                                                    "Non_Zinc_binding", "T1","T2","T3","T4","Unique",  
+                                                                    "Non_Zinc_binding", "T1","T2","TX","TY","Unique",  
                                                                     "Intron_shortened",
                                                                     "\"InterPro:IPR036322\"",
                                                                     "\"InterPro:IPR019775\"",
@@ -2085,7 +2150,7 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
                              "grey"), 
                     name="Functional Domains",
                     breaks=c("\"InterPro:IPR022103\"",
-                             "Non_Zinc_binding", "T1","T2","T3","T4","Unique",
+                             "Non_Zinc_binding", "T1","T2","TX","TY","Unique",
                              "Intron_shortened",
                              "\"InterPro:IPR036322\"",
                              "\"InterPro:IPR019775\"",
@@ -2100,7 +2165,7 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
                              "\"InterPro:IPR027417\"",
                              "G3DSA:1.10.533.10"),
                     labels=c("Baculoviral IAP repeat-containing protein 6",
-                             "Non-Zinc-binding BIR", "BIR Type 1","BIR Type 2","BIR Type 3","BIR Type 4","Uncharacterized BIR",
+                             "Non-Zinc-binding BIR", "BIR Type I","BIR Type II","BIR Type X","BIR Type Y","Uncharacterized BIR", # switch to roman numeral
                              "Intron not to scale",
                              "WD40-repeat-containing domain superfamily",
                              "WD40 repeat, conserved site",
@@ -2137,7 +2202,7 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text <-
             aes(x=text_number, y = y_midpoint, label = Number, family= "sans", fontface = Bold_group),
             size = 6)  
 
-### Plot collapsed tree with the domain plot ##
+#### PLOT IAP COLLAPSED TREE WITH IAP PROTEIN DOMAINS ####
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed)
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + 
   theme(legend.position='none')
@@ -2155,7 +2220,7 @@ IAP_tr_dom_collapsed_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_verti
 ## Create combined figure for publication
 IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_legend,  ncol=1, rel_heights  = c(0.8, 0.1)) +
   # add labels for plot components
-  draw_plot_label(c("A","B","C"), x= c(0.38, 0.53, 0.9), y = c(1,1,1), size = 30)
+  draw_plot_label(c("A","B","C"), x= c(0.38, 0.53, 0.9), y = c(1,1,1), size = 30, family = "sans")
 
 # Export plot with tree and domains aligned 
 ggsave(filename = "IAP_tr_dom_plus_legend_plot.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
