@@ -1252,7 +1252,6 @@ IAP_domain_structure_node <-  left_join(IAP_MY_CV_CG_raxml_tibble[,c("label","no
 # reorder the nodes based on tree to correctly call nodes for each group
 IAP_domain_structure_node <- IAP_domain_structure_node[match(IAP_MY_CV_CG_raxml_treedata_tip_order, IAP_domain_structure_node$label),]
 
-
 # Plot collapsed tree
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <- 
   ggtree(IAP_MY_CV_CG_raxml_treedata_collapsed, aes(color=Species, fill=Species),  branch.length = "none") + 
@@ -1287,27 +1286,27 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <-
   geom_point2(aes(subset=(node==150)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
   geom_point2(aes(subset=(node==179)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
   ## Add clade labels for the 21 domain groups  domain groups using the internal node number
-  geom_cladelabel(261, label="1",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(254, label="2",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(233, label="3",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(228, label="4",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(217, label="5",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(211, label="6",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(207, label="7",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(198, label="8",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(201, label="9",  offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(311, label="10", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(308, label="11", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(291, label="12", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(304, label="13", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(329, label="14", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(340, label="15", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(343, label="16", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(347, label="17", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(353, label="18", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(359, label="19", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(188, label="20", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
-  geom_cladelabel(185, label="21", offset = 1, offset.text=0.1, family="sans", fontsize = 6, barsize=2, color='black') +
+  geom_cladelabel(261, label="1",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(254, label="2",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(233, label="3",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(228, label="4",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(217, label="5",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(211, label="6",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(207, label="7",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(198, label="8",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(201, label="9",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(311, label="10", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(308, label="11", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(291, label="12", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(304, label="13", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(329, label="14", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(340, label="15", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(343, label="16", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(347, label="17", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(353, label="18", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(359, label="19", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(188, label="20", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(366, label="21", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
   #Edit theme
   theme(legend.position = "bottom", 
         legend.text = element_text(face = "italic", size=14, family="sans"),
@@ -1319,9 +1318,10 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <-
   guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
 
 # find internal node number to use for the clade labels above 
-IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + geom_text2(aes(subset=!isTip, label=node), hjust=-.3)
+#IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + geom_text2(aes(subset=!isTip, label=node), hjust=-.3)
 
-#### PLOT IAP DOMAIN STRUCTURE AND COMBINE WITH TREE ####
+
+#### PLOT ALL IAP DOMAINS WITHOUT BIR TYPE INFORMATION ####
 # Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
 # Get only the Interproscan domains for my proteins of interest
 IAP_MY_CV_CG_raxml_tibble_join <- IAP_collapsed_tibble %>% filter(!is.na(label)) # remove rows with just bootstrap information
@@ -1420,84 +1420,6 @@ BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref) %>% distinct(Dbxref)
 BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref) %>% filter(Dbxref == "\"InterPro:IPR001370\"") %>% group_by(protein_id) %>% 
     filter(n() >=3) %>% distinct(protein_id)
 
-### Plot select domains 
-# Plot the line segments of the NA source lines (which have the full protein start and end)
-IAP_Interproscan_domain_plot <- ggplot() + 
-  # plot length of each protein as line
-  geom_segment(data =BIR_XP_gff_Interpro_Domains_fullprot,
-               aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
-  # add boxes with geom_rect 
-  geom_rect(data=BIR_XP_gff_Interpro_Domains_only,
-            aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Dbxref)) +
-  #add labels
-  labs(y = NULL, x = "Protein Domain Position (aa)") +
-  # add text labels
-  #geom_text(data=BIR_XP_gff_Interpro_Domains_fullprot,aes(x= end, y = node, label=alias),
-  #          size=2.0, hjust=-.15, check_overlap = TRUE) + 
-  # text theme
-  theme_bw() + 
-  # plot theme
-  theme(axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.grid.major.y = element_blank(),
-        panel.border = element_blank(),
-        axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black"),
-        legend.position = "bottom",
-        legend.box = "vertical",
-        legend.text = element_text(size=12, family="sans"),
-        legend.title = element_text(size=14, family="sans"))+
-  # Change y axis ticks
-  scale_x_continuous(breaks=c(0,500,1000,1500,2000,3000), expand = c(0,0)) + 
-  # Change domain labels 
-  scale_fill_manual(values=c("#d44172","#6d8dd7","#c972c4","#ca8853","#cd9c2e","#92b540",
-                             "#da83b4","#45c097","#cba950","#65c874","#5b3788","#8a371d","#b1457b",
-                             "#be4a5b","#6971d7","#50893b","#d55448","#c46a2f","#8a8a39","#d1766b","#6da6a1"), 
-    name="Functional Domains",
-    breaks=c("cd16713",
-             "\"InterPro:IPR001370\"",
-             "\"InterPro:IPR013083\"",
-             "\"InterPro:IPR001841\"",
-             "\"InterPro:IPR015940\"",
-             "\"InterPro:IPR003131\"",
-             "cd18316",
-             "\"InterPro:IPR011333\"",
-             "\"InterPro:IPR000210\"",
-             "\"InterPro:IPR000608\"",
-             "\"InterPro:IPR016135\"",
-             "\"InterPro:IPR022103\"",
-             "\"InterPro:IPR036322\"",
-             "\"InterPro:IPR011047\"",
-             "\"InterPro:IPR019775\"",
-             "\"InterPro:IPR017907\"",
-             "\"InterPro:IPR038765\"",
-             "\"InterPro:IPR032171\"",
-             "\"InterPro:IPR027417\"",
-             "cd14321", 
-             "G3DSA:1.10.533.10"),
-    labels=c("RING-HC_BIRC2_3_7",
-             "BIR repeat",
-             "Zinc finger, RING/FYVE/PHD-type",
-             "Zinc finger, RING-type",
-             "Ubiquitin-associated domain",
-             "Potassium channel tetramerisation-type BTB domain",
-             "BTB/POZ domain",
-             "SKP1/BTB/POZ domain superfamily",
-             "BTB/POZ domain",
-             "Ubiquitin-conjugating enzyme E2",
-             "Ubiquitin-conjugating enzyme/RWD-like",
-             "Baculoviral IAP repeat-containing protein 6",
-             "WD40-repeat-containing domain superfamily",
-             "Quinoprotein alcohol dehydrogenase-like superfamily",
-             "WD40 repeat, conserved site",
-             "Zinc finger, RING-type, conserved site",
-             "Papain-like cysteine peptidase superfamily",
-             "C-terminal of Roc (COR) domain",
-             "P-loop containing nucleoside triphosphate hydrolase",
-             "Ubiquitin-associated domain",
-             "Death domain, Fas")) +
-  # change number of legend columns and put the legend title on top
-  guides(fill=guide_legend(ncol=3, title.position="top"))
 
 # Plotting all domains 
 IAP_Interproscan_all_domain_plot <- ggplot() + 
@@ -1802,22 +1724,10 @@ for(j in 1:dim(BIR_IAP_raxml_tibble_color)[1]){
   BIR_IAP_raxml_tree <- BIR_IAP_raxml_tree + geom_hilight(node=BIR_IAP_raxml_tibble_color$node[j], offset = .25, fill = BIR_IAP_raxml_tibble_color$color[j], alpha=.2, extend = 6.2)
 }
 
-  # add geom_hilight to draw boxes around each clade grouping, use below the internal node number
-  geom_hilight(node=449, fill="#7095b9", alpha=.2, extend = 6.2) + 
-  geom_hilight(node=464, fill="#7095b9", alpha=.2, extend = 6.2) +
-  geom_hilight(node = 178, "#c6458b", alpha=.2, extend = 6.2)
-
-# find internal node number in order to fill in the geom_hilight above 
-BIR_IAP_raxml_tree + geom_text2(aes(subset=!isTip, label=node), hjust=-.3)
-
-# Add plot labels
-BIR_IAP_raxml_tree_label <- draw_plot_label(BIR_IAP_raxml_tree, c("A","B"), x= c(0,2), y= c(1,1), size = 30, family = "sans")
-# not working because cannot coerce ggtree object 
-
 # ggsave BIR tree only
 ggsave(filename = "BIR_tree_type.tiff", plot=BIR_IAP_raxml_tree, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-       width = 10 ,
+       width = 15 ,
        height = 25,
        units = "in",
        dpi=300)
@@ -1852,6 +1762,8 @@ ggsave(filename = "BIR_tree_type.tiff", plot=BIR_IAP_raxml_tree, device="tiff",
 # https://cran.r-project.org/web/packages/ggmsa/vignettes/ggmsa.html#visualizing-multiple-sequence-alignments
 # ggtree author mentions usage of this package: https://github.com/GuangchuangYu/ggtree-current-protocols, however, my plot grid way makes it 
     # easier to use
+# additional protocols for ggmsa https://yulab-smu.github.io/ggmsa/articles/Extensions/extensions.html
+# tips on adding layer to specific facet https://guangchuangyu.github.io/2016/12/add-layer-to-specific-panel-of-facet_plot-output/
 
 # Load AAmultiple alignment using biostrings
 #BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa", format = "fasta")
@@ -1874,44 +1786,36 @@ dat2fasta(BIR_IAP_all_MSA, outfile ="/Users/erinroberts/Documents/PhD_Research/C
 BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA_treeorder.fa", format = "fasta")
 
 # Plot MSA with ggmsa
-BIR_IAP_all_MSA_treeorder <- ggmsa(BIR_IAP_all_MSA, start = 53, end = 85, 
-      color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
-      none_bg = TRUE, # keeps only the letters and not the full color background
-      posHighligthed = c(57,60, 67, 76, 77,80,82,84), # specify specific positions to highlight in the alignment 
-      seq_name = FALSE) +  # checked that the order is correct so I fixed this, add the sequence name so I can check its plotting in the right order
-     # increase text size
-   theme(text = element_text(size=10),
-         plot.margin = unit(c(0, 0, 0, 0), "cm")) #remove margins
+#BIR_IAP_all_MSA_treeorder <- ggmsa(BIR_IAP_all_MSA, start = 53, end = 85, 
+#      color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
+#      none_bg = TRUE, # keeps only the letters and not the full color background
+#      posHighligthed = c(57,60, 67, 76, 77,80,82,84), # specify specific positions to highlight in the alignment 
+#      seq_name = FALSE) +  # checked that the order is correct so I fixed this, add the sequence name so I can check its plotting in the right order
+#     # increase text size
+#   theme(text = element_text(size=10),
+#         plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
 
-## save msa only
-ggsave(filename = "BIR_type_MSA_plot.tiff", plot=BIR_IAP_all_MSA_treeorder, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-       width = 10 ,
-       height = 25,
-       units = "in",
-       dpi=300)
-
-
-## Plotting the tree with the MSA side by side (decided to not go this route because axis didn't line up well with this method)
-# Plot tree with same axis spacing as the MSA
+## Plotting the tree with the MSA side by side (though it doesn't align well)
+# MSA with same axis spacing as the tree
 BIR_tree <- BIR_IAP_raxml_tree +
-  aplot::ylim2(BIR_IAP_all_MSA_treeorder)
-  
+aplot::ylim2(BIR_IAP_all_MSA_treeorder)
+
 # plot tree and the alignment using plot_grid 
-BIR_tree_type_MSA <- plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="hv", axis ="b",
-                               labels = c("A","B"))
+#BIR_tree_type_MSA <- plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="hv", axis ="b",
+                               labels = c("A","B"), rel_heights = c(0.8,1))
 
 # Remove in between white space in plot 
-#ggsave(filename = "BIR_tree_MSA_plot.tiff", plot=last_plot(), device="tiff",
+#ggsave(filename = "BIR_tree_MSA_plot.tiff", plot=BIR_tree_type_MSA, device="tiff",
 #       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
 #       width = 16 ,
 #       height = 25,
 #       units = "in",
 #       dpi=300)
 
-# In inkscape you can see the x axis are not well lined up due to extra space in the MSA. Doing some post processing in Inkscape
+# final solution was to export the tree and MSA seperately and put them together in inkscape because I kept getting so many errors and the MSA
+  # takes and extremely long time to render.
 
-#### PLOT IAP DOMAIN TREE WITH THE TYPE 1 AND TYPE 2 designations ####
+#### PLOT IAP COLLAPSED TREE WITH IAP PROTEIN DOMAINS ####
 
 # Join domain type with label and full domains
 colnames(BIR_XP_gff_Interpro_Domains_only_cd00022)[16] <-"Domain_Name"
@@ -2033,7 +1937,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill$Type <- factor(BIR
                                                                     "\"InterPro:IPR038765\"",
                                                                     "\"InterPro:IPR001370\""))
 
-#### Plot select domains with Domain Information ###
+### Plot select domains with Domain Information ###
 # get rows we want to add star to - these do not have a type designation
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_with_Type <- 
   BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>% 
@@ -2202,7 +2106,7 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text <-
             aes(x=text_number, y = y_midpoint, label = Number, family= "sans", fontface = Bold_group),
             size = 6)  
 
-#### PLOT IAP COLLAPSED TREE WITH IAP PROTEIN DOMAINS ####
+###  Export and arrange domain plot with tree
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed)
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + 
   theme(legend.position='none')
