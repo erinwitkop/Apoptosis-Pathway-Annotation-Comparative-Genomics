@@ -2620,12 +2620,23 @@ C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- C_vir_vs
             alpha=0.1)   # make translucent 
 
 # drop NA column with gtable (see https://stackoverflow.com/questions/40141684/suppress-na-column-when-faceting)
-Cvir_const_IAP_gt <- ggplot_gtable(ggplot_build(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED))
+Cvir_const_IAP_gt <- ggplot_gtable(ggplot_build(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED + theme(legend.position = "none")))
 #find column to drop
-gtable_show_layout(Cvir_const_IAP_gt) # drop 13
-Cvir_const_IAP_gt2 <- Cvir_const_IAP_gt[,-13]
+gtable_show_layout(Cvir_const_IAP_gt) # drop 15
+lemon::gtable_show_names(Cvir_const_IAP_gt)
+rm_grobs_cvir <- Cvir_const_IAP_gt$layout$name %in% c("strip-t-5","panel-1-5","axis-b-5", "axis-t-5", "axis-r-1", "ylab-r")
+# remove grobs
+Cvir_const_IAP_gt$grobs[rm_grobs_cvir] <- NULL
+Cvir_const_IAP_gt$layout <- Cvir_const_IAP_gt$layout[!rm_grobs_cvir, ]
+lemon::gtable_show_names(Cvir_const_IAP_gt)
+# remove extra width
+Cvir_const_IAP_gt$widths
+Cvir_const_IAP_gt$widths[13] = unit(0, "cm")
+Cvir_const_IAP_gt$widths[17] = unit(0, "cm")
+# check result again
+lemon::gtable_show_names(Cvir_const_IAP_gt)
 #save plot as ggplot object
-C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- ggplotify::as.ggplot(Cvir_const_IAP_gt2)
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- ggplotify::as.ggplot(Cvir_const_IAP_gt)
 
 # Edit factor levels for C. gig
 C_gig_vst_common_df_all_mat_limma_IAP_XP$Experiment <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$Experiment, levels = c("Zhang", "Rubio","He","deLorgeril_Susceptible", "deLorgeril_Resistant"), 
@@ -2696,12 +2707,23 @@ C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- C_gig_vs
             alpha=0.1)   # make translucent 
 
 # drop NA column with gtable (see https://stackoverflow.com/questions/40141684/suppress-na-column-when-faceting)
-Cgig_const_IAP_gt <- ggplot_gtable(ggplot_build(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED))
+Cgig_const_IAP_gt <- ggplot_gtable(ggplot_build(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED + theme(legend.position = "none")))
 #find column to drop
 gtable_show_layout(Cgig_const_IAP_gt) # drop 15
-Cgig_const_IAP_gt2 <- Cgig_const_IAP_gt[c(7:9),-15]
+lemon::gtable_show_names(Cgig_const_IAP_gt)
+rm_grobs <- Cgig_const_IAP_gt$layout$name %in% c("strip-t-6","panel-1-6","axis-b-6", "axis-t-6", "axis-r-1", "ylab-r")
+# remove grobs
+Cgig_const_IAP_gt$grobs[rm_grobs] <- NULL
+Cgig_const_IAP_gt$layout <- Cgig_const_IAP_gt$layout[!rm_grobs, ]
+lemon::gtable_show_names(Cgig_const_IAP_gt)
+# remove extra width
+Cgig_const_IAP_gt$widths
+Cgig_const_IAP_gt$widths[15] = unit(0, "cm")
+Cgig_const_IAP_gt$widths[19] = unit(0, "cm")
+# check result again
+lemon::gtable_show_names(Cgig_const_IAP_gt)
 #save plot as ggplot object
-C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- ggplotify::as.ggplot(Cgig_const_IAP_gt2)
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- ggplotify::as.ggplot(Cgig_const_IAP_gt)
 
 ## Plot vst side by side 
 # get legend
@@ -2712,20 +2734,21 @@ C_gig_vst_legend <- get_legend(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_
 vst_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, C_vir_vst_legend, C_gig_vst_legend,
                         nrow = 1, ncol= 4, align="hv", rel_widths  =c(0.5,0.57,1,1))
 
-vst_plots <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend, Cvir_const_IAP_gt2, Cgig_const_IAP_gt2,
+vst_plots <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend, Cvir_const_IAP_gt,
+                       Cgig_const_IAP_gt ,
           ncol =3, align="h", axis="tb")
 
 vst_combined <- plot_grid(vst_plots, vst_legend, ncol=1, rel_heights  = c(0.8, 0.1)) + 
   # Add some space at top for labels
   theme(plot.margin = unit(c(1.2,0.0,0.0,0.0), "cm")) +
   draw_plot_label(c("A","B","C"), x= c(0.21, 0.33, 0.66), y = c(1,1,1), size = 30, family = "sans", vjust = 0.2) +
-  draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 20, fontfamily = "sans", angle= 0)
+  draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 20, fontfamily = "sans", angle= 0) 
 
-# Export Const. expression plot
+# Export Const. expression plot to use in publication 
 ggsave(filename = "IAP_Const_C_vir_C_gig_07242020.tiff", plot=vst_combined, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
        width = 40,
-       height = 30,
+       height = 25,
        units = "in",
        dpi=300, limitsize = FALSE)
 
