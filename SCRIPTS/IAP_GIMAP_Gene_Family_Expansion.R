@@ -1238,20 +1238,6 @@ length(IAP_shape_node)
 # check nrows
 IAP_collapsed_tibble %>% filter(!is.na(label)) %>% count() # 184 lines to plot 
 
-## Get node order so that I can correctly find the nodes to annotate for the domain structure groups 
-# Get the node order from collapsed IAP tree
-IAP_MY_CV_CG_raxml_treedata_tip  <- fortify(IAP_MY_CV_CG_raxml_treedata_collapsed) # not changing code from here down
-IAP_MY_CV_CG_raxml_treedata_tip <- subset(IAP_MY_CV_CG_raxml_treedata_tip, isTip)
-IAP_MY_CV_CG_raxml_treedata_tip_order <- IAP_MY_CV_CG_raxml_treedata_tip$label[order(IAP_MY_CV_CG_raxml_treedata_tip$y, decreasing=TRUE)]
-
-# Join in Domain annotation document in order to get the node number for geom_strip
-IAP_domain_structure <- read_csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_Domain_Structure_groups.csv")
-IAP_domain_structure_label <- IAP_domain_structure
-colnames(IAP_domain_structure_label)[1] <- "label" # change the name
-IAP_domain_structure_node <-  left_join(IAP_MY_CV_CG_raxml_tibble[,c("label","node")], IAP_domain_structure_label)
-# reorder the nodes based on tree to correctly call nodes for each group
-IAP_domain_structure_node <- IAP_domain_structure_node[match(IAP_MY_CV_CG_raxml_treedata_tip_order, IAP_domain_structure_node$label),]
-
 # Plot collapsed tree
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <- 
   ggtree(IAP_MY_CV_CG_raxml_treedata_collapsed, aes(color=Species, fill=Species),  branch.length = "none") + 
@@ -1286,7 +1272,7 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <-
   geom_point2(aes(subset=(node==150)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
   geom_point2(aes(subset=(node==179)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
   ## Add clade labels for the 21 domain groups  domain groups using the internal node number
-  geom_cladelabel(261, label="1",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
+  geom_cladelabel(261, label="1",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') + # get node order from below 
   geom_cladelabel(254, label="2",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
   geom_cladelabel(233, label="3",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
   geom_cladelabel(228, label="4",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
@@ -2236,8 +2222,34 @@ C_gig_apop_LFC_IAP_full_XP$protein_id <- factor(C_gig_apop_LFC_IAP_full_XP$prote
 C_vir_apop_LFC_IAP_full_XP$node <- factor(C_vir_apop_LFC_IAP_full_XP$node, levels = rev(unique(C_vir_apop_LFC_IAP_full_XP$node)))
 C_gig_apop_LFC_IAP_full_XP$node <- factor(C_gig_apop_LFC_IAP_full_XP$node, levels = rev(unique(C_gig_apop_LFC_IAP_full_XP$node)))
 
+# Create geom_rect object for LFC and const. plots - need to have the nodes in the correct order first
+# Join in Domain annotation document in order to get the node number for geom_strip
+IAP_domain_structure <- read_csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_Domain_Structure_groups.csv")
+IAP_domain_structure_label <- IAP_domain_structure
+colnames(IAP_domain_structure_label)[1] <- "label" # change the name
+IAP_domain_structure_node <-  left_join(IAP_MY_CV_CG_raxml_tibble[,c("label","node")], IAP_domain_structure_label)
+# reorder the nodes based on tree to correctly call nodes for each group
+IAP_domain_structure_node_order <- IAP_domain_structure_node[match(IAP_MY_CV_CG_raxml_treedata_tip_order, IAP_domain_structure_node$label),] %>%
+  mutate(order = as.numeric(row.names(IAP_domain_structure_node_order)) )
+# rename as protien_id
+colnames(IAP_domain_structure_node_order)[1] <- "protein_id"
 
-# Plot LFC data
+# get coordinates
+  IAP_domain_structure_node_order_coordinates <-   IAP_domain_structure_node_order %>%
+    # put order in reverse and this will be y coordinates 
+    mutate(ycord =  as.numeric(rev(order))) %>%
+    group_by(as.character(Number), Color_group)%>%
+    # get coordinate labels for each 
+    summarize(ymax = max(ycord),
+      ymin = min(ycord)) %>%
+  # collapse the rows with summarize each
+    # subtract half from bottom and add half to top 
+    mutate(ymax = as.numeric(ymax) + 0.5,
+           ymin = as.numeric(ymin) - 0.5)
+  
+
+## Plot C. virginica
+# set factor levels 
 C_vir_apop_LFC_IAP_full_XP$experiment <- factor(C_vir_apop_LFC_IAP_full_XP$experiment, levels=c("Hatchery_Probiotic_RI",  "Lab_Pro_RE22","ROD", "Dermo", "NA"), 
                                                 labels= c("Hatchery\nPro. RI",  "Lab Pro. S4, RI\n or RE22","ROD", "Dermo", "NA"))
 C_vir_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_vir_apop_LFC_IAP_full_XP$group_by_sim, levels=c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
@@ -2246,8 +2258,9 @@ C_vir_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_vir_apop_LFC_IAP_full_XP$gro
                           labels= c("RI" ,"RI 6h", "RI 24h", "S4 6h","S4 24h", "RE22" ,"S. ROD","R. ROD", "S. 36h", "S. 7d", "S. 28d","T. 36h",   
                       "T. 7d","T. 28d"))
 
-C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP[!(is.na(C_vir_apop_LFC_IAP_full_XP$experiment)),], aes(x=group_by_sim, y = protein_id, fill=log2FoldChange, na.rm= TRUE)) + 
-  geom_tile()  + 
+C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP[!(is.na(C_vir_apop_LFC_IAP_full_XP$experiment)),]) + 
+  geom_tile(aes(x=group_by_sim, y = protein_id, fill=log2FoldChange))  + 
+  # make translucent 
   #scale_fill_viridis_c(breaks = seq(min(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm = TRUE),max(C_vir_apop_LFC_GIMAP_full_XP$log2FoldChange, na.rm=TRUE),length.out = 15), 
   #                  option="magma", guide=guide_legend()) +
   scale_fill_viridis_c(name = "Log2 Fold Change", 
@@ -2262,7 +2275,7 @@ C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP[!(is
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
         axis.title = element_text(size=20, family="sans"),
-        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.5),
+        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.6),
         axis.text.x.bottom = element_text(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
         legend.position = "bottom",
         legend.title = element_text(size=16, family="sans"), 
@@ -2311,7 +2324,26 @@ C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP[!(is
                              "XP_019926829.1", "XP_011437445.1", "XP_022287977.1", "XP_022287934.1", "XP_022287975.1", "XP_022287971.1", "XP_022287973.1", "XP_022287974.1", "XP_011413590.1", "XP_022295036.1", "XP_022293846.1",
                              "XP_022295029.1", "XP_022293847.1", "XP_022295527.1", "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1",
                              "XP_019924100.1", "XP_019919899.1", "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
-  guides(fill=guide_legend(ncol=4, title.position="top"))
+  guides(fill=guide_legend(ncol=4, title.position="top"))  
+
+  # add geom rect boxes 
+C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- C_vir_apop_LFC_IAP_tile_plot_COLLAPSED + 
+  # color odd numbered groups as blue and even groups 
+  geom_rect(data= IAP_domain_structure_node_order_coordinates[IAP_domain_structure_node_order_coordinates$Color_group == "gray86",], inherit.aes = FALSE, 
+            aes(ymin=as.numeric(ymin),ymax=as.numeric(ymax),xmin=-Inf,xmax=Inf), 
+            # fill works if you put outside of aes and inlude the colors in the data itself # add border color
+            fill = "gray86",
+            color = "gray86", # add border color
+            size=0.2, # set border line thickness 
+            alpha=0.1) +  # make translucent 
+# color odd numbered groups as blue and even groups 
+geom_rect(data= IAP_domain_structure_node_order_coordinates[IAP_domain_structure_node_order_coordinates$Color_group == "slategray1",], inherit.aes = FALSE, 
+          aes(ymin=as.numeric(ymin),ymax=as.numeric(ymax),xmin=-Inf,xmax=Inf), 
+          # fill works if you put outside of aes and inlude the colors in the data itself # add border color
+          color = "gray86", # add border color
+          fill = "slategray1",
+          size=0.2, # set border line thickness 
+          alpha=0.1)   # make translucent 
 
 # check number of rows matches with tree 
 Cvir_LFC_collapsed <- C_vir_apop_LFC_IAP_full_XP[!(is.na(C_vir_apop_LFC_IAP_full_XP$experiment)),]
@@ -2319,6 +2351,7 @@ Cvir_LFC_collapsed %>% distinct(protein_id) %>% count() # 29 to plot
 
 rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)) # 184 levels correct
 
+## Repeat procedure for C. gigas
 # Change factor level order of experiment for ggplot 
 C_gig_apop_LFC_IAP_full_XP$experiment <-  factor(C_gig_apop_LFC_IAP_full_XP$experiment, levels = c("Zhang", "Rubio","He","deLorgeril_sus", "deLorgeril_res","NA"), 
        labels = c("Zhang\n*Vibrio* spp." ,"Rubio\n*Vibrio* spp." , "He OsHV-1" ,"de Lorgeril\nSus. OsHV-1", "de Lorgeril\nRes. OsHV-1","de Lorgeril\nRes. OsHV-1"))
@@ -2399,6 +2432,24 @@ C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP[!(is
                             "XP_022295029.1", "XP_022293847.1", "XP_022295527.1", "XP_022295528.1", "XP_022295529.1", "XP_019925513.1", "XP_022288097.1", "XP_022289977.1", "XP_022288105.1", "XP_022288100.1", "XP_022288104.1",
                             "XP_019924100.1", "XP_019919899.1", "XP_011421261.1", "XP_022290206.1", "XP_022288934.1", "XP_022288750.1", "XP_022288931.1", "XP_022288746.1", "XP_022288748.1")) +
   guides(fill=guide_legend(ncol=3, title.position="top"))
+
+C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- C_gig_apop_LFC_IAP_tile_plot_COLLAPSED + 
+# color odd numbered groups as blue and even groups 
+geom_rect(data= IAP_domain_structure_node_order_coordinates[IAP_domain_structure_node_order_coordinates$Color_group == "gray86",], inherit.aes = FALSE, 
+          aes(ymin=as.numeric(ymin),ymax=as.numeric(ymax),xmin=-Inf,xmax=Inf), 
+          # fill works if you put outside of aes and inlude the colors in the data itself # add border color
+          fill = "gray86",
+          color = "gray86", # add border color
+          size=0.2, # set border line thickness 
+          alpha=0.1) +  # make translucent 
+  # color odd numbered groups as blue and even groups 
+  geom_rect(data= IAP_domain_structure_node_order_coordinates[IAP_domain_structure_node_order_coordinates$Color_group == "slategray1",], inherit.aes = FALSE, 
+            aes(ymin=as.numeric(ymin),ymax=as.numeric(ymax),xmin=-Inf,xmax=Inf), 
+            # fill works if you put outside of aes and inlude the colors in the data itself # add border color
+            color = "gray86", # add border color
+            fill = "slategray1",
+            size=0.2, # set border line thickness 
+            alpha=0.1)   # make translucent 
 
 #### PLOT CONSTITUTIVELY EXPRESSED IAPS ####
 
