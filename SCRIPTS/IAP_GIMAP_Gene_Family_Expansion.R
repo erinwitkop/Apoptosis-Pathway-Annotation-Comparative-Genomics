@@ -32,6 +32,7 @@ library(egg)
 library(grid)
 library(ggmsa)
 library(ggtext)
+library(ggplotify)
 setwd("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics")
 
 #### IMPORT GENOMES AND ANNOTATIONS #####
@@ -1505,8 +1506,8 @@ BIR_XP_gff_Interpro_Domains_only_cd00022 <- BIR_XP_gff_Interpro_Domains_only_cd0
 # remember that this file has the Mizuhopecten yessoensis sequences collapsed 
 
 # Export the file in BED format 
-write.table(BIR_XP_gff_Interpro_Domains_only_cd00022[,c("protein_id","start","end","Name")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_Interpro_Domains_only_cd00022.bed",
-            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+#write.table(BIR_XP_gff_Interpro_Domains_only_cd00022[,c("protein_id","start","end","Name")], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_Interpro_Domains_only_cd00022.bed",
+#            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
 
 ## IN bluewaves, get the BIR sequence for each domain, make multiple sequence alignment in MAFFTT
 ## Load Sequence file from bluewaves back into R and search for subsequences of interest 
@@ -1787,16 +1788,19 @@ BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Docum
 #aplot::ylim2(BIR_IAP_all_MSA_treeorder)
 
 # plot tree and the alignment using plot_grid 
-#BIR_tree_type_MSA <- plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="hv", axis ="b",
-                               labels = c("A","B"), rel_heights = c(0.8,1))
+BIR_tree_type_MSA <- plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="h", axis ="tb",
+                              labels = c("A","B"), rel_heights = c(0.8,1))
 
-# Remove in between white space in plot 
-#ggsave(filename = "BIR_tree_MSA_plot.tiff", plot=BIR_tree_type_MSA, device="tiff",
-#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-#       width = 16 ,
-#       height = 25,
-#       units = "in",
-#       dpi=300)
+plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="h", axis ="tb",
+          labels = c("A","B"), rel_heights = c(0.8,1))
+
+# Remove in between white space in plot in Inkscape
+ggsave(filename = "BIR_tree_MSA_plot.tiff", plot=BIR_tree_type_MSA, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 16 ,
+       height = 25,
+       units = "in",
+       dpi=300)
 
 # final solution was to export the tree and MSA seperately and put them together in inkscape because I kept getting so many errors and the MSA
   # takes and extremely long time to render.
@@ -2113,12 +2117,12 @@ IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_l
   draw_plot_label(c("A","B","C"), x= c(0.38, 0.53, 0.9), y = c(1,1,1), size = 30, family = "sans")
 
 ## Export plot with tree and domains aligned : USE THIS FOR PUBLICATION
-ggsave(filename = "IAP_tr_dom_plus_legend_plot_07232020.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-       width = 34,
-       height = 27,
-       units = "in",
-       dpi=300)
+#ggsave(filename = "IAP_tr_dom_plus_legend_plot_07232020.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
+#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+#       width = 34,
+#       height = 27,
+#       units = "in",
+#       dpi=300)
 
 ### Statistics for looking at Domains ###
 # Number of proteins with a certain number of BIR domains
@@ -2269,13 +2273,17 @@ C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP[!(is
                        option="plasma",
                        guide=guide_legend(), na.value = "transparent") +
   facet_grid(.~experiment, scales="free",space="free", drop=TRUE) + 
-  labs(x="Treatment", y = NULL,
-       title = "*C. virginica* Experiment") +
+  labs(
+    #x="Treatment", 
+    x= NULL,
+    y = NULL,
+       title = "*C. virginica* Experiment"
+    ) +
   theme_minimal() + 
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
         axis.title = element_text(size=20, family="sans"),
-        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.6),
+        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.5),
         axis.text.x.bottom = element_text(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
         legend.position = "bottom",
         legend.title = element_text(size=16, family="sans"), 
@@ -2354,12 +2362,12 @@ rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)) # 184 levels correct
 ## Repeat procedure for C. gigas
 # Change factor level order of experiment for ggplot 
 C_gig_apop_LFC_IAP_full_XP$experiment <-  factor(C_gig_apop_LFC_IAP_full_XP$experiment, levels = c("Zhang", "Rubio","He","deLorgeril_sus", "deLorgeril_res","NA"), 
-       labels = c("Zhang\n*Vibrio* spp." ,"Rubio\n*Vibrio* spp." , "He OsHV-1" ,"de Lorgeril\nSus. OsHV-1", "de Lorgeril\nRes. OsHV-1","de Lorgeril\nRes. OsHV-1"))
-
+       labels = c("Zhang<br>*Vibrio* spp." ,"Rubio<br>*Vibrio* spp." , "He OsHV-1" ,"de Lorgeril<br>Sus. OsHV-1", "de Lorgeril<br>Res. OsHV-1","de Lorgeril<br>Res. OsHV-1"))
+        # make sure to use Rmarkdown newline notation since using element_markdown for strip text formatting
 C_gig_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_gig_apop_LFC_IAP_full_XP$group_by_sim, levels= c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
            "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
            "deLorgeril_res_60hr" ,"deLorgeril_res_72hr" ,"deLorgeril_sus_6hr" , "deLorgeril_sus_12hr" ,"deLorgeril_sus_24hr" ,"deLorgeril_sus_48hr" ,"deLorgeril_sus_60hr" ,"deLorgeril_sus_72hr"), 
-labels= c("*V. alg*","*V.tub\n V. ang*","LPS *M. Lut*", "*V. cras* NVir","*V. cras* Vir" ,"*V. tas* Vir","*V. tas* NVir","6hr",
+labels= c("*V. alg*","*V.tub, V. ang*","LPS *M. Lut*", "*V. cras* NVir","*V. cras* Vir" ,"*V. tas* Vir","*V. tas* NVir","6hr",
           "12hr", "24hr", "48hr", "120hr","6hr","12hr","24hr" ,"48hr",
           "60hr", "72hr" ,"6hr",  "12hr","24hr","48hr" ,
           "60hr", "72hr"))
@@ -2377,13 +2385,18 @@ C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP[!(is
                        guide=guide_legend(), na.value = "transparent") +
   # add facet to plot 
   facet_grid(.~experiment, scales="free",space="free", drop=TRUE) + 
-  labs(x="Treatment", y ="*C. gigas* Experiment") +
+  labs(
+    #x="Treatment", 
+    x = NULL,
+    y = NULL, 
+      title = "*C. gigas* Experiment"
+  ) +
   theme_minimal() + 
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title= ggtext::element_markdown(size = 20),
-        axis.text.x.bottom = element_text(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
-        axis.text.x.bottom = ggtext::element_markdown(),
+        axis.title = element_text(size=20, family="sans"),
+        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.5),
+        axis.text.x.bottom = ggtext::element_markdown(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
         legend.position = "bottom",
         legend.title = element_text(size=16, family="sans"), 
         legend.text = element_text(size=14, family="sans"),
@@ -2392,8 +2405,8 @@ C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP[!(is
         #panel.grid.major.y = element_line(size=0.2, color="gray"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        strip.text.x = element_text(
-          size = 16, face = "bold"),
+        strip.text.x = ggtext::element_markdown(
+          size = 16, face = "bold", family="sans"),
         strip.background = element_rect(colour = "white", fill="white")) +
   guides(fill=guide_legend(ncol=3, title.position="top")) +
   # remove NA row from the list 
@@ -2548,11 +2561,11 @@ C_vir_vst_common_df_all_mat_limma_IAP_XP$Condition <- factor(C_vir_vst_common_df
                                                                                                 "ROD_Res_Control","ROD_Res_Challenge","ROD_Sus_Control","ROD_Sus_Challenge","Dermo_Sus_36h_Control","Dermo_Sus_28d_Control",
                                                                                                 "Dermo_Sus_7d_Control","Dermo_Sus_36h_Injected","Dermo_Sus_7d_Injected","Dermo_Sus_28d_Injected","Dermo_Tol_36h_Control",
                                                                                                 "Dermo_Tol_7d_Control","Dermo_Tol_28d_Control","Dermo_Tol_36h_Injected","Dermo_Tol_7d_Injected","Dermo_Tol_28d_Injected"),
-                                                  labels=c("Control" , "RI", "Control","RI 6h", "RI 24h", "S4 6h","S4 24h", "RE22" ,
+                                                  labels=c("Con" , "RI", "Con","RI 6h", "RI 24h", "S4 6h","S4 24h", "RE22" ,
                                                            "S. Con", "S. ROD", "R. Con","R. ROD", "S. Con. 36h", "S. Con. 7d", "S. Con 28d", 
                                                            "S. Pm 36h", "S. Pm 7d", "S. Pm 28d", "T. Con 36h", "T. Con 7d","T. Con 28d",
                                                            "T. Pm 36h", "T. Pm 7d", "T. Pm 28d"))
-# Plot IAP collapsed
+# Plot Cvir IAP collapsed
 # Fix scale (check yellow)
 C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=protein_id, fill=avg_vst_counts_per_treatment)) + 
   geom_tile() + 
@@ -2562,63 +2575,67 @@ C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C
                        option="plasma",
                        guide=guide_legend(), na.value = "transparent") +
   facet_grid(.~Experiment, scales="free",space="free", drop= TRUE) + 
-  labs(x=NULL, y =NULL) +
-  theme(axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        axis.text.x.bottom = element_blank(),
-        #axis.text.x.bottom = element_text(size=16, family="sans", face = "bold"),
-        #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
-        legend.position = "bottom", 
-        legend.title = element_text(size=16, family="sans"), 
-        legend.text = element_text(size=14, family="sans"),
-        panel.background = element_rect(fill = "transparent"),
-        panel.grid.major.x = element_line(size=0.2, color="gray"),
-        panel.grid.major.y = element_line(size=0.2, color="gray"),
-        strip.text.x = element_text(
-          size = 16, face = "bold")) +
-  guides(fill=guide_legend(ncol=3, title.position="top"))
-
-C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- ggplot(C_vir_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=protein_id, fill=avg_vst_counts_per_treatment)) + 
-  geom_tile() + 
-  scale_fill_viridis_c(name = "Avg. Read Count", 
-                       # limits = c(-11,10),
-                       breaks = c(0,0.5,1,2,3,4,6,8,11,12), 
-                       option="plasma",
-                       guide=guide_legend(), na.value = "transparent") +
-  facet_grid(.~Experiment, scales="free",space="free", drop= TRUE) + 
-  labs(x=NULL, y =NULL) +
+  labs(
+    #x="Treatment", 
+    x= NULL,
+    y = NULL,
+    title = "*C. virginica* Experiment"
+  ) +
   theme_minimal() + 
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
+        axis.title = element_text(size=20, family="sans"),
+        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.5),
         axis.text.x.bottom = element_text(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
-        legend.position = "none",
+        legend.position = "bottom",
+        legend.title = element_text(size=16, family="sans"), 
+        legend.text = element_text(size=14, family="sans"),
         panel.background = element_rect(fill = "transparent"),
         #panel.grid.major.x = element_blank(),
         #panel.grid.major.y = element_line(size=0.2, color="gray"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.text.x = element_text(
-          size = 16, face = "bold"),
-        strip.background = element_rect(colour = "white", fill="white"))+
-  guides(fill=guide_legend(ncol=3, title.position="top"))
+          size = 16, face = "bold", family="sans"),
+        strip.background = element_rect(colour = "white", fill="white")) +
+  guides(fill=guide_legend(ncol=3, title.position="top")) 
+
+# add geom_rect boxes
+# color odd numbered groups as blue and even groups 
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED+ 
+  geom_rect(data= IAP_domain_structure_node_order_coordinates[IAP_domain_structure_node_order_coordinates$Color_group == "gray86",], inherit.aes = FALSE, 
+          aes(ymin=as.numeric(ymin),ymax=as.numeric(ymax),xmin=-Inf,xmax=Inf), 
+          # fill works if you put outside of aes and inlude the colors in the data itself # add border color
+          fill = "gray86",
+          color = "gray86", # add border color
+          size=0.2, # set border line thickness 
+          alpha=0.1) +  # make translucent 
+  # color odd numbered groups as blue and even groups 
+  geom_rect(data= IAP_domain_structure_node_order_coordinates[IAP_domain_structure_node_order_coordinates$Color_group == "slategray1",], inherit.aes = FALSE, 
+            aes(ymin=as.numeric(ymin),ymax=as.numeric(ymax),xmin=-Inf,xmax=Inf), 
+            # fill works if you put outside of aes and inlude the colors in the data itself # add border color
+            color = "gray86", # add border color
+            fill = "slategray1",
+            size=0.2, # set border line thickness 
+            alpha=0.1)   # make translucent 
 
 # drop NA column with gtable (see https://stackoverflow.com/questions/40141684/suppress-na-column-when-faceting)
-Cvir_const_IAP_gt <- ggplot_gtable(ggplot_build(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend))
+Cvir_const_IAP_gt <- ggplot_gtable(ggplot_build(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED))
 #find column to drop
 gtable_show_layout(Cvir_const_IAP_gt) # drop 13
 Cvir_const_IAP_gt2 <- Cvir_const_IAP_gt[,-13]
 #save plot as ggplot object
-C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- as.ggplot(Cvir_const_IAP_gt2)
+C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- ggplotify::as.ggplot(Cvir_const_IAP_gt2)
 
 # Edit factor levels for C. gig
 C_gig_vst_common_df_all_mat_limma_IAP_XP$Experiment <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$Experiment, levels = c("Zhang", "Rubio","He","deLorgeril_Susceptible", "deLorgeril_Resistant"), 
-                                                              labels = c("Zhang\nVibrio spp." ,"Rubio\nVibrio spp." , "He OsHV-1" ,"de Lorgeril\nSus. OsHV-1", "de Lorgeril\nRes. OsHV-1"))
+                                                              labels = c("Zhang<br>*Vibrio* spp." ,"Rubio<br>*Vibrio* spp." , "He OsHV-1" ,"de Lorgeril<br>Sus. OsHV-1", "de Lorgeril<br>Res. OsHV-1"))
 
 C_gig_vst_common_df_all_mat_limma_IAP_XP$Condition <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$Condition, levels = c( "Zhang_Control","V_aes_V_alg1_V_alg2","V_tub_V_ang","LPS_M_lut","Rubio_Control","Vcrass_J2_8","Vcrass_J2_9","Vtasma_LGP32",
                                                                               "Vtasma_LMG20012T","Time0_control","6h_control","6h_OsHV1","12h_control","12h_OsHV1","24h_control","24h_OsHV1","48h_control",
                                                                               "48h_OsHV1","120hr_control","120hr_OsHV1","AF21_Resistant_control_0h","AF21_Resistant_6h","AF21_Resistant_12h","AF21_Resistant_24h",
                                                                               "AF21_Resistant_48h","AF21_Resistant_60h","AF21_Resistant_72h","AF11_Susceptible_control_0h","AF11_Susceptible_6h","AF11_Susceptible_12h","AF11_Susceptible_24h","AF11_Susceptible_48h","AF11_Susceptible_60h","AF11_Susceptible_72h"), 
-                                                                  labels= c("Con","V. alg","V.tub, V. ang","LPS, M. Lut", "Con","V. cras NVir","V. cras Vir" ,"V. tas Vir","V. tas NVir",
+                                                                  labels= c("Con","*V. alg*","*V.tub, V. ang*","LPS, *M. Lut*", "Con","*V. cras* NVir","*V. cras* Vir" ,"*V. tas* Vir","*V. tas* NVir",
                                                                             "0h Con","6h Con", "6h OsHv-1","12h Con","12h OsHv-1", "24h Con","24h OsHv-1",
                                                                             "48h Con","48h OsHv-1","120h Con", "120h OsHv-1","0h Con","6h OsHv-1","12h OsHv-1","24h OsHv-1" ,"48h OsHv-1",
                                                                             "60h OsHv-1","72h OsHv-1" ,"0h Con","6h OsHv-1", "12h OsHv-1","24h OsHv-1","48h OsHv-1" ,
@@ -2635,54 +2652,56 @@ C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C
                        option="plasma",
                        guide=guide_legend(), na.value = "transparent") +
   facet_grid(.~Experiment, scales="free",space="free", drop= TRUE) + 
-  labs(x=NULL, y =NULL) +
-  theme(axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        axis.text.x.bottom = element_text(size=12, family="sans", face = "bold"),
-        #axis.title.x.bottom = element_text(size=12, family="sans", face="bold"),
-        legend.position = "bottom",
-        legend.title = element_text(size=16, family="sans"), 
-        legend.text = element_text(size=14, family="sans"),
-        panel.background = element_rect(fill = "transparent"),
-        panel.grid.major.x = element_line(size=0.2, color="gray"),
-        panel.grid.major.y = element_line(size=0.2, color="gray"),
-        #strip.text.x = element_blank()) +
-        strip.text.x = element_text(
-          size = 16, face = "bold")) +
-  guides(fill=guide_legend(ncol=3, title.position="top"))
-
-# Plot without legend to use when removing NAs
-C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend <- ggplot(C_gig_vst_common_df_all_mat_limma_IAP_XP, aes(x=Condition, y=node, fill=avg_vst_counts_per_treatment)) + 
-  geom_tile() + 
-  scale_fill_viridis_c(name = "Avg. Read Count", 
-                       # limits = c(-11,10),
-                       breaks = c(0,0.5,1,2,3,4,6,8,11,12,13,14), 
-                       option="plasma",
-                       guide=guide_legend(), na.value = "transparent") +
-  facet_grid(.~Experiment, scales="free",space="free", drop= TRUE) + 
-  labs(x=NULL, y =NULL) +
+  labs(
+    #x="Treatment", 
+    x= NULL,
+    y = NULL,
+    title = "*C. gigas* Experiment"
+  ) +
   theme_minimal() + 
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.text.x.bottom = element_text(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
-        legend.position = "none",
+        axis.title = element_text(size=20, family="sans"),
+        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.5),
+        axis.text.x.bottom = ggtext::element_markdown(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
+        legend.position = "bottom",
+        legend.title = element_text(size=16, family="sans"), 
+        legend.text = element_text(size=14, family="sans"),
         panel.background = element_rect(fill = "transparent"),
         #panel.grid.major.x = element_blank(),
         #panel.grid.major.y = element_line(size=0.2, color="gray"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        strip.text.x = element_text(
-          size = 16, face = "bold"),
+        strip.text.x = ggtext::element_markdown(
+          size = 16, face = "bold", family="sans"),
         strip.background = element_rect(colour = "white", fill="white")) +
-  guides(fill=guide_legend(ncol=3, title.position="top"))
+  guides(fill=guide_legend(ncol=3, title.position="top")) 
+# add geom_rect boxes
+# color odd numbered groups as blue and even groups 
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED  + 
+  geom_rect(data= IAP_domain_structure_node_order_coordinates[IAP_domain_structure_node_order_coordinates$Color_group == "gray86",], inherit.aes = FALSE, 
+            aes(ymin=as.numeric(ymin),ymax=as.numeric(ymax),xmin=-Inf,xmax=Inf), 
+            # fill works if you put outside of aes and inlude the colors in the data itself # add border color
+            fill = "gray86",
+            color = "gray86", # add border color
+            size=0.2, # set border line thickness 
+            alpha=0.1) +  # make translucent 
+  # color odd numbered groups as blue and even groups 
+  geom_rect(data= IAP_domain_structure_node_order_coordinates[IAP_domain_structure_node_order_coordinates$Color_group == "slategray1",], inherit.aes = FALSE, 
+            aes(ymin=as.numeric(ymin),ymax=as.numeric(ymax),xmin=-Inf,xmax=Inf), 
+            # fill works if you put outside of aes and inlude the colors in the data itself # add border color
+            color = "gray86", # add border color
+            fill = "slategray1",
+            size=0.2, # set border line thickness 
+            alpha=0.1)   # make translucent 
 
 # drop NA column with gtable (see https://stackoverflow.com/questions/40141684/suppress-na-column-when-faceting)
-Cgig_const_IAP_gt <- ggplot_gtable(ggplot_build(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_no_legend))
+Cgig_const_IAP_gt <- ggplot_gtable(ggplot_build(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED))
 #find column to drop
 gtable_show_layout(Cgig_const_IAP_gt) # drop 15
-Cgig_const_IAP_gt2 <- Cgig_const_IAP_gt[,-15]
+Cgig_const_IAP_gt2 <- Cgig_const_IAP_gt[c(7:9),-15]
 #save plot as ggplot object
-C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- as.ggplot(Cgig_const_IAP_gt2)
+C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- ggplotify::as.ggplot(Cgig_const_IAP_gt2)
 
 ## Plot vst side by side 
 # get legend
@@ -2690,54 +2709,51 @@ C_vir_vst_legend <- get_legend(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_
 C_gig_vst_legend <- get_legend(C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED)
 
 # get legend plot using plot_grid and add on tree legend
-vst_legend <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, C_vir_vst_legend, C_gig_vst_legend, ncol =3)
+vst_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, C_vir_vst_legend, C_gig_vst_legend,
+                        nrow = 1, ncol= 4, align="hv", rel_widths  =c(0.5,0.57,1,1))
 
-vst_combined <- plot_grid(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm, C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm,
-          ncol =2, align="hv", axis="b")
-# plot grid is not plotting the axes aligned, just the plot margins. Not working because the labels are different lengths
+vst_plots <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend, Cvir_const_IAP_gt2, Cgig_const_IAP_gt2,
+          ncol =3, align="h", axis="tb")
 
-## Use gtable to align vertical plot size: guidance here https://github.com/tidyverse/ggplot2/wiki/Align-two-plots-on-a-page
-# colbind plot 
-p4_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + aplot::ylim2(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED)
-tree_grob <- ggplotGrob(p4_collapsed_no_legend)
-tree_grid_original_y <- ggplotGrob(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed)
-
-const_bind <- cbind(Cvir_const_IAP_gt2, Cgig_const_IAP_gt2)
-const_bind $heights <- unit.pmax(Cvir_const_IAP_gt2$heights, Cgig_const_IAP_gt2$heights) #use the largest heights
-const_bind_grid <- ggpubr::ggarrange(const_bind)
-
-# join with the IAP tree
-# method 1 with ggpubr, not aligned :()
-const_bind_grid_tree <- ggpubr::ggarrange(tree_grob,const_bind)
-const_bind_grid_tree_og <- ggpubr::ggarrange(tree_grid_original_y,const_bind)
+vst_combined <- plot_grid(vst_plots, vst_legend, ncol=1, rel_heights  = c(0.8, 0.1)) + 
+  # Add some space at top for labels
+  theme(plot.margin = unit(c(1.2,0.0,0.0,0.0), "cm")) +
+  draw_plot_label(c("A","B","C"), x= c(0.21, 0.33, 0.66), y = c(1,1,1), size = 30, family = "sans", vjust = 0.2) +
+  draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 20, fontfamily = "sans", angle= 0)
 
 # Export Const. expression plot
-ggsave(filename = "IAP_Const_C_vir_C_gig.tiff", plot=const_bind_grid_tree_og, device="tiff",
+ggsave(filename = "IAP_Const_C_vir_C_gig_07242020.tiff", plot=vst_combined, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-       width = 54,
-       height = 20,
+       width = 40,
+       height = 30,
        units = "in",
        dpi=300, limitsize = FALSE)
-# Export const legend
-ggsave(filename = "IAP_Const_C_vir_C_gig_legend.tiff", plot=vst_legend, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-       width = 20,
-       height = 20,
-       units = "in",
-       dpi=300)
-# Rescale the tree in Inkscape
 
 ## Plot LFC expression side by side
-LFC_combined <- plot_grid(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED, C_gig_apop_LFC_IAP_tile_plot_COLLAPSED, ncol=2, align="hv", axis="b")
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_LFC_axis <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED)
+C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_vir_apop_LFC_IAP_tile_plot_COLLAPSED + theme(legend.position = "none")
+C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_gig_apop_LFC_IAP_tile_plot_COLLAPSED + theme(legend.position = "none")
 
-# Export LFC plot
-ggsave(filename = "IAP_LFC_C_vir_C_gig.tiff", plot=LFC_combined, device="tiff",
+LFC_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend,  get_legend(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED), get_legend(C_gig_apop_LFC_IAP_tile_plot_COLLAPSED),
+                        nrow = 1, ncol= 4, align="hv", rel_widths  =c(0.5,0.57,1,1))
+
+LFC_plots <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_LFC_axis, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend, C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend, 
+                          ncol=3, align="h", axis="tb")
+
+LFC_combined <- plot_grid(LFC_plots, LFC_legend, ncol=1, rel_heights  = c(0.8, 0.1)) + 
+  # Add some space at top for labels
+  theme(plot.margin = unit(c(1.2,0.0,0.0,0.0), "cm")) +
+  draw_plot_label(c("A","B","C"), x= c(0.21, 0.33, 0.66), y = c(1,1,1), size = 30, family = "sans", vjust = 0.2) +
+  draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 20, fontfamily = "sans", angle= 0)
+
+# Export LFC plot ## USE FOR PUBLICATION##
+ggsave(filename = "IAP_LFC_C_vir_C_gig_07242020.tiff", plot=LFC_combined, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-       width = 24,
-       height = 20,
+       width = 40,
+       height = 30,
        units = "in",
        dpi=300)
-# legend already attached here 
+
 
 #### IAP STATS LFC, CONST, DOMAINS ####
 
