@@ -1020,6 +1020,9 @@ All_mollusc_IAP_gene_list_after_haplotig_collapsed <- BIR_XP_gff_species_join_ha
   arrange(desc(n))
 # Use this table for paper
 
+All_mollusc_IAP_gene_list_after_haplotig_collapsed %>% gt::gt(groupname_col = "Species") %>%
+  col_label(n = md("**Number of Genes**"))
+
 # How many total proteins and total uncharacterized for C. virginica
 BIR_XP_gff_species_join_haplotig_collapsed %>%
   ungroup() %>%
@@ -2124,8 +2127,8 @@ IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_l
   draw_plot_label(c("A","B","C"), x= c(0.38, 0.53, 0.9), y = c(1,1,1), size = 30, family = "sans")
 
 ## Export plot with tree and domains aligned : USE THIS FOR PUBLICATION
-#ggsave(filename = "IAP_tr_dom_plus_legend_plot_07232020.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
-#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+#ggsave(filename = "IAP_tr_dom_plus_legend_plot_07302020.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
+#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
 #       width = 34,
 #       height = 27,
 #       units = "in",
@@ -2164,14 +2167,14 @@ C_gig_apop_LFC_IAP$Species <- "Crassostrea_gigas"
 # Full Join the list of transcripts so the missing labels are in there and can be ordered for plotting 
 C_gig_apop_LFC_IAP_full_XP <- full_join(C_gig_apop_LFC_IAP, IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
 # Many NA's meaning that many of those proteins were ones that were collapsed as duplicates in CD-Hit
-# For NAs for GIMAP proteins, meaning that those were exactly identical to another protein and were collapsed. Need to replace these NA's with their uncollapsed parent protein
+# For NAs meaning that those were exactly identical to another protein and were collapsed. Need to replace these NA's with their uncollapsed parent protein
 C_gig_apop_LFC_IAP_full_XP_collapsed <- C_gig_apop_LFC_IAP_full_XP %>% filter(is.na(node) & !is.na(log2FoldChange))  %>% 
   distinct(protein_id, .keep_all = TRUE)
 C_gig_apop_LFC_IAP_full_XP_collapsed_BIR_seq_rm_dup_clstr6 <- BIR_seq_rm_dup_clstr6 %>% filter(protein_id %in% (C_gig_apop_LFC_IAP_full_XP_collapsed$protein_id))
 # Find parent proteins in these clusters
 C_gig_apop_LFC_IAP_full_XP_collapsed_BIR_seq_rm_dup_clstr6_cluster <- BIR_seq_rm_dup_clstr6[BIR_seq_rm_dup_clstr6$cluster %in% C_gig_apop_LFC_IAP_full_XP_collapsed_BIR_seq_rm_dup_clstr6$cluster,]
 
-# Recode these proteins for the purpose of plotting
+# Recode these proteins which were collapsed for the purpose of plotting
 C_gig_apop_LFC_IAP$protein_id <- recode(C_gig_apop_LFC_IAP$protein_id, 
                                         "XP_011445380.1" = "XP_011445382.1" ,
                                         "XP_011436808.1" = "XP_011436809.1" ,
@@ -2752,8 +2755,8 @@ vst_combined <- plot_grid(vst_plots, vst_legend, ncol=1, rel_heights  = c(0.8, 0
   draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 20, fontfamily = "sans", angle= 0) 
 
 # Export Const. expression plot to use in publication 
-ggsave(filename = "IAP_Const_C_vir_C_gig_07242020.tiff", plot=vst_combined, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+ggsave(filename = "IAP_Const_C_vir_C_gig_07302020.tiff", plot=vst_combined, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_Const",
        width = 40,
        height = 25,
        units = "in",
@@ -2777,13 +2780,60 @@ LFC_combined <- plot_grid(LFC_plots, LFC_legend, ncol=1, rel_heights  = c(0.8, 0
   draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 20, fontfamily = "sans", angle= 0)
 
 # Export LFC plot ## USE FOR PUBLICATION##
-ggsave(filename = "IAP_LFC_C_vir_C_gig_07242020.tiff", plot=LFC_combined, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+ggsave(filename = "IAP_LFC_C_vir_C_gig_07302020.tiff", plot=LFC_combined, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_LFC",
        width = 40,
        height = 30,
        units = "in",
        dpi=300)
 
+#### TOTAL IAP DOMAIN STATS ####
+
+# How many transcripts not used at all from any experiment
+IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain <- IAP_MY_CV_CG_raxml_tibble_join %>% filter(Species == "Crassostrea_virginica" |Species == "Crassostrea_gigas") %>% left_join(., IAP_domain_structure[,c("protein_id", "Domain_Name")])
+
+# What percent of the total transcripts in each is in each domain type
+# count domain structure of shared transcripts across all experiments 
+# perform separately so I can create a wide table for data visualization
+IAP_MY_CV_CG_raxml_tibble_join_CV_domain_count <- IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain %>%
+  filter(Species == "Crassostrea_virginica") %>% 
+  # add up number of unique proteins in each experiment
+  distinct(protein_id , .keep_all = TRUE) %>%
+  group_by(Domain_Name) %>%
+  dplyr::summarise(CV_total_per_domain = n()) %>%
+  mutate(CV_percent_of_total = CV_total_per_domain/sum(CV_total_per_domain)) 
+
+IAP_MY_CV_CG_raxml_tibble_join_CG_domain_count <- IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain %>%
+  filter(Species == "Crassostrea_gigas") %>% 
+  # add up number of unique proteins in each experiment
+  distinct(protein_id , .keep_all = TRUE) %>%
+  group_by(Domain_Name) %>%
+  dplyr::summarise(CG_total_per_domain = n()) %>%
+  mutate(CG_percent_of_total = CG_total_per_domain/sum(CG_total_per_domain))
+
+# join 
+IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count <- left_join(IAP_MY_CV_CG_raxml_tibble_join_CV_domain_count , IAP_MY_CV_CG_raxml_tibble_join_CG_domain_count)
+
+# create table
+IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table <- IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count %>% 
+  mutate(Domain_Name = replace_na(Domain_Name, "Non Domain Grouped")) %>%
+  gt::gt(rowname_col = "Domain_Name") %>%
+  tab_header(title = gt::md("**Total Identified Transcripts with Each Domain Structure**")) %>%
+  tab_spanner(label = md("*Crassostrea virginica*"), columns = c("CV_total_per_domain", "CV_percent_of_total")) %>%
+  tab_spanner(label = md("*Crassostrea gigas*"), columns = c("CG_total_per_domain", "CG_percent_of_total")) %>%
+  cols_label( CV_total_per_domain  =md("**Transcripts Per Type**"),
+              CV_percent_of_total = md("**Percent of Total**"),
+              CG_total_per_domain  =md("**Transcripts Per Type**"),
+              CG_percent_of_total = md("**Percent of Total**")) %>%
+  fmt_percent(columns = vars(CV_percent_of_total), decimals = 2) %>% # format as percent
+  fmt_percent(columns = vars(CG_percent_of_total), decimals = 2) %>% # format as percent
+  summary_rows(fns=list(Total = "sum"), 
+               columns = c("CV_total_per_domain","CG_total_per_domain"), 
+               formatter = fmt_number) %>%
+  tab_source_note(source_note = md("\\* = *IAP Domain identified by Interproscan and not CDD search*")) 
+  
+# save as png
+gtsave(IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table , "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table.png")
 
 #### IAP STATS LFC, CONST, DOMAINS ####
 
@@ -2819,17 +2869,24 @@ levels(factor(LFC_cont_comb$experiment))
 # Join with Domain type information
 LFC_cont_comb_domain_type <- left_join(LFC_cont_comb, IAP_domain_structure[, c("protein_id","Domain_Name","Number")])
 
+# Number of LFC and Const IAP in each experiment
+LFC_cont_comb_summary_count <- LFC_cont_comb_domain_type  %>% 
+  distinct(protein_id, experiment,Species, Data_Type, group_by_sim, Domain_Name) %>%
+  group_by(experiment, Species, Data_Type, group_by_sim, Domain_Name) %>%
+  count() 
+
 # Are any Domain types unique to 1 experiment?
 LFC_cont_comb_domain_type_protein_number <- LFC_cont_comb_domain_type %>% 
   group_by(Domain_Name, experiment, Data_Type, Species) %>% 
   distinct(protein_id) %>% 
   count()
 
-# create ggplot plot to better visualize patterns
+# create ggplot plot to better visualize patterns in domain usage
 LFC_cont_comb_domain_type_protein_number_plot <- ggplot(LFC_cont_comb_domain_type_protein_number, aes(x=Domain_Name, y=n, fill=experiment, color=experiment)) + geom_col() + 
   theme(axis.text.x.bottom = element_text(angle = 90, hjust =1)) + facet_grid(Species~Data_Type) 
 
-# how many proteins are unique to a certain experiment vs. shared? Calculate number of times they are shared across groups
+### Make aggregate table regarding how many IAPs used out of total in genome, percent shared, percent unique
+# Calculate number of times transcripts are shared across groups 
 LFC_cont_comb_summary_unique_shared <- LFC_cont_comb %>% 
   rowwise() %>%
     mutate(num_groups = sum(group_by(., experiment, Species) %>%
@@ -2838,15 +2895,128 @@ LFC_cont_comb_summary_unique_shared <- LFC_cont_comb %>%
                               select(protein_id) %>%
                               unlist() %in% protein_id)) %>% 
     arrange(num_groups) 
+  
+# Calculate the total number of proteins used in each experiment (only counting shared ones once) and the proportion of total genome IAPs
+LFC_cont_comb_proportion_IAP_used <-  LFC_cont_comb %>%
+  distinct(experiment, protein_id, .keep_all = TRUE) %>%
+  group_by(experiment) %>%
+  mutate(count = n()) %>%
+  distinct(experiment, count, Species) %>%
+  mutate(proportion_used = as.numeric(case_when(
+           Species == "Crassostrea_virginica"~ as.character(count/158*100),
+           Species == "Crassostrea_gigas"~ as.character(count/74*100),
+           TRUE~NA_character_))) %>%
+  arrange(desc(proportion_used))
+  
+# Calculate how many unique transcripts in each experiment and proportion unique
+LFC_cont_comb_summary_unique <- LFC_cont_comb_summary_unique_shared %>%
+  filter(num_groups == 1) %>%
+  # add up number of unique proteins in each experiment
+  distinct(experiment, protein_id, .keep_all = TRUE) %>%
+  group_by(experiment) %>%
+  dplyr::summarise(total_unique = n()) %>%
+  left_join(. , LFC_cont_comb_proportion_IAP_used) %>%
+  mutate(percent_not_shared_each_exp = total_unique/count*100)
 
-# combine with information on protein domains 
-LFC_cont_comb_domain <- left_join(LFC_cont_comb, IAP_domain_structure[,c("protein_id","Domain_Name", "Number")])
+# Calculate percent of shared transcripts between experiments in each experiment 
+LFC_cont_comb_summary_shared <- LFC_cont_comb_summary_unique_shared %>%
+  filter(num_groups > 1) %>%
+  # add up number of unique proteins in each experiment
+  distinct(experiment, protein_id, .keep_all = TRUE) %>%
+  group_by(experiment) %>%
+  summarise(total_shared = n()) %>%
+  left_join(., LFC_cont_comb_proportion_IAP_used) %>%
+  mutate(percent_shared_each_exp = total_shared/count*100)
 
-# Number of LFC and Const IAP in each experiment
-LFC_cont_comb_summary_count <- LFC_cont_comb_domain  %>% 
-  distinct(protein_id, experiment,Species, Data_Type, group_by_sim, Domain_Name) %>%
-  group_by(experiment, Species, Data_Type, group_by_sim, Domain_Name) %>%
-  count() 
+## final df with count, %unique % shared % percent used out of all IAPS
+LFC_cont_comb_summary_shared_unique <- left_join(LFC_cont_comb_summary_shared, LFC_cont_comb_summary_unique)
+
+# Make table of summary IAP shared and unique transcripts
+LFC_cont_comb_summary_shared_unique_table <- LFC_cont_comb_summary_shared_unique %>%
+  select(Species, experiment,count,proportion_used,total_shared,percent_shared_each_exp, total_unique, percent_not_shared_each_exp) %>%
+  # replace all NA's
+  mutate(
+    across(everything(), ~replace_na(.x, 0)),
+    proportion_used = proportion_used*0.01,
+    percent_shared_each_exp= percent_shared_each_exp*0.01,
+    percent_not_shared_each_exp = percent_not_shared_each_exp*0.01) %>%
+  gt::gt(rowname_col = "experiment", groupname = "Species") %>%
+  tab_header(title = gt::md("**Unique and Shared Differentially Expressed IAP Transcripts Across Experiments**")) %>%
+  cols_label( count = md("**Total Differentially<br>Expressed IAP<br>Transcripts**"),
+              proportion_used  =md("**Percent Expressed<br>of Total<br>IAP Transcripts**"),
+              total_shared = md("**Number IAP Transcripts<br>Significant Across<br>Experiments**"),
+              total_unique = md("**Number Unique<br>IAP Transcripts**"),
+              percent_shared_each_exp = md("**Percent Shared<br>Transcripts**"),
+              percent_not_shared_each_exp = md("**Percent Unique<br>Transcripts**")) %>%
+  fmt_percent(columns = vars(proportion_used), decimals = 2) %>% # format as percent
+  fmt_percent(columns = vars(percent_shared_each_exp), decimals = 2) %>% # format as percent
+  fmt_percent(columns = vars(percent_not_shared_each_exp), decimals = 2) %>% # format as percent
+tab_row_group(group = "Crassostrea virginica",rows = 1:4) %>%
+  tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea virginica")) %>%
+  tab_row_group(group = "Crassostrea gigas",rows = 5:9) %>%
+  tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea gigas")) %>%
+  summary_rows(groups = TRUE, fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = c("proportion_used","percent_shared_each_exp","percent_not_shared_each_exp"))
+
+# save as png
+gtsave(LFC_cont_comb_summary_shared_unique_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/LFC_cont_comb_summary_shared_unique_table.png")
+
+### Analyze domain structure of unique and shared transcripts ###
+# join with domain structure
+LFC_cont_comb_summary_unique_shared_domain_type <- left_join(LFC_cont_comb_summary_unique_shared, IAP_domain_structure[,c("protein_id","Domain_Name")])
+
+# Count domain structure of unique transcripts in each experiments
+LFC_cont_comb_summary_unique_shared_domain_type %>%
+filter(num_groups == 1) %>%
+  # add up number of unique proteins in each experiment
+  distinct(experiment, protein_id, .keep_all = TRUE) %>%
+  group_by(experiment, Domain_Name) %>%
+  dplyr::summarise(total_unique_per_domain = n()) %>% View()
+
+# count domain structure of unique transcripts across all experiments 
+LFC_cont_comb_summary_unique_shared_domain_type_unique <- LFC_cont_comb_summary_unique_shared_domain_type %>%
+  filter(num_groups == 1) %>%
+  # add up number of unique proteins in each experiment
+  distinct(experiment, protein_id, .keep_all = TRUE) %>%
+  group_by(Domain_Name) %>%
+  dplyr::summarise(total_unique_per_domain = n()) %>%
+  arrange(desc(total_unique_per_domain)) 
+
+# Count domain structure of shared transcripts in each experiments
+LFC_cont_comb_summary_unique_shared_domain_type %>%
+  filter(num_groups > 1) %>%
+  # add up number of unique proteins in each experiment
+  distinct(experiment, protein_id, .keep_all = TRUE) %>%
+  group_by(experiment, Domain_Name) %>%
+  filter(!is.na(Domain_Name)) %>%
+  dplyr::summarise(total_shared_per_domain = n()) %>% 
+  arrange(desc(total_shared_per_domain)) %>% View()
+
+# count domain structure of shared transcripts across all experiments 
+LFC_cont_comb_summary_unique_shared_domain_type_shared <- LFC_cont_comb_summary_unique_shared_domain_type %>%
+  filter(num_groups > 1) %>%
+  # add up number of unique proteins in each experiment
+  distinct(experiment, protein_id, .keep_all = TRUE) %>%
+  group_by(Domain_Name) %>%
+  dplyr::summarise(total_shared_per_domain = n()) %>%
+  filter(!is.na(Domain_Name)) %>%
+  arrange(desc(total_shared_per_domain))
+
+# Join two together and create table
+unique_shared_by_domain <- left_join(LFC_cont_comb_summary_unique_shared_domain_type_shared, LFC_cont_comb_summary_unique_shared_domain_type_unique) %>%
+  mutate(total_unique_per_domain = replace_na(total_unique_per_domain, 0))
+
+# create table
+unique_shared_by_domain_table <- unique_shared_by_domain %>% 
+gt::gt(rowname_col = "Domain_Name") %>%
+  tab_header(title = gt::md("**Number Unique and Shared Transcripts with Each Domain Structure Across Experiments**")) %>%
+  cols_label( Domain_Name = md("**Domain Structure Type**"),
+              total_unique_per_domain  =md("**Total Unique**"),
+              total_shared_per_domain = md("**Total Shared**")) %>%
+  tab_source_note(source_note = md("\\* = *IAP Domain identified by Interproscan and not CDD search*"))
+
+# save as png
+gtsave(unique_shared_by_domain_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/unique_shared_by_domain_table.png")
+
 
 ## Generate const IAP TABLE
 LFC_cont_comb_summary_count_CONST_IAP_TABLE <- LFC_cont_comb_summary_count %>%
@@ -2861,7 +3031,7 @@ LFC_cont_comb_summary_count_CONST_IAP_TABLE <- LFC_cont_comb_summary_count %>%
   select(Domain_Name, n, Species) %>% 
   spread(Species, n, fill = 0) %>% 
   gt::gt(rowname_col = "Domain_Name") %>%
-  tab_header(title = gt::md("**Constitutively Expressed IAP Transcripts**")) %>%
+  tab_header(title = gt::md("**Domain Structure of Constitutively Expressed IAP Transcripts**")) %>%
   cols_label( Domain_Name = md("**Domain Structure Type**"),
               Crassostrea_gigas  =md("*Crassostrea gigas*"),
               Crassostrea_virginica = md("*Crassostrea virginica*")) %>%
@@ -2924,19 +3094,54 @@ levels(factor(C_vir_gig_sig_table$group_by_sim))
 C_vir_gig_sig_table$group_by_sim <- as.factor(C_vir_gig_sig_table$group_by_sim)
 C_vir_gig_sig_table$experiment <- as.factor(C_vir_gig_sig_table$experiment)
 
-# export table of apoptosis data statistics with gtable
-C_vir_gig_sig_table_apop_table <- C_vir_gig_sig_table %>%
+# export table of apoptosis data statistics with gtable for C. virginica
+C_vir_sig_table_apop_table <- C_vir_gig_sig_table %>%
+  # change labels and add species
+  mutate(Species = case_when(
+    experiment == "deLorgeril" |experiment ==  "He"| experiment == "Rubio"| experiment == "Zhang" ~"Crassostrea_gigas",
+    experiment == "Dermo" |experiment ==  "Pro_RE22"| experiment == "Probiotic"| experiment == "ROD"   ~"Crassostrea_virginica",
+    TRUE ~ NA_character_))  %>% 
+  mutate(apop_percent = apop_percent*0.01) %>% 
+  filter(Species == "Crassostrea_virginica") %>%
+  # change order
+  select(group_by_sim, experiment, sig_total, num_sig_apop, apop_percent) %>%
+  gt::gt(rowname_col = "group_by_sim", groupname_col = "experiment") %>%
+  # use md function to invoke markdown format and add title
+  tab_header(title = gt::md("**Significant Differentially Expressed *C. virginica* Transcripts**")) %>% 
+  fmt_percent(columns = vars(apop_percent), decimals = 2) %>% # format as percent
+  # fix column labels
+  cols_label( group_by_sim = md("**Experiment**"),
+              sig_total  =md("**Total Significant DEGs**"),
+              num_sig_apop = md("**Significant Apoptosis DEGs**"),
+              apop_percent = md("**Percent Apoptosis DEGs**")) %>%
+  # change group labels and put in bold
+  tab_row_group(group = "ROD",rows = 1:2) %>%
+  tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "ROD")) %>%
+  tab_row_group(group = "Hatchery Probiotic RI",rows = 3) %>%
+  tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "Hatchery Probiotic RI")) %>% 
+  tab_row_group(group = "Dermo",rows = 4:8) %>%
+  tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "Dermo")) %>%
+  tab_row_group(group = "Lab Probiotic S4,RI, RE22",rows =9:13) %>%
+  tab_style(style = cell_text(weight = "bold"),locations =cells_row_groups(groups = "Lab Probiotic S4,RI, RE22")) %>%
+  summary_rows(groups = c("ROD","Dermo","Lab Probiotic S4,RI, RE22"), fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = "apop_percent")
+
+# save as png
+gtsave(C_vir_sig_table_apop_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_vir_sig_table_apop_table.png")
+
+# export table of apoptosis data statistics with gtable for C. gigas
+C_gig_sig_table_apop_table <- C_vir_gig_sig_table %>%
   # change labels and add species
   mutate(Species = case_when(
     experiment == "deLorgeril" |experiment ==  "He"| experiment == "Rubio"| experiment == "Zhang" ~"Crassostrea_gigas",
     experiment == "Dermo" |experiment ==  "Pro_RE22"| experiment == "Probiotic"| experiment == "ROD"   ~"Crassostrea_virginica",
     TRUE ~ NA_character_))  %>%
   mutate(apop_percent = apop_percent*0.01) %>% 
+  filter(Species == "Crassostrea_gigas") %>%
   # change order
   select(group_by_sim, experiment, sig_total, num_sig_apop, apop_percent) %>%
-  gt::gt(groupname_col = "experiment") %>%
+  gt::gt(rowname_col = "group_by_sim", groupname_col = "experiment") %>%
   # use md function to invoke markdown format and add title
-  tab_header(title = gt::md("**Significant Differentially Expressed Genes**")) %>% 
+  tab_header(title = gt::md("**Significant Differentially Expressed *C. virginica* Transcripts**")) %>% 
   fmt_percent(columns = vars(apop_percent), decimals = 2) %>% # format as percent
   # fix column labels
   cols_label( group_by_sim = md("**Experiment**"),
@@ -2952,21 +3157,67 @@ C_vir_gig_sig_table_apop_table <- C_vir_gig_sig_table %>%
   tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "He OsHV-1"))   %>%
   tab_row_group(group = "de Lorgeril OsHV-1",rows = 13:24) %>%
   tab_style(style = cell_text(weight = "bold"), locations = cells_row_groups(groups = "de Lorgeril OsHV-1")) %>%
-  tab_row_group(group = "ROD",rows = 25:26) %>%
-  tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "ROD")) %>%
-  tab_row_group(group = "Hatchery Probiotic RI",rows = 27) %>%
-  tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "Hatchery Probiotic RI")) %>% 
-  tab_row_group(group = "Dermo",rows = 28:32) %>%
-  tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "Dermo")) %>%
-  tab_row_group(group = "Lab Probiotic S4,RI, RE22",rows = 33:37) %>%
-  tab_style(style = cell_text(weight = "bold"),locations =cells_row_groups(groups = "Lab Probiotic S4,RI, RE22")) %>%
-  tab_source_note(source_note = md("\\* = *IAP Domain identified by Interproscan and not CDD search*"))
+  summary_rows(groups = TRUE, fns = list(Avgerage = "mean", SD = "sd"), formatter = fmt_percent, columns = "apop_percent")
 
 # save as png
-gtsave(C_vir_gig_sig_table_apop_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_vir_gig_sig_table_apop_table.png")
+gtsave(C_gig_sig_table_apop_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_gig_sig_table_apop_table.png")
 
+# How many transcripts not used at all from any experiment
+IAP_MY_CV_CG_raxml_tibble_join_CV <- IAP_MY_CV_CG_raxml_tibble_join %>% filter(Species == "Crassostrea_virginica")
+IAP_MY_CV_CG_raxml_tibble_join_CG <- IAP_MY_CV_CG_raxml_tibble_join %>% filter(Species == "Crassostrea_gigas")
 
+C_vir_apop_LFC_IAP_full_XP_stats[!(IAP_MY_CV_CG_raxml_tibble_join_CV$protein_id %in% C_vir_apop_LFC_IAP_full_XP_stats$protein_id),] %>%
+  distinct(protein_id) %>% filter(!is.na(protein_id)) %>% 
+  mutate(proportion_not_used = n()/158*100) # 25 transcripts not used at all # 15% not used in any
 
+C_gig_apop_LFC_IAP_full_XP_stats[!(IAP_MY_CV_CG_raxml_tibble_join_CG$protein_id %in% C_gig_apop_LFC_IAP_full_XP_stats$protein_id),] %>%
+  distinct(protein_id) %>% filter(!is.na(protein_id)) %>% 
+  mutate(proportion_not_used = n()/74*100) # 23 transcripts not used at all # 31% not used in any challenge
+
+### Recode challenge types into the following categories: bacterial, parasitic, viral, intracellular and extracellular 
+LFC_cont_comb_domain_type_regroup <- LFC_cont_comb_domain_type %>%
+  filter(Data_Type == "LFC") %>%
+  mutate(
+         challenge_type = case_when(
+           experiment == "Hatchery\nPro. RI"| experiment == "Lab Pro. S4, RI\n or RE22" | experiment == "ROD" | experiment ==   "Zhang<br>*Vibrio* spp."  | experiment == "Rubio<br>*Vibrio* spp."  ~"bacterial",
+           experiment == "Dermo" ~ "parasitic",                       
+           experiment == "He OsHV-1"| experiment =="de Lorgeril<br>Sus. OsHV-1" | experiment == "de Lorgeril<br>Res. OsHV-1"~ "viral"),
+         target = case_when(
+           group_by_sim == "RI"|group_by_sim == "RI 6h"|group_by_sim == "RI 24h"|group_by_sim == "S4 6h"|group_by_sim == "S4 24h"|group_by_sim == "S. ROD"|
+             group_by_sim == "R. ROD"|group_by_sim == "*V. alg*"|group_by_sim == "*V.tub, V. ang*"|group_by_sim == "LPS *M. Lut*"|group_by_sim == "*V. cras* NVir"|
+             group_by_sim == "*V. cras* Vir" | group_by_sim == "*V. tas* NVir" ~ "bacterial_extracellular",
+           group_by_sim ==  "RE22"|  group_by_sim == "*V. tas* Vir" ~ "bacterial_intracellular",
+             group_by_sim ==  "S. 36h"|group_by_sim == "S. 7d"|group_by_sim == "S. 28d"|group_by_sim == "T. 36h"|group_by_sim == "T. 7d"|group_by_sim == "T. 28d" ~ "parasitic_intracellular",
+             group_by_sim == "6hr"|group_by_sim == "12hr"|group_by_sim == "24hr"|group_by_sim == "48hr" | group_by_sim == "120hr"|group_by_sim == "60hr"|group_by_sim == "72hr"  ~"viral_intracellular",
+           TRUE ~ as.character(group_by_sim)))
+
+# remake ggplot with newly recoded categories
+# create ggplot plot to better visualize patterns in domain usage
+# plot with challenge type
+LFC_cont_comb_domain_type_regroup_challenge_type <- LFC_cont_comb_domain_type_regroup %>% 
+  group_by(Domain_Name, Species,challenge_type) %>% 
+  distinct(protein_id, .keep_all = TRUE) %>%
+dplyr::summarise(count=n()) %>%
+  ggplot(., aes(x=Domain_Name, y=count, fill=challenge_type)) + geom_col() + 
+theme(axis.text.x.bottom = element_text(angle = 90, hjust =1)) + facet_grid(.~Species, scales="free") +
+  coord_flip()
+ggsave(LFC_cont_comb_domain_type_regroup_challenge_type, filename ="LFC_cont_comb_domain_type_regroup_challenge_type.tiff", device = "tiff",
+       width = 17, height = 15, units = "cm",
+       path = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/")
+# plot with target 
+LFC_cont_comb_domain_type_regroup_target <- LFC_cont_comb_domain_type_regroup %>% 
+  group_by(Domain_Name, Species,target) %>% 
+  distinct(protein_id, .keep_all = TRUE) %>%
+  dplyr::summarise(count=n()) %>%
+  ggplot(., aes(x=Domain_Name, y=count, fill=target)) + geom_col() + 
+  theme(axis.text.x.bottom = element_text(angle = 90, hjust =1)) +  facet_grid(.~Species, scales="free") +
+  coord_flip()
+
+ggsave(LFC_cont_comb_domain_type_regroup_target, filename ="LFC_cont_comb_domain_type_regroup_target.tiff", device = "tiff",
+       width = 17, height = 15, units = "cm",
+       path = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/")
+
+# upset plot
 
 #### PLOT FULL GIMAP PROTEIN TREE ####
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
