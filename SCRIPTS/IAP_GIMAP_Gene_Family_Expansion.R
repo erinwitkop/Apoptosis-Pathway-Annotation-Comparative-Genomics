@@ -1249,6 +1249,13 @@ IAP_domain_structure1 <- read_csv("/Users/erinroberts/Documents/PhD_Research/Cha
 colnames(IAP_domain_structure1)[1] <- "label"
 IAP_collapsed_tibble_domain_type <- left_join(IAP_collapsed_tibble, IAP_domain_structure1[,c("label","Domain_Name","Number")])
 
+IAP_collapsed_tibble_domain_type %>% group_by(Species) %>% count()
+#Species                     n
+#<chr>                   <int>
+#  1 Crassostrea_gigas          54
+#2 Crassostrea_virginica      95
+#3 Mizuhopecten_yessoensis    35
+
 # Plot collapsed tree
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <- 
   ggtree(IAP_MY_CV_CG_raxml_treedata_collapsed, aes(color=Species, fill=Species),  branch.length = "none") + 
@@ -1316,7 +1323,6 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <-
 
 # find internal node number to use for the clade labels above 
 #IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + geom_text2(aes(subset=!isTip, label=node), hjust=-.3)
-
 
 #### PLOT ALL IAP DOMAINS WITHOUT BIR TYPE INFORMATION ####
 # Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
@@ -2160,6 +2166,9 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
 load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_vir_apop_LFC_IAP.Rdata")
 load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_gig_apop_LFC_IAP.Rdata")
 
+C_vir_apop_LFC_IAP_OG <- C_vir_apop_LFC_IAP
+C_gig_apop_LFC_IAP_OG <- C_gig_apop_LFC_IAP
+
 # Keep tables separate for plotting 
 C_vir_apop_LFC_IAP$Species <- "Crassostrea_virginica"
 C_gig_apop_LFC_IAP$Species <- "Crassostrea_gigas"
@@ -2835,6 +2844,49 @@ IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table <- IAP_MY_CV_CG_raxml_ti
 # save as png
 gtsave(IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table , "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table.png")
 
+### join IAP XM IDs to IAP domain structure groupings so I can pull out results in WGCNA
+## I only want to search for those that were significantly differentially expressed
+# Add into IAP_domain_structure those that were recoded
+
+# make key for recode
+C_gigas_recode <- data.frame(recode = c("XP_011445380.1","XP_011436808.1","XP_011445383.1","XP_019925515.1","XP_019925516.1","XP_019925512.1","XP_011418792.1","XP_019925514.1","XP_011445381.1","XP_011437419.1","XP_011428386.1"),
+                                protein_id = c("XP_011445382.1" , "XP_011436809.1" , "XP_011445382.1" , "XP_019925513.1" , "XP_019925513.1" , "XP_019925513.1" , "XP_011418791.1" , "XP_019925513.1" , "XP_011445382.1", "XP_011437418.1" , "XP_011428384.1"))
+
+C_vir_recode <- data.frame(recode = c("XP_022287921.1","XP_022288976.1","XP_022292112.1","XP_022295524.1","XP_022288687.1","XP_022287932.1","XP_022291031.1","XP_022292110.1","XP_022292109.1","XP_022292969.1","XP_022288681.1","XP_022293781.1","XP_022288683.1","XP_022286792.1","XP_022292414.1","XP_022291628.1","XP_022289978.1"),
+                             protein_id = c("XP_022287919.1","XP_022288977.1","XP_022292108.1","XP_022295527.1","XP_022288684.1","XP_022287934.1","XP_022291030.1","XP_022292108.1","XP_022292108.1","XP_022292970.1","XP_022288684.1","XP_022293782.1","XP_022288684.1","XP_022295668.1","XP_022292412.1","XP_022291629.1","XP_022289977.1"))
+# find protein domain matches
+C_gigas_recode_domain <- left_join(C_gigas_recode , IAP_domain_structure[,c("protein_id", "Domain_Name")])
+C_vir_recode_domain <- left_join(C_vir_recode , IAP_domain_structure[,c("protein_id", "Domain_Name")])
+# combine
+recode_domain <- rbind(C_gigas_recode_domain, C_vir_recode_domain )
+recode_domain <- recode_domain[,-2]
+colnames(recode_domain)[1] <- "protein_id"
+
+# the "recode" column is now the one I want to add back into my data frame using the domain name
+IAP_domain_structure_recoded <- rbind(IAP_domain_structure[,c("protein_id", "Domain_Name")], recode_domain)
+
+# join C_vir_apop_LFC_IAP_OG with transcript ID
+C_vir_apop_LFC_IAP_OG <- left_join(C_vir_apop_LFC_IAP_OG, C_vir_rtracklayer[,c("transcript_id","ID")], by = "ID")
+
+# Join with LFC dataframe that was not recoded
+IAP_domain_structure_XM_CG <- left_join(IAP_domain_structure_recoded , unique(C_gig_apop_LFC_IAP_OG[,c("protein_id","transcript_id")]))
+IAP_domain_structure_XM_CV <- left_join(IAP_domain_structure_recoded, unique(C_vir_apop_LFC_IAP_OG[,c("protein_id","transcript_id")]))
+
+# count matches 
+IAP_domain_structure_XM_CG %>% filter(!is.na(transcript_id)) %>% distinct(protein_id) %>%count() # 38 - all were added back in (was 30 before)
+IAP_domain_structure_XM_CV %>% filter(!is.na(transcript_id)) %>% distinct(protein_id) %>%count() # 37 - all were added back in (was 28 before)
+
+# combine
+IAP_domain_structure_XM <- rbind(IAP_domain_structure_XM_CG, IAP_domain_structure_XM_CV)
+
+#combine transcript ID column from Cgig and ID column from Cvir
+IAP_domain_structure_XM_filter <- IAP_domain_structure_XM %>%
+  filter(!is.na(Domain_Name), !is.na(transcript_id))
+nrow(IAP_domain_structure_XM_filter) # 68
+
+# export
+save(IAP_domain_structure_XM_filter, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_domain_structure_XM_filter.RData")
+
 #### IAP STATS LFC, CONST, DOMAINS ####
 
 # Combine tables to get stats about which domain types are present 
@@ -2903,8 +2955,8 @@ LFC_cont_comb_proportion_IAP_used <-  LFC_cont_comb %>%
   mutate(count = n()) %>%
   distinct(experiment, count, Species) %>%
   mutate(proportion_used = as.numeric(case_when(
-           Species == "Crassostrea_virginica"~ as.character(count/158*100),
-           Species == "Crassostrea_gigas"~ as.character(count/74*100),
+           Species == "Crassostrea_virginica"~ as.character(count/95*100),
+           Species == "Crassostrea_gigas"~ as.character(count/54*100),
            TRUE~NA_character_))) %>%
   arrange(desc(proportion_used))
   
