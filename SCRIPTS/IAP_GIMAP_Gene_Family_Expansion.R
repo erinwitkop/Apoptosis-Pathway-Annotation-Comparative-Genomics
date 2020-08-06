@@ -178,16 +178,59 @@ write.table(unique(BIR_XP_gff_species$protein_id), file="/Users/erinroberts/Docu
 write.table(unique(AIG1_XP_ALL_gff_GIMAP_species$protein_id), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG_GIMAP_HMMER_Interpro_XP_list_all.txt",
             quote=FALSE, row.names=FALSE, col.names=FALSE)
 
-# Export protein lists for CV and CG only to use to look up transcripts in the DESeq dataset 
+### Export XP and XM lists for CV and CG only to use to look up transcripts in the DESeq dataset ###
 BIR_XP_gff_CG_uniq_XP <- unique(BIR_XP_gff_CG$protein_id)
 BIR_XP_gff_CV_uniq_XP <- unique(BIR_XP_gff_CV$protein_id)
 AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP <- unique(AIG1_XP_ALL_gff_GIMAP_CG$protein_id)
 AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP <- unique(AIG1_XP_ALL_gff_GIMAP_CV$protein_id)
 
-save(BIR_XP_gff_CG_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_protein_list_CG.Rdata")
-save(BIR_XP_gff_CV_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_protein_list_CV.Rdata")
-save(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_protein_list_CG.Rdata")
-save(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_protein_list_CV.Rdata")
+#save(BIR_XP_gff_CG_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_protein_list_CG.Rdata")
+#save(BIR_XP_gff_CV_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_protein_list_CV.Rdata")
+#save(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_protein_list_CG.Rdata")
+#save(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_protein_list_CV.Rdata")
+
+# Join with XM information 
+BIR_XP_gff_CG_uniq_XP <- as.data.frame(BIR_XP_gff_CG_uniq_XP)
+BIR_XP_gff_CV_uniq_XP <- as.data.frame(BIR_XP_gff_CV_uniq_XP)
+AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP <- as.data.frame(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP)
+AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP <- as.data.frame(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP)
+
+colnames(BIR_XP_gff_CG_uniq_XP)[1] <- "protein_id" 
+colnames(BIR_XP_gff_CV_uniq_XP)[1] <- "protein_id" 
+colnames(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP)[1] <- "protein_id" 
+colnames(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP)[1] <- "protein_id" 
+
+BIR_XP_gff_CG_uniq_XP_XM <- left_join(BIR_XP_gff_CG_uniq_XP, C_gig_rtracklayer)
+BIR_XP_gff_CV_uniq_XP_XM <- left_join(BIR_XP_gff_CV_uniq_XP, C_vir_rtracklayer)
+AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP_XM <- left_join(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP, C_gig_rtracklayer)
+AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP_XM <- left_join(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP, C_vir_rtracklayer)
+
+BIR_XP_gff_CG_uniq_XP_XM <- BIR_XP_gff_CG_uniq_XP_XM %>% distinct(protein_id, Parent, .keep_all = TRUE)
+BIR_XP_gff_CV_uniq_XP_XM <- BIR_XP_gff_CV_uniq_XP_XM %>% distinct(protein_id, Parent, .keep_all = TRUE)
+AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP_XM <- AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP_XM %>% distinct(protein_id, Parent, .keep_all = TRUE)
+AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP_XM <- AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP_XM %>% distinct(protein_id, Parent, .keep_all = TRUE)
+
+# Remove "rna-" from Parent column for CG 
+BIR_XP_gff_CG_uniq_XP_XM$Parent <- str_remove(BIR_XP_gff_CG_uniq_XP_XM$Parent, "rna-")
+AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP_XM$Parent <- str_remove(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP_XM $Parent, "rna-")
+
+colnames(BIR_XP_gff_CG_uniq_XP_XM)[20] <- "transcript_id"
+BIR_XP_gff_CG_uniq_XP_XM <- BIR_XP_gff_CG_uniq_XP_XM[,-23]
+
+BIR_XP_gff_CV_uniq_XP_XM <- BIR_XP_gff_CV_uniq_XP_XM[,-10]
+colnames(BIR_XP_gff_CV_uniq_XP_XM)[23] <- "ID"
+
+colnames(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP_XM)[20] <- "transcript_id"
+AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP_XM <- AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP_XM[,-23]
+
+AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP_XM <- AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP_XM[,-10]
+colnames(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP_XM)[23] <- "ID"
+
+# EXPORT XM XP lists - use this to join IAP transcripts to apoptosis list to serch for in DESeq2 and WGCNA
+save(BIR_XP_gff_CG_uniq_XP_XM, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_CG_uniq_XP_XM.Rdata")
+save(BIR_XP_gff_CV_uniq_XP_XM, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_CV_uniq_XP_XM.Rdata")
+save(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP_XM, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP_XM.Rdata")
+save(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP_XM, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP_XM.Rdata")
 
 # How many IAP proteins in each 
 length(BIR_XP_gff_CG_uniq_XP) # 74
@@ -2165,6 +2208,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
 load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_vir_apop_LFC_IAP.Rdata")
 load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_gig_apop_LFC_IAP.Rdata")
+# remember this is the IAPs that were significantly different with challenge, not expression of all IAPs!
 
 C_vir_apop_LFC_IAP_OG <- C_vir_apop_LFC_IAP
 C_gig_apop_LFC_IAP_OG <- C_gig_apop_LFC_IAP
@@ -2865,12 +2909,9 @@ colnames(recode_domain)[1] <- "protein_id"
 # the "recode" column is now the one I want to add back into my data frame using the domain name
 IAP_domain_structure_recoded <- rbind(IAP_domain_structure[,c("protein_id", "Domain_Name")], recode_domain)
 
-# join C_vir_apop_LFC_IAP_OG with transcript ID
-C_vir_apop_LFC_IAP_OG <- left_join(C_vir_apop_LFC_IAP_OG, C_vir_rtracklayer[,c("transcript_id","ID")], by = "ID")
-
-# Join with LFC dataframe that was not recoded
-IAP_domain_structure_XM_CG <- left_join(IAP_domain_structure_recoded , unique(C_gig_apop_LFC_IAP_OG[,c("protein_id","transcript_id")]))
-IAP_domain_structure_XM_CV <- left_join(IAP_domain_structure_recoded, unique(C_vir_apop_LFC_IAP_OG[,c("protein_id","transcript_id")]))
+# Join with LFC dataframe that was not recoded (meaning collapsed for duplicates)
+IAP_domain_structure_XM_CG <- left_join(IAP_domain_structure_recoded , )
+IAP_domain_structure_XM_CV <- left_join(IAP_domain_structure_recoded, )
 
 # count matches 
 IAP_domain_structure_XM_CG %>% filter(!is.na(transcript_id)) %>% distinct(protein_id) %>%count() # 38 - all were added back in (was 30 before)
@@ -2882,7 +2923,7 @@ IAP_domain_structure_XM <- rbind(IAP_domain_structure_XM_CG, IAP_domain_structur
 #combine transcript ID column from Cgig and ID column from Cvir
 IAP_domain_structure_XM_filter <- IAP_domain_structure_XM %>%
   filter(!is.na(Domain_Name), !is.na(transcript_id))
-nrow(IAP_domain_structure_XM_filter) # 68
+nrow(IAP_domain_structure_XM_filter) # 68 (remember this is less than total number of transcripts because some proteins were classified by domain)
 
 # export
 save(IAP_domain_structure_XM_filter, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_domain_structure_XM_filter.RData")
