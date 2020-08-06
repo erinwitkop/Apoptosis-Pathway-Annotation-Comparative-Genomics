@@ -2295,8 +2295,9 @@ IAP_domain_structure <- read_csv("/Users/erinroberts/Documents/PhD_Research/Chap
 IAP_domain_structure_label <- IAP_domain_structure
 colnames(IAP_domain_structure_label)[1] <- "label" # change the name
 IAP_domain_structure_node <-  left_join(IAP_MY_CV_CG_raxml_tibble[,c("label","node")], IAP_domain_structure_label)
+IAP_domain_structure_node <- IAP_domain_structure_node[!is.na(IAP_domain_structure_node$label),]
 # reorder the nodes based on tree to correctly call nodes for each group
-IAP_domain_structure_node_order <- IAP_domain_structure_node[match(IAP_MY_CV_CG_raxml_treedata_tip_order, IAP_domain_structure_node$label),] %>%
+IAP_domain_structure_node_order <- IAP_domain_structure_node[match(IAP_MY_CV_CG_raxml_treedata_tip_order$protein_id, IAP_domain_structure_node$label),] %>%
   mutate(order = as.numeric(row.names(IAP_domain_structure_node_order)) )
 # rename as protien_id
 colnames(IAP_domain_structure_node_order)[1] <- "protein_id"
@@ -2889,10 +2890,10 @@ IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table <- IAP_MY_CV_CG_raxml_ti
 gtsave(IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table , "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table.png")
 
 ### join IAP XM IDs to IAP domain structure groupings so I can pull out results in WGCNA
-## I only want to search for those that were significantly differentially expressed
-# Add into IAP_domain_structure those that were recoded
+## Need to search for all IAPs in the WGCNA data 
+# Add into IAP_domain_structure those that were recoded into other protein IDs because duplicates were collapsed 
 
-# make key for recode
+# make key for recoding proteins that were collapsed prior to the making of the IAP_domain_structure
 C_gigas_recode <- data.frame(recode = c("XP_011445380.1","XP_011436808.1","XP_011445383.1","XP_019925515.1","XP_019925516.1","XP_019925512.1","XP_011418792.1","XP_019925514.1","XP_011445381.1","XP_011437419.1","XP_011428386.1"),
                                 protein_id = c("XP_011445382.1" , "XP_011436809.1" , "XP_011445382.1" , "XP_019925513.1" , "XP_019925513.1" , "XP_019925513.1" , "XP_011418791.1" , "XP_019925513.1" , "XP_011445382.1", "XP_011437418.1" , "XP_011428384.1"))
 
@@ -2909,24 +2910,20 @@ colnames(recode_domain)[1] <- "protein_id"
 # the "recode" column is now the one I want to add back into my data frame using the domain name
 IAP_domain_structure_recoded <- rbind(IAP_domain_structure[,c("protein_id", "Domain_Name")], recode_domain)
 
-# Join with LFC dataframe that was not recoded (meaning collapsed for duplicates)
-IAP_domain_structure_XM_CG <- left_join(IAP_domain_structure_recoded , )
-IAP_domain_structure_XM_CV <- left_join(IAP_domain_structure_recoded, )
+# Join with the full list of IAP transcripts found from manual curation and haplotig collapse
+IAP_domain_structure_XM_CG <- left_join(BIR_XP_gff_CG_uniq_XP_XM, IAP_domain_structure_recoded)
+IAP_domain_structure_XM_CV <- left_join(BIR_XP_gff_CV_uniq_XP_XM, IAP_domain_structure_recoded)
 
-# count matches 
-IAP_domain_structure_XM_CG %>% filter(!is.na(transcript_id)) %>% distinct(protein_id) %>%count() # 38 - all were added back in (was 30 before)
-IAP_domain_structure_XM_CV %>% filter(!is.na(transcript_id)) %>% distinct(protein_id) %>%count() # 37 - all were added back in (was 28 before)
+# count number of transcripts and proteins matched to domain name
+IAP_domain_structure_XM_CG %>% filter(!is.na(Domain_Name)) %>% distinct(protein_id) %>%count() # 56 proteins - all were added back in (was 30 before)
+IAP_domain_structure_XM_CG %>% filter(!is.na(Domain_Name)) %>% distinct(transcript_id) %>%count() # 56 92 transcripts
 
-# combine
-IAP_domain_structure_XM <- rbind(IAP_domain_structure_XM_CG, IAP_domain_structure_XM_CV)
+IAP_domain_structure_XM_CV %>% filter(!is.na(Domain_Name)) %>% distinct(protein_id) %>%count() # 92 proteins - all were added back in (was 28 before)
+IAP_domain_structure_XM_CV %>% filter(!is.na(Domain_Name)) %>% distinct(ID) %>%count() # 92 transcripts - all were added back in (was 28 before)
 
-#combine transcript ID column from Cgig and ID column from Cvir
-IAP_domain_structure_XM_filter <- IAP_domain_structure_XM %>%
-  filter(!is.na(Domain_Name), !is.na(transcript_id))
-nrow(IAP_domain_structure_XM_filter) # 68 (remember this is less than total number of transcripts because some proteins were classified by domain)
-
-# export
-save(IAP_domain_structure_XM_filter, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_domain_structure_XM_filter.RData")
+# export each data frame
+save(IAP_domain_structure_XM_CG, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_domain_structure_XM_CG.RData")
+save(IAP_domain_structure_XM_CV, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_domain_structure_XM_CV.RData")
 
 #### IAP STATS LFC, CONST, DOMAINS ####
 
