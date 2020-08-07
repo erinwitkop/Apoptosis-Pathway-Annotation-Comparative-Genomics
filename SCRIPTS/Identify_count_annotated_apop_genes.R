@@ -1177,5 +1177,5 @@ gene_family_cvir_cgig_heatmap <- ggplot(gene_family_statistics_joined_plot_long_
 
 save(C_gig_rtracklayer, C_vir_rtracklayer, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_annotations.RData")
 save(C_gig_rtracklayer_apop_product_final, C_vir_rtracklayer_apop_product_final, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_apoptosis_products.RData")
-
+C_vir_rtracklayer_apop_product_final 
 
