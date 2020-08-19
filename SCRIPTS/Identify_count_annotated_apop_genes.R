@@ -1032,7 +1032,7 @@ combined_gene_name_yes_no_table <- full_join(C_vir_rtracklayer_apop_product_fina
                                              by = "gene_name")
 #remove duplicate gene names
 combined_gene_name_yes_no_table_unique <- combined_gene_name_yes_no_table[!duplicated(combined_gene_name_yes_no_table$gene_name),]
-write.table(combined_gene_name_yes_no_table_unique, file="combined_gene_name_yes_no_table_unique.txt")
+write.table(combined_gene_name_yes_no_table_unique, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/combined_gene_name_yes_no_table_unique.txt")
 nrow(combined_gene_name_yes_no_table_unique) #275
 #join on the pathway descriptions for the molecules 
 # load in table with pathway descriptions for each in Excel 
@@ -1049,7 +1049,7 @@ nrow(c_gig_not_c_vir) # 49
 # shared in both 
 shared_apoptosis_gene_names <- na.omit(combined_gene_name_yes_no_table_unique)
 nrow(shared_apoptosis_gene_names) # 175
-write.table(shared_apoptosis_gene_names , file="shared_apoptosis_gene_names.txt")
+write.table(shared_apoptosis_gene_names , file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/shared_apoptosis_gene_names.txt")
 
 # number of uniquely names proteins in C_vir for paper
 C_vir_all <- combined_gene_name_yes_no_table_unique %>% filter(!is.na(C_vir_gene_LOC)) %>% select(C_vir_gene_LOC, gene_name) 
@@ -1059,11 +1059,11 @@ C_gig_all <- combined_gene_name_yes_no_table_unique %>% filter(!is.na(C_gig_gene
 nrow(C_gig_all) #224 
 
 # Load gene pathway key with protein aliases curated in excel
-# August 5th, 2020: need to fix this table in excel to include the new IAP genes
+# August 19th, 2020: fixed this table and added more specific pathway designations and the newly identified IAPs
 gene_name_pathway_key_merged <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/Gene_name_pathway_key.csv", head=TRUE)
 
-# Which ones shared by both C_gig and C_vir (no NAs)
-gene_name_pathway_key_merged_shared <- na.omit(gene_name_pathway_key_merged)
+# Which ones shared by both C_gig and C_vir
+gene_name_pathway_key_merged_shared <- gene_name_pathway_key_merged %>% filter(!grepl("No matching", C_vir_gene_LOC) & !grepl("No matching",C_gig_gene_LOC))
 
 ### 2. Make combined table with gene family statistics
 # investigate differences in apoptosis_names_df and apoptosis_names_df_CG 
@@ -1176,6 +1176,6 @@ gene_family_cvir_cgig_heatmap <- ggplot(gene_family_statistics_joined_plot_long_
 #### EXPORT DATA FRAMES FOR USE IN DESEQ AND WGCNA ####
 
 save(C_gig_rtracklayer, C_vir_rtracklayer, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_annotations.RData")
-save(C_gig_rtracklayer_apop_product_final, C_vir_rtracklayer_apop_product_final, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_apoptosis_products.RData")
-C_vir_rtracklayer_apop_product_final 
+save(C_gig_rtracklayer_apop_product_final, C_vir_rtracklayer_apop_product_final, gene_name_pathway_key_merged, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_apoptosis_products.RData")
+
 
