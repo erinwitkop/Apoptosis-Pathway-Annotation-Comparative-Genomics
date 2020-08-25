@@ -1002,7 +1002,7 @@ save(C_gig_rtracklayer_apop_product_final_product_joined_by_gene_duplicates, C_g
 
 #### Combine C_vir and C_gig tables ######
 
-### 1.Make table of presence and absence of specific genes (not gene family)
+### Make table of presence and absence of specific genes (not gene family) ###
 # unique gene name lists for both species
 C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name <- C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique[!duplicated(C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique$gene_name),]
 C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name <- C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique[!duplicated(C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique$gene_name),]
@@ -1035,10 +1035,14 @@ combined_gene_name_yes_no_table_unique <- combined_gene_name_yes_no_table[!dupli
 write.table(combined_gene_name_yes_no_table_unique, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/combined_gene_name_yes_no_table_unique.txt")
 nrow(combined_gene_name_yes_no_table_unique) #275
 #join on the pathway descriptions for the molecules 
-# load in table with pathway descriptions for each in Excel 
+# load in table with pathway descriptions for each in Excel file "Gene_name_pathway_key.csv"
 
 # Still a few discrepancies in the gene names, namely when they are named in C. virginica "* homolog"
 # "mitogen-activated protein kinase kinase kinase 7-interacting protein 3 homolog" is "TGF-beta-activated kinase 1 and MAP3K7-binding protein 3" - need to add one to the tally of shared
+
+# Load gene pathway key with protein aliases curated in excel
+# August 19th, 2020: fixed this table and added more specific pathway designations and the newly identified IAPs
+gene_name_pathway_key_merged <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/Gene_name_pathway_key.csv", head=TRUE)
 
 # Genes in C vir and not in C gig (all the C_gig_gene_LOC NA's)
 c_vir_not_c_gig <- combined_gene_name_yes_no_table_unique %>% filter(is.na(C_gig_gene_LOC))
@@ -1058,12 +1062,33 @@ nrow(C_vir_all) #226
 C_gig_all <- combined_gene_name_yes_no_table_unique %>% filter(!is.na(C_gig_gene_LOC)) %>% select(C_gig_gene_LOC, gene_name) 
 nrow(C_gig_all) #224 
 
-# Load gene pathway key with protein aliases curated in excel
-# August 19th, 2020: fixed this table and added more specific pathway designations and the newly identified IAPs
-gene_name_pathway_key_merged <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/Gene_name_pathway_key.csv", head=TRUE)
+### Create Table of C. gig and C. vir gene names, keeping the -"like" to facilitate joining pathway designations in WGCNA ####
+# Export table with the "-like" not removed (use this to present in publication)
+C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name_org <- C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique[!duplicated(C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique$gene_name),]
+C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name_org <- C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique[!duplicated(C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique$gene_name),]
 
-# Which ones shared by both C_gig and C_vir
-gene_name_pathway_key_merged_shared <- gene_name_pathway_key_merged %>% filter(!grepl("No matching", C_vir_gene_LOC) & !grepl("No matching",C_gig_gene_LOC))
+# rename gene column for joining
+colnames(C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name_org)[1] <- "C_vir_gene_LOC"
+colnames(C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name_org)[1] <- "C_gig_gene_LOC"
+
+combined_gene_name_org_yes_no_table <- full_join(C_vir_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name_org, C_gig_rtracklayer_apop_product_final_product_joined_split_product_unique_gene_name_org,
+                                             by = "gene_name")
+#remove duplicate gene names
+combined_gene_name_org_yes_no_table_unique <- combined_gene_name_org_yes_no_table [!duplicated(combined_gene_name_org_yes_no_table $gene_name),]
+colnames(combined_gene_name_org_yes_no_table_unique)[2] <- "gene_name_original"
+
+# Put the product with like removed in another column
+combined_gene_name_org_yes_no_table_unique$gene_name <-  stringr::str_remove(combined_gene_name_org_yes_no_table_unique$gene_name_original, "\\like$")
+combined_gene_name_org_yes_no_table_unique$gene_name <-  stringr::str_remove(combined_gene_name_org_yes_no_table_unique$gene_name, "\\-$")
+
+# full_join with pathway table without the -like products so that pathway can be added
+combined_gene_name_org_yes_no_table_unique_pathway_joined <- full_join(combined_gene_name_org_yes_no_table_unique, gene_name_pathway_key_merged[,c("gene_name","Pathway","Sub_pathway")], by = "gene_name") %>% arrange(desc(gene_name)) 
+  # don't join by product name so that the manually edited uncharacterized IAP names would stay
+
+write.table(combined_gene_name_org_yes_no_table_unique_pathway_joined[-4], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/combined_gene_name_org_yes_no_table_unique_pathway_joined.txt")
+nrow(combined_gene_name_org_yes_no_table_unique_pathway_joined) #405
+#join on the pathway descriptions joined
+## Use this version of the table, with the original product names to join in WGCNA 
 
 ### 2. Make combined table with gene family statistics
 # investigate differences in apoptosis_names_df and apoptosis_names_df_CG 
@@ -1176,6 +1201,6 @@ gene_family_cvir_cgig_heatmap <- ggplot(gene_family_statistics_joined_plot_long_
 #### EXPORT DATA FRAMES FOR USE IN DESEQ AND WGCNA ####
 
 save(C_gig_rtracklayer, C_vir_rtracklayer, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_annotations.RData")
-save(C_gig_rtracklayer_apop_product_final, C_vir_rtracklayer_apop_product_final, gene_name_pathway_key_merged, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_apoptosis_products.RData")
+save(C_gig_rtracklayer_apop_product_final, C_vir_rtracklayer_apop_product_final, combined_gene_name_org_yes_no_table_unique_pathway_joined, file="/Volumes/My Passport for Mac/Chapter1_Apoptosis_Paper_Saved_DESeq_WGCNA_Data/C_gig_C_vir_apoptosis_products.RData")
 
 

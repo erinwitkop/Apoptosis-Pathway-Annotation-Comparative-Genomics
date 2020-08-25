@@ -2855,7 +2855,7 @@ IAP_MY_CV_CG_raxml_tibble_join_CV_domain_count <- IAP_MY_CV_CG_raxml_tibble_join
   distinct(protein_id , .keep_all = TRUE) %>%
   group_by(Domain_Name) %>%
   dplyr::summarise(CV_total_per_domain = n()) %>%
-  mutate(CV_percent_of_total = CV_total_per_domain/sum(CV_total_per_domain)) 
+  mutate(CV_percent_of_total = CV_total_per_domain/sum(CV_total_per_domain)) %>% arrange(desc(CV_total_per_domain))
 
 IAP_MY_CV_CG_raxml_tibble_join_CG_domain_count <- IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain %>%
   filter(Species == "Crassostrea_gigas") %>% 
@@ -2863,7 +2863,7 @@ IAP_MY_CV_CG_raxml_tibble_join_CG_domain_count <- IAP_MY_CV_CG_raxml_tibble_join
   distinct(protein_id , .keep_all = TRUE) %>%
   group_by(Domain_Name) %>%
   dplyr::summarise(CG_total_per_domain = n()) %>%
-  mutate(CG_percent_of_total = CG_total_per_domain/sum(CG_total_per_domain))
+  mutate(CG_percent_of_total = CG_total_per_domain/sum(CG_total_per_domain)) %>% arrange(desc(CG_total_per_domain))
 
 # join 
 IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count <- left_join(IAP_MY_CV_CG_raxml_tibble_join_CV_domain_count , IAP_MY_CV_CG_raxml_tibble_join_CG_domain_count)
@@ -2964,6 +2964,11 @@ LFC_cont_comb_summary_count <- LFC_cont_comb_domain_type  %>%
   distinct(protein_id, experiment,Species, Data_Type, group_by_sim, Domain_Name) %>%
   group_by(experiment, Species, Data_Type, group_by_sim, Domain_Name) %>%
   count() 
+
+# Number of LFC total per species
+LFC_comb_summary_count_species <- LFC_cont_comb_summary_count %>% filter(Data_Type == "LFC") %>% 
+  dplyr::group_by(Species, Domain_Name, Data_Type)  %>% dplyr::summarize(total_IAP = sum(n)) %>% ungroup() %>%
+  group_by(Species) %>% dplyr::mutate(percent = total_IAP/sum(total_IAP)*100) %>% arrange(Data_Type, -total_IAP)
 
 # Are any Domain types unique to 1 experiment?
 LFC_cont_comb_domain_type_protein_number <- LFC_cont_comb_domain_type %>% 
