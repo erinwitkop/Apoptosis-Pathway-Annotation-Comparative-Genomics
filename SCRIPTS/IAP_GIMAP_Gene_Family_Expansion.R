@@ -2844,7 +2844,8 @@ ggsave(filename = "IAP_LFC_C_vir_C_gig_07302020.tiff", plot=LFC_combined, device
 #### TOTAL IAP DOMAIN STATS ####
 
 # How many transcripts not used at all from any experiment
-IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain <- IAP_MY_CV_CG_raxml_tibble_join %>% filter(Species == "Crassostrea_virginica" |Species == "Crassostrea_gigas") %>% left_join(., IAP_domain_structure[,c("protein_id", "Domain_Name")])
+IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain <- IAP_MY_CV_CG_raxml_tibble_join %>% filter(Species == "Crassostrea_virginica" |Species == "Crassostrea_gigas") %>% 
+  left_join(., IAP_domain_structure[,c("protein_id", "Domain_Name")])
 
 # What percent of the total transcripts in each is in each domain type
 # count domain structure of shared transcripts across all experiments 
@@ -2925,7 +2926,8 @@ IAP_domain_structure_XM_CV %>% filter(!is.na(Domain_Name)) %>% distinct(ID) %>%c
 save(IAP_domain_structure_XM_CG, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_domain_structure_XM_CG.RData")
 save(IAP_domain_structure_XM_CV, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_domain_structure_XM_CV.RData")
 
-#### IAP STATS LFC, CONST, DOMAINS ####
+#### IAP SUMMARY TABLE STATS LFC, CONST, DOMAINS ####
+### THIS CODE MAKES INITIAL TABLES AND STATISTICS, MORE DETAILED PLOTS AND PATHWAY ANALYSIS ARE IN THE DESEQ2 ANALYSIS SCRIPT 
 
 # Combine tables to get stats about which domain types are present 
 # First combine LFC and const
@@ -3312,7 +3314,6 @@ ggsave(LFC_cont_comb_domain_type_regroup_target, filename ="LFC_cont_comb_domain
        width = 17, height = 15, units = "cm",
        path = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/")
 
-# upset plot
 
 #### PLOT FULL GIMAP PROTEIN TREE ####
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
