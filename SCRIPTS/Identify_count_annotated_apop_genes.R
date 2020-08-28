@@ -380,6 +380,10 @@ nrow(C_vir_rtracklayer_apop_product_final) # 1312
 C_vir_rtracklayer_apop_product_final <- C_vir_rtracklayer_apop_product_final[!duplicated(C_vir_rtracklayer_apop_product_final$transcript_id),]
 nrow(C_vir_rtracklayer_apop_product_final) # 1290
 
+# Export table as text file
+write.table(C_vir_rtracklayer_apop_product_final, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/ PAPER DRAFTS AND OUTLINES/Additional:Supplementary_Data_files_for_paper/Supplementary_Table_3_C_virginica.txt",
+            row.names = FALSE)
+
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet., then checked by "Supplementary Table 2. C. virginica apoptosis.xlsx" table that I have
 # Checking to make sure all YES proteins are actually present 
@@ -885,6 +889,10 @@ C_gig_rtracklayer_apop_product_final <- rbind(C_gig_rtracklayer_apop_product_fin
 C_gig_rtracklayer_apop_product_final <- C_gig_rtracklayer_apop_product_final[!duplicated(C_gig_rtracklayer_apop_product_final$transcript_id),]
 nrow(C_gig_rtracklayer_apop_product_final) # 844 unique transcripts
 
+# Export table as text file
+write.table(C_gig_rtracklayer_apop_product_final, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/ PAPER DRAFTS AND OUTLINES/Additional:Supplementary_Data_files_for_paper/Supplementary_Table_4_C_gigas.txt",
+            row.names = FALSE)
+
 ### Checked genes were added correctly and confirmed with previous results by comparing DF merged list to my previous research
 # of which genes are there in my "Updated_APOPTOSIS_GENES, DOMAINS....".xlsx sheet.
 
@@ -1086,6 +1094,8 @@ combined_gene_name_org_yes_no_table_unique_pathway_joined <- full_join(combined_
   # don't join by product name so that the manually edited uncharacterized IAP names would stay
 
 write.table(combined_gene_name_org_yes_no_table_unique_pathway_joined[-4], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/combined_gene_name_org_yes_no_table_unique_pathway_joined.txt")
+write.csv(combined_gene_name_org_yes_no_table_unique_pathway_joined[-4], file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/combined_gene_name_org_yes_no_table_unique_pathway_joined.csv")
+
 nrow(combined_gene_name_org_yes_no_table_unique_pathway_joined) #405
 #join on the pathway descriptions joined
 ## Use this version of the table, with the original product names to join in WGCNA 
