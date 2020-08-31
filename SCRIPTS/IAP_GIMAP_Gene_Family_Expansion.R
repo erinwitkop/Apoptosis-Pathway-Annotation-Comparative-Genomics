@@ -2982,9 +2982,10 @@ LFC_cont_comb_domain_type_protein_number <- LFC_cont_comb_domain_type %>%
 LFC_cont_comb_domain_type_protein_number_plot <- ggplot(LFC_cont_comb_domain_type_protein_number, aes(x=Domain_Name, y=n, fill=experiment, color=experiment)) + geom_col() + 
   theme(axis.text.x.bottom = element_text(angle = 90, hjust =1)) + facet_grid(Species~Data_Type) 
 
-### Make aggregate table regarding how many IAPs used out of total in genome, percent shared, percent unique
-# Calculate number of times transcripts are shared across groups 
+### Make aggregate table regarding how many DEG IAPs used out of total in genome, percent shared, percent unique
+# Calculate number of times transcripts are shared across experiments
 LFC_cont_comb_summary_unique_shared <- LFC_cont_comb %>% 
+  filter(Data_Type == "LFC") %>% 
   rowwise() %>%
     mutate(num_groups = sum(group_by(., experiment, Species) %>%
                               distinct(protein_id) %>%
@@ -2995,6 +2996,8 @@ LFC_cont_comb_summary_unique_shared <- LFC_cont_comb %>%
   
 # Calculate the total number of proteins used in each experiment (only counting shared ones once) and the proportion of total genome IAPs
 LFC_cont_comb_proportion_IAP_used <-  LFC_cont_comb %>%
+  filter(Data_Type == "LFC") %>% 
+  ungroup() %>% 
   distinct(experiment, protein_id, .keep_all = TRUE) %>%
   group_by(experiment) %>%
   mutate(count = n()) %>%
@@ -3020,6 +3023,7 @@ LFC_cont_comb_summary_shared <- LFC_cont_comb_summary_unique_shared %>%
   filter(num_groups > 1) %>%
   # add up number of unique proteins in each experiment
   distinct(experiment, protein_id, .keep_all = TRUE) %>%
+  # count up the total shared with other experiments
   group_by(experiment) %>%
   summarise(total_shared = n()) %>%
   left_join(., LFC_cont_comb_proportion_IAP_used) %>%
@@ -3029,6 +3033,12 @@ LFC_cont_comb_summary_shared <- LFC_cont_comb_summary_unique_shared %>%
 LFC_cont_comb_summary_shared_unique <- left_join(LFC_cont_comb_summary_shared, LFC_cont_comb_summary_unique)
 
 # Make table of summary IAP shared and unique transcripts
+# change C. gigas experiment labels
+LFC_cont_comb_summary_shared_unique$experiment <- factor(LFC_cont_comb_summary_shared_unique$experiment, levels = c("Hatchery\nPro. RI","Lab Pro. S4, RI\n or RE22",  "ROD","Dermo" ,
+                                                                                                                    "Zhang<br>*Vibrio* spp."  ,"Rubio<br>*Vibrio* spp.",
+                                                                                                                    "He OsHV-1","de Lorgeril<br>Sus. OsHV-1", "de Lorgeril<br>Res. OsHV-1"),
+                                                         labels= c("Hatchery\nPro. RI","Lab Pro. S4, RI\n or RE22",  "ROD","Dermo","Zhang Vibrio spp." ,   
+                                                                                                                   "Rubio Vibrio spp.","He OsHV-1","de Lorgeril Sus. OsHV-1", "de Lorgeril Res. OsHV-1"))
 LFC_cont_comb_summary_shared_unique_table <- LFC_cont_comb_summary_shared_unique %>%
   select(Species, experiment,count,proportion_used,total_shared,percent_shared_each_exp, total_unique, percent_not_shared_each_exp) %>%
   # replace all NA's
@@ -3057,7 +3067,7 @@ tab_row_group(group = "Crassostrea virginica",rows = 1:4) %>%
 # save as png
 gtsave(LFC_cont_comb_summary_shared_unique_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/LFC_cont_comb_summary_shared_unique_table.png")
 
-### Analyze domain structure of unique and shared transcripts ###
+### Analyze domain structure of unique and shared DEG transcripts ###
 # join with domain structure
 LFC_cont_comb_summary_unique_shared_domain_type <- left_join(LFC_cont_comb_summary_unique_shared, IAP_domain_structure[,c("protein_id","Domain_Name")])
 
@@ -3220,7 +3230,8 @@ C_vir_sig_table_apop_table <- C_vir_gig_sig_table %>%
   tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "Dermo")) %>%
   tab_row_group(group = "Lab Probiotic S4,RI, RE22",rows =9:13) %>%
   tab_style(style = cell_text(weight = "bold"),locations =cells_row_groups(groups = "Lab Probiotic S4,RI, RE22")) %>%
-  summary_rows(groups = c("ROD","Dermo","Lab Probiotic S4,RI, RE22"), fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = "apop_percent")
+  summary_rows(groups = c("ROD","Dermo","Lab Probiotic S4,RI, RE22"), fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = "apop_percent") %>%
+  summary_rows(groups = c("ROD","Dermo","Lab Probiotic S4,RI, RE22"), fns = list(Total = "sum"), columns = "num_sig_apop")
 
 # save as png
 gtsave(C_vir_sig_table_apop_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_vir_sig_table_apop_table.png")
@@ -3238,7 +3249,7 @@ C_gig_sig_table_apop_table <- C_vir_gig_sig_table %>%
   select(group_by_sim, experiment, sig_total, num_sig_apop, apop_percent) %>%
   gt::gt(rowname_col = "group_by_sim", groupname_col = "experiment") %>%
   # use md function to invoke markdown format and add title
-  tab_header(title = gt::md("**Significant Differentially Expressed *C. virginica* Transcripts**")) %>% 
+  tab_header(title = gt::md("**Significant Differentially Expressed *C. gigas* Transcripts**")) %>% 
   fmt_percent(columns = vars(apop_percent), decimals = 2) %>% # format as percent
   # fix column labels
   cols_label( group_by_sim = md("**Experiment**"),
@@ -3254,8 +3265,9 @@ C_gig_sig_table_apop_table <- C_vir_gig_sig_table %>%
   tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "He OsHV-1"))   %>%
   tab_row_group(group = "de Lorgeril OsHV-1",rows = 13:24) %>%
   tab_style(style = cell_text(weight = "bold"), locations = cells_row_groups(groups = "de Lorgeril OsHV-1")) %>%
-  summary_rows(groups = TRUE, fns = list(Avgerage = "mean", SD = "sd"), formatter = fmt_percent, columns = "apop_percent")
-
+  summary_rows(groups = TRUE, fns = list(Avgerage = "mean", SD = "sd"), formatter = fmt_percent, columns = "apop_percent") %>%
+  summary_rows(groups = TRUE, fns = list(Total = "sum"), columns = "num_sig_apop")
+  
 # save as png
 gtsave(C_gig_sig_table_apop_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_gig_sig_table_apop_table.png")
 
