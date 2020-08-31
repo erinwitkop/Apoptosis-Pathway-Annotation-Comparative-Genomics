@@ -1167,7 +1167,7 @@ ggsave(filename = "IAP_full_protein_circular_tree.tiff", plot=IAP_raxml_treedata
        units = "in",
        dpi=300)
 
-## Plot circular gene tree to use for paper ##
+## Plot circular gene tree ##
 IAP_raxml_treedata_circular_gene <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
   geom_tiplab2(aes(label=gene_locus_tag,angle=angle), size =1.8, offset=.5) + # geom_tiplab2 flips the labels correctly
   #Edit theme
@@ -1223,7 +1223,9 @@ IAP_raxml_treedata_artifact_tree <- ggtree(IAP_raxml_treedata_artifact, aes(colo
   theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-40,40)  
 
 
- #### PLOT IAP MY, CV, CG PROTEIN TREE ####
+
+
+#### PLOT IAP MY, CV, CG PROTEIN TREE ####
 
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
 IAP_MY_CV_CG_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG_MSA_RAxML")
@@ -3325,6 +3327,66 @@ LFC_cont_comb_domain_type_regroup_target <- LFC_cont_comb_domain_type_regroup %>
 ggsave(LFC_cont_comb_domain_type_regroup_target, filename ="LFC_cont_comb_domain_type_regroup_target.tiff", device = "tiff",
        width = 17, height = 15, units = "cm",
        path = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/")
+
+#### PLOT IAP FULL PROTEIN TREE WITH BIR MSA AND IAP TABLE ####
+# tutorial for review #https://cran.r-project.org/web/packages/ggmsa/vignettes/ggmsa.html
+# object with protein tree
+IAP_raxml_treedata_circular_product 
+
+# Subset tree to get an example of each domain type in C. virginica and C. gigas
+BIR_IAP_all_MSA_subset <- phylotools::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa")
+BIR_IAP_raxml_tibble_figure_subset <- BIR_IAP_raxml_tibble %>% filter(Species == "Crassostrea_gigas" | Species == "Crassostrea_virginica") %>% distinct(Type, Species, .keep_all = TRUE) %>% 
+  # remove the "unique" types
+  filter(Type != "Unique") %>% arrange(Type)
+BIR_IAP_raxml_tibble_figure_subset_label <- BIR_IAP_raxml_tibble_figure_subset$label
+
+# Make table to go alongside MSA
+BIR_IAP_raxml_tibble_figure_subset_table <- BIR_IAP_raxml_tibble_figure_subset %>%
+  dplyr::select(Species, label, Type) %>%
+  gt::gt(rowname_col = "Type") %>%
+  tab_header(title = gt::md("**BIR Domain Type Amino Acids in *C. virginica* and *C. gigas***")) %>%
+  cols_label( label = md("**Product, BIR order, RefSeq annotation**"),
+              Species = md ("**Species**"))
+
+# subset MSA
+class(BIR_IAP_all_MSA)
+BIR_IAP_all_MSA_figure_subset <- BIR_IAP_all_MSA_subset[match(rev(BIR_IAP_raxml_tibble_figure_subset_label), BIR_IAP_all_MSA_subset[,1]),]
+
+# export back to then reload in correct order
+dat2fasta(BIR_IAP_all_MSA_figure_subset, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_all_MSA_figure_subset.fa")
+
+# reload as AAMultipleAlignment object 
+BIR_IAP_all_MSA_figure_subset <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_all_MSA_figure_subset.fa", format = "fasta")
+
+# Plot MSA with ggmsa
+BIR_IAP_all_MSA_figure_subset_msa <- ggmsa(BIR_IAP_all_MSA_figure_subset, start = 53, end = 85, 
+      color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
+      none_bg = TRUE, # keeps only the letters and not the full color background
+      posHighligthed = c(57,60, 67, 76, 77,80,82,84), # specify specific positions to highlight in the alignment 
+      seq_name = TRUE) +
+     # increase text size
+   theme(text = element_text(size=10),
+         plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
+# checked and the order is correct 
+
+## Plot MSA and tree, add
+# align with plot_grid 
+BIR_IAP_all_MSA_figure_subset_grid <- plot_grid(BIR_IAP_raxml_tibble_figure_subset_table, BIR_IAP_all_MSA_figure_subset_msa, ncol=1 )
+                               #labels = c("A","B"), rel_heights = c(0.8,1))
+
+plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="h", axis ="tb",
+          labels = c("A","B"), rel_heights = c(0.8,1))
+
+# Remove in between white space in plot in Inkscape
+ggsave(filename = "BIR_tree_MSA_plot.tiff", plot=BIR_tree_type_MSA, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+       width = 16 ,
+       height = 25,
+       units = "in",
+       dpi=300)
+
+
+
 
 
 #### PLOT FULL GIMAP PROTEIN TREE ####
