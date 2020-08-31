@@ -2887,7 +2887,8 @@ IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table <- IAP_MY_CV_CG_raxml_ti
   summary_rows(fns=list(Total = "sum"), 
                columns = c("CV_total_per_domain","CG_total_per_domain"), 
                formatter = fmt_number) %>%
-  tab_source_note(source_note = md("\\* = *IAP Domain identified by Interproscan and not CDD search*")) 
+  tab_source_note(source_note = md("\\* = *IAP Domain identified by Interproscan and not CDD search*")) %>%
+  tab_options(table.font.color = "black")
   
 # save as png
 gtsave(IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table , "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table.png")
@@ -3342,11 +3343,35 @@ BIR_IAP_raxml_tibble_figure_subset_label <- BIR_IAP_raxml_tibble_figure_subset$l
 
 # Make table to go alongside MSA
 BIR_IAP_raxml_tibble_figure_subset_table <- BIR_IAP_raxml_tibble_figure_subset %>%
-  dplyr::select(Species, label, Type) %>%
+  dplyr::select(Species, Type) %>%
+  mutate(Type = case_when(
+    Type == "Non_Zinc_binding"~ "Non Zinc-binding",
+    Type == "T1"              ~ "T1"              ,
+    Type == "T1_like_3"       ~ "T1-like-3"       ,
+    Type == "T1-like_1"       ~ "T1-like-1"       ,
+    Type == "T1-like_2"       ~ "T1-like-2"       ,
+    Type == "T2"              ~ "T2"              ,
+    Type == "T2_like_3"       ~ "T2-like-3"       ,
+    Type == "T2_like_4"       ~ "T2-like-4"       ,
+    Type == "T2-like_1"       ~ "T2-like-1"       ,
+    Type == "T2-like_2"       ~ "T2-like-2"       ,
+    Type == "TX"~ "TX",
+    Type == "TY"  ~ "TY"),
+    Species = case_when(
+      Species == "Crassostrea_gigas" ~ "Crassostrea gigas",
+      Species == "Crassostrea_virginica" ~ "Crassostrea virginica")) %>% 
   gt::gt(rowname_col = "Type") %>%
-  tab_header(title = gt::md("**BIR Domain Type Amino Acids in *C. virginica* and *C. gigas***")) %>%
-  cols_label( label = md("**Product, BIR order, RefSeq annotation**"),
-              Species = md ("**Species**"))
+  tab_header(title = gt::md("BIR Domain Type Amino Acids in *C. virginica* and *C. gigas*")) %>%
+  cols_label( Type = md("BIR Type"), 
+              Species = md ("Species")) %>%
+  tab_options(table.font.size = 50,
+              table.font.weight = "bold",
+              table.font.color = "black")
+# save as png
+gtsave(BIR_IAP_raxml_tibble_figure_subset_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/BIR_IAP_raxml_tibble_figure_subset_table.png")
+
+# this table does not look good though next to the MSA 
+# need to change the labels to be the Type 1 and 2 designations
 
 # subset MSA
 class(BIR_IAP_all_MSA)
@@ -3369,25 +3394,18 @@ BIR_IAP_all_MSA_figure_subset_msa <- ggmsa(BIR_IAP_all_MSA_figure_subset, start 
          plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct 
 
-## Plot MSA and tree, add
+## Plot MSA and tree
 # align with plot_grid 
-BIR_IAP_all_MSA_figure_subset_grid <- plot_grid(BIR_IAP_raxml_tibble_figure_subset_table, BIR_IAP_all_MSA_figure_subset_msa, ncol=1 )
-                               #labels = c("A","B"), rel_heights = c(0.8,1))
+BIR_IAP_all_MSA_figure_subset_grid <- plot_grid(IAP_raxml_treedata_circular_product , BIR_IAP_all_MSA_figure_subset_msa, ncol=1,
+                               rel_heights = c(1,0.2))
 
-plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="h", axis ="tb",
-          labels = c("A","B"), rel_heights = c(0.8,1))
-
-# Remove in between white space in plot in Inkscape
-ggsave(filename = "BIR_tree_MSA_plot.tiff", plot=BIR_tree_type_MSA, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
-       width = 16 ,
-       height = 25,
+# Because gt tables can't be converted into grobs, add those in using Inkscape
+ggsave(filename = "BIR_IAP_all_MSA_figure_subset_grid.tiff", plot=BIR_IAP_all_MSA_figure_subset_grid, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_full_tree_MSA",
+       width = 13 ,
+       height = 13,
        units = "in",
        dpi=300)
-
-
-
-
 
 #### PLOT FULL GIMAP PROTEIN TREE ####
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
