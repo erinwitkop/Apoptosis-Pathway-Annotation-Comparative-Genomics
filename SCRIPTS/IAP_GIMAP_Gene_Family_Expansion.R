@@ -2878,9 +2878,9 @@ IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table <- IAP_MY_CV_CG_raxml_ti
   tab_header(title = gt::md("**Total Identified Transcripts with Each Domain Structure**")) %>%
   tab_spanner(label = md("*Crassostrea virginica*"), columns = c("CV_total_per_domain", "CV_percent_of_total")) %>%
   tab_spanner(label = md("*Crassostrea gigas*"), columns = c("CG_total_per_domain", "CG_percent_of_total")) %>%
-  cols_label( CV_total_per_domain  =md("**Transcripts Per Type**"),
-              CV_percent_of_total = md("**Percent of Total**"),
-              CG_total_per_domain  =md("**Transcripts Per Type**"),
+  cols_label( CV_total_per_domain  =md("**Transcripts<br>Per Type**"),
+              CV_percent_of_total = md("**Percent<br>of Total**"),
+              CG_total_per_domain  =md("**Transcripts<br>Per Type**"),
               CG_percent_of_total = md("**Percent of Total**")) %>%
   fmt_percent(columns = vars(CV_percent_of_total), decimals = 2) %>% # format as percent
   fmt_percent(columns = vars(CG_percent_of_total), decimals = 2) %>% # format as percent
@@ -2888,7 +2888,7 @@ IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table <- IAP_MY_CV_CG_raxml_ti
                columns = c("CV_total_per_domain","CG_total_per_domain"), 
                formatter = fmt_number) %>%
   tab_source_note(source_note = md("\\* = *IAP Domain identified by Interproscan and not CDD search*")) %>%
-  tab_options(table.font.color = "black")
+  tab_options(table.font.color = "black", table.font.size = 20) 
   
 # save as png
 gtsave(IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table , "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table.png")
@@ -3065,7 +3065,8 @@ tab_row_group(group = "Crassostrea virginica",rows = 1:4) %>%
   tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea virginica")) %>%
   tab_row_group(group = "Crassostrea gigas",rows = 5:9) %>%
   tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea gigas")) %>%
-  summary_rows(groups = TRUE, fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = c("proportion_used","percent_shared_each_exp","percent_not_shared_each_exp"))
+  summary_rows(groups = TRUE, fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = c("proportion_used","percent_shared_each_exp","percent_not_shared_each_exp")) %>%
+  tab_options(table.font.color = "black")
 
 # save as png
 gtsave(LFC_cont_comb_summary_shared_unique_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/LFC_cont_comb_summary_shared_unique_table.png")
@@ -3191,7 +3192,8 @@ LFC_cont_comb_summary_count_LFC_IAP_TABLE <- LFC_cont_comb_summary_count %>%
   tab_spanner(
     label = md("*Crassostrea virginica*"),
       columns = vars(Hatchery_Probiotic_RI, LabPro_S4_RI_RE22, ROD, Dermo)) %>%
-  tab_source_note(source_note = md("\\* = *IAP Domain identified by Interproscan and not CDD search*"))
+  tab_source_note(source_note = md("\\* = *IAP Domain identified by Interproscan and not CDD search*")) %>%
+  tab_options(table.font.color = "black")
 # save as png
 gtsave(LFC_cont_comb_summary_count_LFC_IAP_TABLE, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/LFC_cont_comb_summary_count_LFC_IAP_TABLE.png")
 
@@ -3343,7 +3345,7 @@ BIR_IAP_raxml_tibble_figure_subset_label <- BIR_IAP_raxml_tibble_figure_subset$l
 
 # Make table to go alongside MSA
 BIR_IAP_raxml_tibble_figure_subset_table <- BIR_IAP_raxml_tibble_figure_subset %>%
-  dplyr::select(Species, Type) %>%
+  dplyr::select(Type) %>%
   mutate(Type = case_when(
     Type == "Non_Zinc_binding"~ "Non Zinc-binding",
     Type == "T1"              ~ "T1"              ,
@@ -3356,29 +3358,48 @@ BIR_IAP_raxml_tibble_figure_subset_table <- BIR_IAP_raxml_tibble_figure_subset %
     Type == "T2-like_1"       ~ "T2-like-1"       ,
     Type == "T2-like_2"       ~ "T2-like-2"       ,
     Type == "TX"~ "TX",
-    Type == "TY"  ~ "TY"),
-    Species = case_when(
-      Species == "Crassostrea_gigas" ~ "Crassostrea gigas",
-      Species == "Crassostrea_virginica" ~ "Crassostrea virginica")) %>% 
-  gt::gt(rowname_col = "Type") %>%
-  tab_header(title = gt::md("BIR Domain Type Amino Acids in *C. virginica* and *C. gigas*")) %>%
-  cols_label( Type = md("BIR Type"), 
-              Species = md ("Species")) %>%
-  tab_options(table.font.size = 50,
-              table.font.weight = "bold",
+    Type == "TY"  ~ "TY")) %>%
+    #Species = case_when(
+    #  Species == "Crassostrea_gigas" ~ "C. gigas",
+    #  Species == "Crassostrea_virginica" ~ "C. virginica")) %>% 
+  gt::gt() %>%
+  cols_label(Type = md("**BIR Type**")) %>%
+  tab_options(table.font.size = 20,
               table.font.color = "black")
 # save as png
 gtsave(BIR_IAP_raxml_tibble_figure_subset_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/BIR_IAP_raxml_tibble_figure_subset_table.png")
-
-# this table does not look good though next to the MSA 
+# this table does not look good though next to the MSA, not going to use for figure 
 # need to change the labels to be the Type 1 and 2 designations
 
 # subset MSA
 class(BIR_IAP_all_MSA)
 BIR_IAP_all_MSA_figure_subset <- BIR_IAP_all_MSA_subset[match(rev(BIR_IAP_raxml_tibble_figure_subset_label), BIR_IAP_all_MSA_subset[,1]),]
+colnames(BIR_IAP_raxml_tibble_figure_subset)[4] <- "seq.name"
+# make label the type info
+BIR_IAP_all_MSA_figure_subset_join <- left_join(BIR_IAP_all_MSA_figure_subset, BIR_IAP_raxml_tibble_figure_subset[,c("seq.name","Type","Species")], by = "seq.name")
+BIR_IAP_all_MSA_figure_subset_join <- BIR_IAP_all_MSA_figure_subset_join[-1]
+BIR_IAP_all_MSA_figure_subset_join <- BIR_IAP_all_MSA_figure_subset_join %>% 
+  dplyr::mutate(Species = case_when(
+      Species == "Crassostrea_gigas" ~ "C. gig.",
+      Species == "Crassostrea_virginica" ~ "C. vir."),
+      Type = case_when(
+        Type == "Non_Zinc_binding"~ "Non Zinc-binding",
+        Type == "T1"              ~ "T1"              ,
+        Type == "T1_like_3"       ~ "T1-like-3"       ,
+        Type == "T1-like_1"       ~ "T1-like-1"       ,
+        Type == "T1-like_2"       ~ "T1-like-2"       ,
+        Type == "T2"              ~ "T2"              ,
+        Type == "T2_like_3"       ~ "T2-like-3"       ,
+        Type == "T2_like_4"       ~ "T2-like-4"       ,
+        Type == "T2-like_1"       ~ "T2-like-1"       ,
+        Type == "T2-like_2"       ~ "T2-like-2"       ,
+        Type == "TX"~ "TX",
+        Type == "TY"  ~ "TY"), 
+      seq.names = paste(Type, Species, sep = ", "))
+BIR_IAP_all_MSA_figure_subset_join <- BIR_IAP_all_MSA_figure_subset_join[,c(4,1)]
 
 # export back to then reload in correct order
-dat2fasta(BIR_IAP_all_MSA_figure_subset, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_all_MSA_figure_subset.fa")
+dat2fasta(BIR_IAP_all_MSA_figure_subset_join, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_all_MSA_figure_subset.fa")
 
 # reload as AAMultipleAlignment object 
 BIR_IAP_all_MSA_figure_subset <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_IAP_all_MSA_figure_subset.fa", format = "fasta")
