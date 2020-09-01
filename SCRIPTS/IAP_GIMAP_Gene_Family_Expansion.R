@@ -3150,7 +3150,8 @@ LFC_cont_comb_summary_count_CONST_IAP_TABLE <- LFC_cont_comb_summary_count %>%
   tab_footnote(footnote = md("Note: 3 *C. gigas* and 9 *C. virginica* transcripts were not placed into domain structure groups based on bootstrap support"),
                              location = cells_stub("Non Domain Grouped")) %>%
   #add total column
-  grand_summary_rows(fns = list(Total="sum"), formatter = fmt_number, decimals = 0)
+  grand_summary_rows(fns = list(Total="sum"), formatter = fmt_number, decimals = 0)%>%
+  tab_options(table.font.color = "black")
 # save as png
 gtsave(LFC_cont_comb_summary_count_CONST_IAP_TABLE, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/LFC_cont_comb_summary_count_CONST_IAP_TABLE.png")
 
@@ -3236,8 +3237,8 @@ C_vir_sig_table_apop_table <- C_vir_gig_sig_table %>%
   tab_row_group(group = "Lab Probiotic S4,RI, RE22",rows =9:13) %>%
   tab_style(style = cell_text(weight = "bold"),locations =cells_row_groups(groups = "Lab Probiotic S4,RI, RE22")) %>%
   summary_rows(groups = c("ROD","Dermo","Lab Probiotic S4,RI, RE22"), fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = "apop_percent") %>%
-  summary_rows(groups = c("ROD","Dermo","Lab Probiotic S4,RI, RE22"), fns = list(Total = "sum"), columns = "num_sig_apop")
-
+  summary_rows(groups = c("ROD","Dermo","Lab Probiotic S4,RI, RE22"), fns = list(Total = "sum"), columns = "num_sig_apop") %>%
+  tab_options(table.font.color = "black")
 # save as png
 gtsave(C_vir_sig_table_apop_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_vir_sig_table_apop_table.png")
 
@@ -3271,8 +3272,8 @@ C_gig_sig_table_apop_table <- C_vir_gig_sig_table %>%
   tab_row_group(group = "de Lorgeril OsHV-1",rows = 13:24) %>%
   tab_style(style = cell_text(weight = "bold"), locations = cells_row_groups(groups = "de Lorgeril OsHV-1")) %>%
   summary_rows(groups = TRUE, fns = list(Avgerage = "mean", SD = "sd"), formatter = fmt_percent, columns = "apop_percent") %>%
-  summary_rows(groups = TRUE, fns = list(Total = "sum"), columns = "num_sig_apop")
-  
+  summary_rows(groups = TRUE, fns = list(Total = "sum"), columns = "num_sig_apop")%>%
+  tab_options(table.font.color = "black")
 # save as png
 gtsave(C_gig_sig_table_apop_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_gig_sig_table_apop_table.png")
 
