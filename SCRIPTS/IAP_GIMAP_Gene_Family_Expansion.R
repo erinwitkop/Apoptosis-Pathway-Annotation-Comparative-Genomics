@@ -1197,7 +1197,6 @@ ggsave(filename = "IAP_full_gene_circular_tree.tiff", plot=IAP_raxml_treedata_ci
        units = "in",
        dpi=300)
 
-
 # PLOT AS GENE TREES TO SEARCH FOR POTENTIAL ARTIFACTS
 IAP_raxml_treedata_circular_gene <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
   geom_tiplab2(aes(label=gene_locus_tag,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
@@ -1222,10 +1221,7 @@ IAP_raxml_treedata_artifact_tree <- ggtree(IAP_raxml_treedata_artifact, aes(colo
   geom_tiplab(aes(label=gene_locus_tag), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
   theme(legend.position = "right", legend.text = element_text(face = "italic")) + xlim(-40,40)  
 
-
-
-
-#### PLOT IAP MY, CV, CG PROTEIN TREE ####
+#### PLOT IAP MY, CV, CG PROTEIN TREE WITH DOMAIN INFO ####
 
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
 IAP_MY_CV_CG_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG_MSA_RAxML")
@@ -1265,7 +1261,6 @@ IAP_to_drop <- c("236","237","238","239","240","205","206","115","116","117","12
                  "144","145","149","154","128","129","130","13","17","15","16","20","18","19","21","26","22","23","24",
                  "25","50","52","53","54","59","60","61","62","63","70","71")
 
-
 # get labels for nodes to drop
 IAP_to_drop_label <- IAP_MY_CV_CG_raxml_tibble[IAP_MY_CV_CG_raxml_tibble$node %in% IAP_to_drop,]
 IAP_to_drop_label <- IAP_to_drop_label$label
@@ -1289,7 +1284,7 @@ length(IAP_shape_node)
 # check nrows
 IAP_collapsed_tibble %>% filter(!is.na(label)) %>% count() # 184 lines to plot 
 
-# Add Domain type groupings for later statistics
+# Add Domain type groupings for later statistics, remember the below data frame has been collapsed so that proteins with identical sequence have been removed 
 IAP_domain_structure1 <- read_csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_Domain_Structure_groups.csv")
 colnames(IAP_domain_structure1)[1] <- "label"
 IAP_collapsed_tibble_domain_type <- left_join(IAP_collapsed_tibble, IAP_domain_structure1[,c("label","Domain_Name","Number")])
@@ -2002,7 +1997,7 @@ BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_coord <- BIR_XP_gff_Interpro
   select(protein_id, end, node)
 
 ## Join domain structure designations and use to create dataframe for plotting shading
-# Join with domain structure designatins to add annotation
+# Join with domain structure designations with proteins collapsed to add annotation
 IAP_domain_structure <- read_csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_Domain_Structure_groups.csv")
 class(BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened$protein_id)
 BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect <- left_join(BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened, IAP_domain_structure)
@@ -2215,6 +2210,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
 
 
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
+# for plotting here, proteins with identical sequence are collaped for the purpose of plotting 
 load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_vir_apop_LFC_IAP.Rdata")
 load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/C_gig_apop_LFC_IAP.Rdata")
 # remember this is the IAPs that were significantly different with challenge, not expression of all IAPs!
@@ -2252,7 +2248,6 @@ C_gig_apop_LFC_IAP$protein_id <- recode(C_gig_apop_LFC_IAP$protein_id,
 # Rejoin the Full list of transcript and check for fixed NA
 C_gig_apop_LFC_IAP_full_XP <- full_join(C_gig_apop_LFC_IAP, IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
 
-
 C_vir_apop_LFC_IAP_full_XP <- full_join(C_vir_apop_LFC_IAP, IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")])
 # For NAs for GIMAP proteins, meaning that those were exactly identical to another protein and were collapsed. Need to replace these NA's with their uncollapsed parent protein
 C_vir_apop_LFC_IAP_full_XP_collapsed <- C_vir_apop_LFC_IAP_full_XP %>% filter(is.na(node) & !is.na(log2FoldChange)) %>% 
@@ -2260,7 +2255,6 @@ C_vir_apop_LFC_IAP_full_XP_collapsed <- C_vir_apop_LFC_IAP_full_XP %>% filter(is
 C_vir_apop_LFC_IAP_full_XP_collapsed_BIR_seq_rm_dup_clstr6 <- BIR_seq_rm_dup_clstr6 %>% filter(protein_id %in% (C_vir_apop_LFC_IAP_full_XP_collapsed$protein_id))
 # Find parent proteins in these clusters
 C_vir_apop_LFC_IAP_full_XP_collapsed_BIR_seq_rm_dup_clstr6_cluster <- BIR_seq_rm_dup_clstr6[BIR_seq_rm_dup_clstr6$cluster %in% C_vir_apop_LFC_IAP_full_XP_collapsed_BIR_seq_rm_dup_clstr6$cluster,]
-
 
 
 # Recode these proteins for the purpose of plotting
@@ -2301,7 +2295,7 @@ C_vir_apop_LFC_IAP_full_XP$node <- factor(C_vir_apop_LFC_IAP_full_XP$node, level
 C_gig_apop_LFC_IAP_full_XP$node <- factor(C_gig_apop_LFC_IAP_full_XP$node, levels = rev(unique(C_gig_apop_LFC_IAP_full_XP$node)))
 
 # Create geom_rect object for LFC and const. plots - need to have the nodes in the correct order first
-# Join in Domain annotation document in order to get the node number for geom_strip
+# Join in Domain annotation document (with proteins collapsed) in order to get the node number for geom_strip
 IAP_domain_structure <- read_csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_Domain_Structure_groups.csv")
 IAP_domain_structure_label <- IAP_domain_structure
 colnames(IAP_domain_structure_label)[1] <- "label" # change the name
@@ -2540,6 +2534,7 @@ geom_rect(data= IAP_domain_structure_node_order_coordinates[IAP_domain_structure
             alpha=0.1)   # make translucent 
 
 #### PLOT CONSTITUTIVELY EXPRESSED IAPS ####
+# As with the LFC plot, the proteins with identical sequence have been collapsed for the purpose of plotting with the output tree from RAxML
 
 # Load data from Transcriptome dataframes
 load(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_gig_vst_common_df_all_mat_limma_IAP_gather_avg.RData")
@@ -2866,7 +2861,72 @@ ggsave(filename = "IAP_LFC_C_vir_C_gig_09172020.tiff", plot=LFC_combined, device
        units = "in",
        dpi=300)
 
+
+#### CREATE TABLE WITH IAP DOMAIN STRUCTURE FOR ALL IAP PROTEINS ####
+
+# This data frames is currently collapsed where duplicate proteins have been removed, need to add back in those removed into the correct groups
+IAP_domain_structure <- read_csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_Domain_Structure_groups.csv")
+
+# Examine those that have been removed 
+BIR_XP_gff_species_join_haplotig_collapsed
+BIR_XP_gff_species_join_haplotig_collapsed_CV_CG <- BIR_XP_gff_species_join_haplotig_collapsed %>% filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas")
+
+setdiff(IAP_domain_structure$protein_id, BIR_XP_gff_species_join_haplotig_collapsed_CV_CG$protein_id) 
+    # 35 proteins missing in second data frame because Mizuhopecten yessoensis proteins are also included in the original domain group table
+length(setdiff(BIR_XP_gff_species_join_haplotig_collapsed_CV_CG$protein_id, IAP_domain_structure$protein_id)) # 83 proteins that were removed from being duplicated sequences for RAxML
+
+# Examine the cluster file where it shows the groupings of clusters and those that were removed
+BIR_seq_rm_dup_clstr6_CV_CG <- BIR_seq_rm_dup_clstr6 %>% filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas")
+
+# Join collapsed IAP domain structure data frame to this to put them into their clusters 
+BIR_seq_rm_dup_clstr6_CV_CG_domain <- left_join(BIR_seq_rm_dup_clstr6_CV_CG, IAP_domain_structure[,c("protein_id","Domain_Name","Number")])
+
+# Do all have the same domain desigations within clusters
+BIR_seq_rm_dup_clstr6_CV_CG_domain %>% group_by(cluster, Domain_Name) %>% distinct(cluster, Domain_Name) %>%  filter(n() >1) # 0, all have only 1 domain name added
+
+# Group by cluster and paste the values for those that are empty
+BIR_seq_rm_dup_clstr6_CV_CG_domain_group_fill <- BIR_seq_rm_dup_clstr6_CV_CG_domain %>% group_by(cluster) %>% fill(Domain_Name, Number) %>% 
+  # change NAs to be called not classified
+  mutate(Domain_Name = case_when(
+    is.na(Domain_Name) ~ "not_classified",
+    TRUE ~ Domain_Name
+  ))
+
+# subset and rename data frame 
+IAP_domain_structure_no_dup_rm <- BIR_seq_rm_dup_clstr6_CV_CG_domain_group_fill[,c("protein_id", "gene","product", "Species","Domain_Name", "Number")]
+
+# check that all original IAP proteins identified are there
+setdiff(IAP_domain_structure_no_dup_rm$protein_id, BIR_XP_gff_species_join_haplotig_collapsed_CV_CG$protein_id) # 6 proteins now extra in the IAP domain structure file, these are the protein haplotigs that were removed 
+# remove those proteins that are haplotigs
+
+haplotid_protein_id_rm <- c("XP_022308010.1", "XP_022292821.1", "XP_022336127.1", "XP_022290466.1", "XP_022308067.1", "XP_022304464.1")
+IAP_domain_structure_no_dup_rm <- IAP_domain_structure_no_dup_rm %>% filter(!(protein_id %in% haplotid_protein_id_rm))
+
+# check again 
+setdiff(IAP_domain_structure_no_dup_rm$protein_id, BIR_XP_gff_species_join_haplotig_collapsed_CV_CG$protein_id) # files match 
+setdiff(BIR_XP_gff_species_join_haplotig_collapsed_CV_CG$protein_id, IAP_domain_structure_no_dup_rm $protein_id) # no proteins missing from origincal haplotig collapsed file
+
+# check number of total proteins 
+IAP_domain_structure_no_dup_rm %>% distinct(protein_id, Species) %>% count(Species) # this is correct! 
+ # Species                   n
+ # <chr>                 <int>
+ #   1 Crassostrea_gigas        74
+ # 2 Crassostrea_virginica   158
+
 #### TOTAL IAP DOMAIN STATS ####
+
+# Join original IAP stats from C_gig and C_vir experiments with the domain info
+
+IAP_domain_structure_no_dup_rm
+
+C_vir_apop_LFC_IAP_OG_domain_structure <- left_join(C_vir_apop_LFC_IAP_OG, IAP_domain_structure_no_dup_rm)
+C_vir_apop_LFC_IAP_OG_domain_structure$Species <- "Crassostrea_virginica"
+# change ID column to transcript_id for joining purposes
+C_gig_apop_LFC_IAP_OG_domain_structure <- left_join(C_gig_apop_LFC_IAP_OG, IAP_domain_structure_no_dup_rm)
+C_gig_apop_LFC_IAP_OG_domain_structure$Species <- "Crassostrea_gigas"
+
+# combine into one
+C_vir_C_gig_apop_LFC_IAP_OG_domain_structure <- rbind(C_vir_apop_LFC_IAP_OG_domain_structure, C_gig_apop_LFC_IAP_OG_domain_structure)
 
 # How many transcripts not used at all from any experiment
 IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain <- IAP_MY_CV_CG_raxml_tibble_join %>% filter(Species == "Crassostrea_virginica" |Species == "Crassostrea_gigas") %>% 
