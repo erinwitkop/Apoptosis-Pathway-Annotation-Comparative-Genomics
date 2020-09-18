@@ -2913,8 +2913,62 @@ IAP_domain_structure_no_dup_rm %>% distinct(protein_id, Species) %>% count(Speci
  #   1 Crassostrea_gigas        74
  # 2 Crassostrea_virginica   158
 
-#### TOTAL IAP DOMAIN STATS ####
+#### TOTAL ANNOTATED IAP DOMAIN STATS ####
 
+IAP_domain_structure_no_dup_rm
+
+# What percent of the total annotated in genome transcripts in each is in each domain type
+# perform separately so I can create a wide table for data visualization
+C_vir_IAP_domain_structure_no_dup_rm_count <- IAP_domain_structure_no_dup_rm %>%
+  filter(Species == "Crassostrea_virginica") %>% 
+  # add up number of unique proteins in each experiment
+  distinct(protein_id , .keep_all = TRUE) %>%
+  group_by(Domain_Name) %>%
+  dplyr::summarise(CV_total_per_domain = n()) %>%
+  mutate(CV_percent_of_total = CV_total_per_domain/sum(CV_total_per_domain)) %>% arrange(desc(CV_total_per_domain))
+
+C_gig_IAP_domain_structure_no_dup_rm_count <- IAP_domain_structure_no_dup_rm %>%
+  filter(Species == "Crassostrea_gigas") %>% 
+  # add up number of unique proteins in each experiment
+  distinct(protein_id , .keep_all = TRUE) %>%
+  group_by(Domain_Name) %>%
+  dplyr::summarise(CG_total_per_domain = n()) %>%
+  mutate(CG_percent_of_total = CG_total_per_domain/sum(CG_total_per_domain)) %>% arrange(desc(CG_total_per_domain))
+
+# join 
+C_vir_C_gig_IAP_domain_structure_no_dup_rm_count <- left_join(C_vir_IAP_domain_structure_no_dup_rm_count, C_gig_IAP_domain_structure_no_dup_rm_count)
+C_vir_C_gig_IAP_domain_structure_no_dup_rm_count$CG_total_per_domain <- replace_na(C_vir_C_gig_IAP_domain_structure_no_dup_rm_count$CG_total_per_domain,0)
+C_vir_C_gig_IAP_domain_structure_no_dup_rm_count$CG_percent_of_total <- replace_na(C_vir_C_gig_IAP_domain_structure_no_dup_rm_count$CG_percent_of_total,0)
+
+# create table for Paper Figure 
+C_vir_C_gig_IAP_domain_structure_no_dup_rm_count_table <- C_vir_C_gig_IAP_domain_structure_no_dup_rm_count %>% 
+  mutate(Domain_Name = case_when(Domain_Name == "not_classified" ~ "Non-Domain Grouped", TRUE ~ Domain_Name)) %>%
+  gt::gt(rowname_col = "Domain_Name") %>%
+  tab_header(title = gt::md("**Total Identified Transcripts with Each Domain Structure**")) %>%
+  tab_spanner(label = md("*Crassostrea virginica*"), columns = c("CV_total_per_domain", "CV_percent_of_total")) %>%
+  tab_spanner(label = md("*Crassostrea gigas*"), columns = c("CG_total_per_domain", "CG_percent_of_total")) %>%
+  cols_label( CV_total_per_domain  =md("**Transcripts<br>Per Type**"),
+              CV_percent_of_total = md("**Percent<br>of Total**"),
+              CG_total_per_domain  =md("**Transcripts<br>Per Type**"),
+              CG_percent_of_total = md("**Percent of Total**")) %>%
+  fmt_percent(columns = vars(CV_percent_of_total), decimals = 2) %>% # format as percent
+  fmt_percent(columns = vars(CG_percent_of_total), decimals = 2) %>% # format as percent
+  summary_rows(fns=list(Total = "sum"), 
+               columns = c("CV_total_per_domain","CG_total_per_domain"), 
+               formatter = fmt_number) %>%
+  tab_source_note(source_note = md("\\* = *IAP Domain identified by Interproscan and not CDD search*")) %>%
+  tab_options(table.font.color = "black", table.font.size = 20) 
+  
+# save as png
+gtsave(C_vir_C_gig_IAP_domain_structure_no_dup_rm_count_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_vir_C_gig_IAP_domain_structure_no_dup_rm_count_table.png")
+
+### Export Data frame of DEG IAPs and domain groupsing to in WGCNA
+
+# export data frame
+save(C_vir_C_gig_apop_LFC_IAP_OG_domain_structure, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/C_vir_C_gig_apop_LFC_IAP_OG_domain_structure.RData")
+
+#### IAP SUMMARY TABLE STATS LFC, CONST, DOMAINS ####
+### THIS CODE MAKES INITIAL TABLES AND STATISTICS, MORE DETAILED PLOTS AND PATHWAY ANALYSIS ARE IN THE DESEQ2 ANALYSIS SCRIPT 
 # Join original IAP stats from C_gig and C_vir experiments with the domain info
 C_vir_apop_LFC_IAP_OG_domain_structure <- left_join(C_vir_apop_LFC_IAP_OG, IAP_domain_structure_no_dup_rm) %>% filter(!is.na(protein_id))
 C_vir_apop_LFC_IAP_OG_domain_structure$Species <- "Crassostrea_virginica"
@@ -2936,7 +2990,7 @@ BIR_XP_gff_species_join_haplotig_collapsed_CG <- BIR_XP_gff_species_join_haploti
 length(setdiff(BIR_XP_gff_species_join_haplotig_collapsed_CV$protein_id, unique(C_vir_apop_LFC_IAP_OG_domain_structure$protein_id))) # 121 proteins not used at all in any C. vir experiment
 length(setdiff(BIR_XP_gff_species_join_haplotig_collapsed_CG$protein_id, unique(C_gig_apop_LFC_IAP_OG_domain_structure$protein_id))) # 36 proteins not used at all in any C. gig experiment
 
-# What percent of the total transcripts in each is in each domain type
+# What percent of the total LFC transcripts in each is in each domain type
 # count domain structure of shared transcripts across all experiments 
 # perform separately so I can create a wide table for data visualization
 C_vir_apop_LFC_IAP_OG_domain_structure_count <- C_vir_C_gig_apop_LFC_IAP_OG_domain_structure %>%
@@ -2964,7 +3018,7 @@ C_vir_C_gig_apop_LFC_IAP_OG_domain_structure_count$CG_percent_of_total <- replac
 C_vir_C_gig_apop_LFC_IAP_OG_domain_structure_count_table <- C_vir_C_gig_apop_LFC_IAP_OG_domain_structure_count %>% 
   mutate(Domain_Name = case_when(Domain_Name == "not_classified" ~ "Non-Domain Grouped", TRUE ~ Domain_Name)) %>%
   gt::gt(rowname_col = "Domain_Name") %>%
-  tab_header(title = gt::md("**Total Identified Transcripts with Each Domain Structure**")) %>%
+  tab_header(title = gt::md("**Total Significantly Differentially Expressed Transcripts with Each Domain Structure**")) %>%
   tab_spanner(label = md("*Crassostrea virginica*"), columns = c("CV_total_per_domain", "CV_percent_of_total")) %>%
   tab_spanner(label = md("*Crassostrea gigas*"), columns = c("CG_total_per_domain", "CG_percent_of_total")) %>%
   cols_label( CV_total_per_domain  =md("**Transcripts<br>Per Type**"),
@@ -2978,18 +3032,9 @@ C_vir_C_gig_apop_LFC_IAP_OG_domain_structure_count_table <- C_vir_C_gig_apop_LFC
                formatter = fmt_number) %>%
   tab_source_note(source_note = md("\\* = *IAP Domain identified by Interproscan and not CDD search*")) %>%
   tab_options(table.font.color = "black", table.font.size = 20) 
-  
+
 # save as png
-# OLD incorrect table gtsave(IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table , "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/IAP_MY_CV_CG_raxml_tibble_join_CV_CG_domain_count_table.png")
 gtsave(C_vir_C_gig_apop_LFC_IAP_OG_domain_structure_count_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_vir_C_gig_apop_LFC_IAP_OG_domain_structure_count_table.png")
-
-### Export Data frame of DEG IAPs and domain groupsing to in WGCNA
-
-# export data frame
-save(C_vir_C_gig_apop_LFC_IAP_OG_domain_structure, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/C_vir_C_gig_apop_LFC_IAP_OG_domain_structure.RData")
-
-#### IAP SUMMARY TABLE STATS LFC, CONST, DOMAINS ####
-### THIS CODE MAKES INITIAL TABLES AND STATISTICS, MORE DETAILED PLOTS AND PATHWAY ANALYSIS ARE IN THE DESEQ2 ANALYSIS SCRIPT 
 
 # Join IAP domain information with constitutively expressed IAP information
 C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_domain <- left_join(C_vir_vst_common_df_all_mat_limma_IAP_gather_avg,  IAP_domain_structure_no_dup_rm)
