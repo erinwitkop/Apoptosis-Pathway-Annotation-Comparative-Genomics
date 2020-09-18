@@ -1304,7 +1304,7 @@ IAP_collapsed_tibble_domain_type %>% group_by(Species) %>% count()
 # Plot collapsed tree
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed <- 
   ggtree(IAP_MY_CV_CG_raxml_treedata_collapsed, aes(color=Species, fill=Species),  branch.length = "none") + 
-  geom_tiplab(aes(label=alias), fontface="bold", size =3.5, offset=0) + # geom_tiplab2 flips the labels correctly
+  geom_tiplab(aes(label=gene), fontface="bold", size =3.5, offset=0) + # geom_tiplab2 flips the labels correctly
   # add circle for 90-100 instead of bootstrap values
   geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=2.0) +
   # add triangle for 70-89 instead of bootstrap values
@@ -2185,6 +2185,13 @@ IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_l
 #       units = "in",
 #       dpi=300)
 
+ggsave(filename = "IAP_tr_dom_plus_legend_plot_09172020.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
+       width = 34,
+       height = 27,
+       units = "in",
+       dpi=300)
+
 ### Statistics for looking at Domains ###
 # Number of proteins with a certain number of BIR domains
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
@@ -2253,6 +2260,8 @@ C_vir_apop_LFC_IAP_full_XP_collapsed <- C_vir_apop_LFC_IAP_full_XP %>% filter(is
 C_vir_apop_LFC_IAP_full_XP_collapsed_BIR_seq_rm_dup_clstr6 <- BIR_seq_rm_dup_clstr6 %>% filter(protein_id %in% (C_vir_apop_LFC_IAP_full_XP_collapsed$protein_id))
 # Find parent proteins in these clusters
 C_vir_apop_LFC_IAP_full_XP_collapsed_BIR_seq_rm_dup_clstr6_cluster <- BIR_seq_rm_dup_clstr6[BIR_seq_rm_dup_clstr6$cluster %in% C_vir_apop_LFC_IAP_full_XP_collapsed_BIR_seq_rm_dup_clstr6$cluster,]
+
+
 
 # Recode these proteins for the purpose of plotting
 C_vir_apop_LFC_IAP$protein_id <- recode(C_vir_apop_LFC_IAP$protein_id, 
@@ -2811,7 +2820,14 @@ vst_combined <- plot_grid(vst_plots, vst_legend, ncol=1, rel_heights  = c(0.8, 0
   draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 20, fontfamily = "sans", angle= 0) 
 
 # Export Const. expression plot to use in publication 
-ggsave(filename = "IAP_Const_C_vir_C_gig_07302020.tiff", plot=vst_combined, device="tiff",
+#ggsave(filename = "IAP_Const_C_vir_C_gig_07302020.tiff", plot=vst_combined, device="tiff",
+#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_Const",
+#       width = 40,
+#       height = 25,
+#       units = "in",
+#       dpi=300, limitsize = FALSE)
+
+ggsave(filename = "IAP_Const_C_vir_C_gig_09172020.tiff", plot=vst_combined, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_Const",
        width = 40,
        height = 25,
@@ -2836,7 +2852,14 @@ LFC_combined <- plot_grid(LFC_plots, LFC_legend, ncol=1, rel_heights  = c(0.8, 0
   draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 20, fontfamily = "sans", angle= 0)
 
 # Export LFC plot ## USE FOR PUBLICATION##
-ggsave(filename = "IAP_LFC_C_vir_C_gig_07302020.tiff", plot=LFC_combined, device="tiff",
+#ggsave(filename = "IAP_LFC_C_vir_C_gig_07302020.tiff", plot=LFC_combined, device="tiff",
+#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_LFC",
+#       width = 40,
+#       height = 30,
+#       units = "in",
+#       dpi=300)
+
+ggsave(filename = "IAP_LFC_C_vir_C_gig_09172020.tiff", plot=LFC_combined, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_LFC",
        width = 40,
        height = 30,
@@ -2963,6 +2986,9 @@ levels(factor(LFC_cont_comb$experiment))
 
 # Join with Domain type information
 LFC_cont_comb_domain_type <- left_join(LFC_cont_comb, IAP_domain_structure[, c("protein_id","Domain_Name","Number")])
+
+# Export recoded LFC data frames with transcript IDs to search for modules with matchin transcripts in the WGCNA data
+save(LFC_cont_comb_domain_type, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/WGCNA/LFC_cont_comb_domain_type.RData")
 
 # Number of LFC and Const IAP in each experiment
 LFC_cont_comb_summary_count <- LFC_cont_comb_domain_type  %>% 
