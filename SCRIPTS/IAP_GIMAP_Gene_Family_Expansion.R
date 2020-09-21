@@ -2981,8 +2981,8 @@ C_gig_apop_LFC_IAP_OG_domain_structure$Species <- "Crassostrea_gigas"
 C_vir_C_gig_apop_LFC_IAP_OG_domain_structure <- rbind(C_vir_apop_LFC_IAP_OG_domain_structure, C_gig_apop_LFC_IAP_OG_domain_structure)
 
 # How many transcripts not used at all from any experiment
-length(unique(C_vir_apop_LFC_IAP_OG_domain_structure$protein_id)) # 37 
-length(unique(C_gig_apop_LFC_IAP_OG_domain_structure$protein_id)) # 38
+length(unique(C_vir_apop_LFC_IAP_OG_domain_structure$protein_id)) # 37 total used 
+length(unique(C_gig_apop_LFC_IAP_OG_domain_structure$protein_id)) # 38 total used 
 
 BIR_XP_gff_species_join_haplotig_collapsed_CV <- BIR_XP_gff_species_join_haplotig_collapsed_CV_CG  %>% filter(Species =="Crassostrea_virginica")
 BIR_XP_gff_species_join_haplotig_collapsed_CG <- BIR_XP_gff_species_join_haplotig_collapsed_CV_CG %>% filter(Species =="Crassostrea_gigas")
@@ -3411,6 +3411,115 @@ C_gig_sig_table_apop_table <- C_vir_gig_sig_table %>%
   tab_options(table.font.color = "black")
 # save as png
 gtsave(C_gig_sig_table_apop_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_gig_sig_table_apop_table.png")
+
+
+#### IAP AND CONST GENE AND TRANSCRIPT USAGE ####
+
+# Remember I found 69 unique genes in C. virginica and 40 unique genes in C. gigas
+IAP_domain_structure_no_dup_rm %>% distinct(gene, Species) %>% count(Species)
+#Species                   n
+#<chr>                 <int>
+#  1 Crassostrea_gigas        40
+#2 Crassostrea_virginica    69
+
+IAP_domain_structure_no_dup_rm %>% distinct(protein_id, Species) %>% count(Species)
+#Species                   n
+#<chr>                 <int>
+#  1 Crassostrea_gigas        74
+#2 Crassostrea_virginica   158
+
+# Join gene info to LFC and cont table 
+LFC_cont_comb_gene <- left_join(LFC_cont_comb, unique(IAP_domain_structure_no_dup_rm[,c("protein_id","gene","Domain_Name")]))
+
+# How many genes of the total IAP genes are being used in each species and data type across experiments
+LFC_cont_comb_gene %>% distinct(gene, Data_Type, Species) %>% count(Data_Type, Species)
+  #Data_Type               Species  n
+  #1     Const     Crassostrea_gigas 13
+  #2     Const Crassostrea_virginica 38
+  #3       LFC     Crassostrea_gigas 25
+  #4       LFC Crassostrea_virginica 25
+
+# How many transcripts of the total IAP transcripts are being used in each species and data type across experiments
+LFC_cont_comb_gene %>% distinct(protein_id, Data_Type, Species) %>% count(Data_Type, Species)
+#Data_Type               Species  n
+#1     Const     Crassostrea_gigas 16
+#2     Const Crassostrea_virginica 40
+#3       LFC     Crassostrea_gigas 38
+#4       LFC Crassostrea_virginica 37
+
+## How many unique genes and transcripts being used across both LFC and cont (how much of total gene diversity is being used)
+LFC_cont_comb_gene %>% distinct(gene, Species) %>% count(Species)
+  #Species  n
+  #1     Crassostrea_gigas 33
+  #2 Crassostrea_virginica 53
+
+LFC_cont_comb_gene %>% distinct(protein_id, Species) %>% count(Species)
+#Species  n
+#1     Crassostrea_gigas 53 transcripts
+#2 Crassostrea_virginica 76
+
+## how many LFC transcripts for each gene being used?
+LFC_cont_comb_gene_transcript_usage <- LFC_cont_comb_gene %>% filter(Data_Type == "LFC") %>% distinct(protein_id, experiment, Species, group_by_sim, gene) %>%
+  group_by(experiment, Species, group_by_sim, gene) %>% count() %>% arrange(desc(n)) 
+
+### Are different LFC transcripts within genes being used between experiments?
+LFC_cont_comb_gene_prot_comb <- LFC_cont_comb_gene %>% filter(Data_Type == "LFC") %>% distinct(protein_id, experiment, Species, group_by_sim, gene)  %>%
+  group_by(experiment, group_by_sim, gene) %>% 
+  # paste together combo of prot id's
+  mutate(comb_prot_id = paste(protein_id, collapse = "_")) %>% distinct(gene, experiment, comb_prot_id, Species)
+
+# find which genes have several different transcript combos
+LFC_cont_comb_gene_prot_comb_diff <- LFC_cont_comb_gene_prot_comb %>% ungroup() %>% distinct(comb_prot_id, gene, Species) %>% group_by(gene) %>% filter(n()>1)
+
+# How many genes have differential trancript usage between experiments and how many do not?
+LFC_cont_comb_gene_prot_comb_diff %>% ungroup() %>% distinct(gene, Species) %>% count(Species)
+# 6 genes in each have differential transcript usage - a small percentage of the total genes express a different set of transcripts between experiments
+#Species                   n
+#<chr>                 <int>
+#  1 Crassostrea_gigas         6
+#2 Crassostrea_virginica     6
+
+# Which genes are those that have differential transcript usage?
+LFC_cont_comb_gene_prot_comb_differential_usage <- LFC_cont_comb_gene_prot_comb[LFC_cont_comb_gene_prot_comb$gene %in% LFC_cont_comb_gene_prot_comb_diff$gene,]
+
+# view these genes but with the product and domain type info
+LFC_cont_comb_gene_differential_usage <- LFC_cont_comb_gene[LFC_cont_comb_gene$gene %in% LFC_cont_comb_gene_prot_comb_diff$gene,]
+  
+  
+#### Which annotated IAP genes and transcripts not utilized in any experiment
+Not_used_IAP_prot_gene <- IAP_domain_structure_no_dup_rm[!(IAP_domain_structure_no_dup_rm$protein_id %in% LFC_cont_comb_gene$protein_id),]
+
+# How many genes not used in any experiment?
+Not_used_IAP_prot_gene_uniq <- Not_used_IAP_prot_gene %>% distinct(Species, gene)
+Not_used_IAP_prot_gene %>% distinct(Species, gene) %>% count(Species)
+#   Species                   n
+#<chr>                 <int>
+#1 Crassostrea_gigas        15
+#2 Crassostrea_virginica    43
+
+# How many transcripts not used in any experiment?
+Not_used_IAP_prot_gene %>% distinct(Species, protein_id) %>% count(Species)
+  #Species                   n
+  #<chr>                 <int>
+  #  1 Crassostrea_gigas        21
+  #2 Crassostrea_virginica    82
+
+# Are the const genes different from the LFC genes 
+
+## Are any genes both cont and DEG?
+LFC_cont_comb_gene_shared_LFC_cont_gene <- LFC_cont_comb_gene %>% distinct(Species, gene, Data_Type) %>% group_by(gene, Species) %>% filter(n() > 1) %>% ungroup() %>% distinct(gene, Species)
+LFC_cont_comb_gene %>% distinct(Species, gene, Data_Type) %>% group_by(gene, Species) %>% filter(n() > 1) %>% ungroup() %>% distinct(gene, Species) %>% count(Species)
+#Species                   n
+#<chr>                 <int>
+#  1 Crassostrea_gigas         5
+#2 Crassostrea_virginica    10
+
+# Which transcripts do these represent
+LFC_cont_comb_gene_shared_LFC_cont_gene_prot <- left_join(LFC_cont_comb_gene_shared_LFC_cont_gene, IAP_domain_structure_no_dup_rm) %>% 
+  # also join which proteins were cont vs. LFC for each gene
+  left_join(., unique(LFC_cont_comb_gene[,c("protein_id","Data_Type", "experiment")]))
+
+# how many const transcripts vs. LFC transcripts used 
 
 #### PLOT IAP FULL PROTEIN TREE WITH BIR MSA AND IAP TABLE ####
 # tutorial for review #https://cran.r-project.org/web/packages/ggmsa/vignettes/ggmsa.html
