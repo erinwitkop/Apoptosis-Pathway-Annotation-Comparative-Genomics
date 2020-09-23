@@ -2913,6 +2913,9 @@ IAP_domain_structure_no_dup_rm %>% distinct(protein_id, Species) %>% count(Speci
  #   1 Crassostrea_gigas        74
  # 2 Crassostrea_virginica   158
 
+# export IAP_domain_structure_no_dup_rm for use in DEG workspace 
+save(IAP_domain_structure_no_dup_rm, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/IAP_domain_structure_no_dup_rm.RData")
+
 #### TOTAL ANNOTATED IAP DOMAIN STATS ####
 
 IAP_domain_structure_no_dup_rm
@@ -2980,6 +2983,9 @@ C_gig_apop_LFC_IAP_OG_domain_structure$Species <- "Crassostrea_gigas"
 # combine into one
 C_vir_C_gig_apop_LFC_IAP_OG_domain_structure <- rbind(C_vir_apop_LFC_IAP_OG_domain_structure, C_gig_apop_LFC_IAP_OG_domain_structure)
 
+# save for used in other script
+save(C_vir_C_gig_apop_LFC_IAP_OG_domain_structure, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/C_vir_C_gig_apop_LFC_IAP_OG_domain_structure")
+
 # How many transcripts not used at all from any experiment
 length(unique(C_vir_apop_LFC_IAP_OG_domain_structure$protein_id)) # 37 total used 
 length(unique(C_gig_apop_LFC_IAP_OG_domain_structure$protein_id)) # 38 total used 
@@ -2991,20 +2997,17 @@ length(setdiff(BIR_XP_gff_species_join_haplotig_collapsed_CV$protein_id, unique(
 length(setdiff(BIR_XP_gff_species_join_haplotig_collapsed_CG$protein_id, unique(C_gig_apop_LFC_IAP_OG_domain_structure$protein_id))) # 36 proteins not used at all in any C. gig experiment
 
 # What percent of the total LFC transcripts in each is in each domain type
-# count domain structure of shared transcripts across all experiments 
 # perform separately so I can create a wide table for data visualization
 C_vir_apop_LFC_IAP_OG_domain_structure_count <- C_vir_C_gig_apop_LFC_IAP_OG_domain_structure %>%
   filter(Species == "Crassostrea_virginica") %>% 
-  # add up number of unique proteins in each experiment
-  distinct(protein_id , .keep_all = TRUE) %>%
+  # add up number of TOTAL proteins in each experiment
   group_by(Domain_Name) %>%
   dplyr::summarise(CV_total_per_domain = n()) %>%
   mutate(CV_percent_of_total = CV_total_per_domain/sum(CV_total_per_domain)) %>% arrange(desc(CV_total_per_domain))
 
 C_gig_apop_LFC_IAP_OG_domain_structure_count <- C_vir_C_gig_apop_LFC_IAP_OG_domain_structure %>%
   filter(Species == "Crassostrea_gigas") %>% 
-  # add up number of unique proteins in each experiment
-  distinct(protein_id , .keep_all = TRUE) %>%
+  # add up number of TOTAL proteins in each experiment
   group_by(Domain_Name) %>%
   dplyr::summarise(CG_total_per_domain = n()) %>%
   mutate(CG_percent_of_total = CG_total_per_domain/sum(CG_total_per_domain)) %>% arrange(desc(CG_total_per_domain))
@@ -3106,7 +3109,7 @@ LFC_cont_comb_domain_type <- left_join(LFC_cont_comb, IAP_domain_structure_no_du
 # Export recoded LFC data frames with transcript IDs to search for modules with matchin transcripts in the WGCNA data
 save(LFC_cont_comb_domain_type, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/WGCNA/LFC_cont_comb_domain_type.RData")
 
-# Number of LFC and Const IAP in each experiment
+# Number of LFC and Const IAP in each experiment, group, and Domain_Name
 LFC_cont_comb_summary_count <- LFC_cont_comb_domain_type  %>% 
   distinct(protein_id, experiment,Species, Data_Type, group_by_sim, Domain_Name) %>%
   group_by(experiment, Species, Data_Type, group_by_sim, Domain_Name) %>%
@@ -3143,7 +3146,7 @@ LFC_cont_comb_summary_unique_shared <- LFC_cont_comb %>%
 LFC_cont_comb_proportion_IAP_used <-  LFC_cont_comb %>%
   filter(Data_Type == "LFC") %>% 
   ungroup() %>% 
-  distinct(experiment, protein_id, .keep_all = TRUE) %>%
+  distinct(experiment, group_by_sim, protein_id, .keep_all = TRUE) %>% # include group by sim when getting the full count
   group_by(experiment) %>%
   mutate(count = n()) %>%
   distinct(experiment, count, Species) %>%
@@ -3165,7 +3168,7 @@ LFC_cont_comb_summary_unique <- LFC_cont_comb_summary_unique_shared %>%
 
 # Calculate percent of shared transcripts between experiments in each experiment 
 LFC_cont_comb_summary_shared <- LFC_cont_comb_summary_unique_shared %>%
-  filter(num_groups > 1) %>%
+  filter(num_groups > 1) %>% # this means it is found across more than 1 experiment
   # add up number of unique proteins in each experiment
   distinct(experiment, protein_id, .keep_all = TRUE) %>%
   # count up the total shared with other experiments
@@ -3195,10 +3198,10 @@ LFC_cont_comb_summary_shared_unique_table <- LFC_cont_comb_summary_shared_unique
   gt::gt(rowname_col = "experiment", groupname = "Species") %>%
   tab_header(title = gt::md("**Unique and Shared Differentially Expressed IAP Transcripts Across Experiments**")) %>%
   cols_label( count = md("**Total Differentially<br>Expressed IAP<br>Transcripts**"),
-              proportion_used  =md("**Percent Expressed<br>of Total<br>IAP Transcripts**"),
-              total_shared = md("**Number IAP Transcripts<br>Significant Across<br>Experiments**"),
+              proportion_used  =md("**Percent Differentially<br>Expressed of Total<br>IAP Transcripts**"),
+              total_shared = md("**Number IAP Transcripts<br>Significant Across<br>Multiple Experiments**"),
               total_unique = md("**Number Unique<br>IAP Transcripts**"),
-              percent_shared_each_exp = md("**Percent Shared<br>Transcripts**"),
+              percent_shared_each_exp = md("**Percent IAP Transcripts<br>Significant Across<br>Multiple Experiments**"),
               percent_not_shared_each_exp = md("**Percent Unique<br>Transcripts**")) %>%
   fmt_percent(columns = vars(proportion_used), decimals = 2) %>% # format as percent
   fmt_percent(columns = vars(percent_shared_each_exp), decimals = 2) %>% # format as percent
@@ -3334,7 +3337,7 @@ gtsave(LFC_cont_comb_summary_count_LFC_IAP_TABLE, "/Users/erinroberts/Documents/
 ## Create table with statistics on DEGS, apop DEGs, percent apop DEGs
 # get statistics on percent of IAPs out of all apoptosis transcript by joining with summary LFC 
 load(file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_vir_gig_sig_table.RData")
-nrow(C_vir_gig_sig_table) # 37
+nrow(C_vir_gig_sig_table) # 38
 # levels don't match 
 levels(factor(LFC_comb$group_by_sim))
 levels(factor(C_vir_gig_sig_table$group_by_sim))
@@ -3369,7 +3372,7 @@ C_vir_sig_table_apop_table <- C_vir_gig_sig_table %>%
   tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "Hatchery Probiotic RI")) %>% 
   tab_row_group(group = "Dermo",rows = 4:9) %>%
   tab_style(style = cell_text(weight = "bold"),locations = cells_row_groups(groups = "Dermo")) %>%
-  tab_row_group(group = "Lab Probiotic S4,RI, RE22",rows =10:13) %>%
+  tab_row_group(group = "Lab Probiotic S4,RI, RE22",rows =10:14) %>%
   tab_style(style = cell_text(weight = "bold"),locations =cells_row_groups(groups = "Lab Probiotic S4,RI, RE22")) %>%
   summary_rows(groups = c("ROD","Dermo","Lab Probiotic S4,RI, RE22"), fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = "apop_percent") %>%
   summary_rows(groups = c("ROD","Dermo","Lab Probiotic S4,RI, RE22"), fns = list(Total = "sum"), columns = "num_sig_apop") %>%
@@ -3412,6 +3415,150 @@ C_gig_sig_table_apop_table <- C_vir_gig_sig_table %>%
 # save as png
 gtsave(C_gig_sig_table_apop_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_gig_sig_table_apop_table.png")
 
+#### IAP SUMMARY TABLES INTO HEATMAPS ####
+# Use the package complex heatmap to create better looking graphic than including a lot of separate tables 
+# Structure:
+    # ROWS = each DEG and const experimental challenge
+    # COLUMNS:
+      # Heatmap one
+        # 1. Total DEGs: heatmap
+        # 2. Apoptosis DEGs: heatmap
+        # 3. % apoptosis DEGs: bar graph 
+        # - also include text annotation with the sample size for each group
+      # Heatmap 2
+        # 4. Number IAP DEGs
+        # 5-19: column of numbers for each domain structure
+      # Heatmap 3
+        # 20. # of genes in each challenge that are shared in other experiments
+        # 21. # of genes in each challenge that are unique to that experiment
+        # 22. % shared genes
+        # 23. % unique genes
+      # Heatmap 4
+        # Same as heatmap 3 but with transcripts instead of genes 
+
+## Heatmap 1 (axes as groups in each experiment)
+# Generate the matrix for each data set
+total_DEG_mat <- C_vir_gig_sig_table[,c(1,4)]
+total_DEG_mat <- total_DEG_mat %>% column_to_rownames(., var = "group_by_sim")
+total_DEG_mat <- as.matrix(total_DEG_mat)
+
+apop_DEG_mat <- C_vir_gig_sig_table[,c(1,3)]
+apop_DEG_mat <- apop_DEG_mat %>% column_to_rownames(., var = "group_by_sim")
+apop_DEG_mat <- as.matrix(apop_DEG_mat)
+
+apop_perc_DEG_mat <- C_vir_gig_sig_table[,c(1,5)]
+apop_perc_DEG_mat <- apop_perc_DEG_mat %>% column_to_rownames(., var = "group_by_sim")
+apop_perc_DEG_mat <- as.matrix(apop_DEG_mat)
+
+# generate domain structure matrix
+LFC_group_domain_count <- LFC_cont_comb_summary_count %>% ungroup() %>% filter(Data_Type == "LFC") %>% distinct(Domain_Name, group_by_sim, n) %>%
+  spread(Domain_Name, n, fill = 0)   %>% column_to_rownames(., var = "group_by_sim")
+LFC_group_domain_count_mat <- as.matrix(LFC_group_domain_count)
+
+# generate color matrices for each 
+
+# define plotting options
+ht_opt(
+  legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
+  legend_labels_gp = gpar(fontsize = 8), 
+  heatmap_column_names_gp = gpar(fontsize = 8),
+  heatmap_column_title_gp = gpar(fontsize = 10),
+  heatmap_row_title_gp = gpar(fontsize = 8)
+)
+
+# plot heatmap list
+ht_list = 
+  
+## Heatmap 2 (axes as individual experiments)
+# generate matrices of shared and unique TRANSCRIPTs in each experiment as compared with other experiments
+  LFC_cont_comb_summary_shared_unique
+
+Total_IAP_trans_mat <- LFC_cont_comb_summary_shared_unique %>% select(experiment, count) %>% column_to_rownames(., var = "experiment") %>% as.matrix()
+shared_IAP_trans_mat <- LFC_cont_comb_summary_shared_unique %>% select(experiment, total_shared) %>% column_to_rownames(., var = "experiment") %>% as.matrix()
+unique_IAP_trans_mat <- LFC_cont_comb_summary_shared_unique %>% select(experiment, total_unique) %>% column_to_rownames(., var = "experiment") %>% as.matrix()
+
+propotion_used_IAP_trans_mat <- LFC_cont_comb_summary_shared_unique %>% select(experiment, proportion_used) %>% column_to_rownames(., var = "experiment") %>% as.matrix()
+propotion_shared_IAP_trans_mat <- LFC_cont_comb_summary_shared_unique %>% select(experiment, percent_shared_each_exp) %>% column_to_rownames(., var = "experiment") %>% as.matrix()
+propotion_unique_IAP_trans_mat <- LFC_cont_comb_summary_shared_unique %>% select(experiment, percent_not_shared_each_exp) %>% column_to_rownames(., var = "experiment") %>% as.matrix()
+
+# generate matrices of shared and unique GENES in each experiment as compared with other experiments
+# Calculate number of times GENES are shared across experiments
+# Join gene info to LFC and cont table 
+LFC_cont_comb_gene <- left_join(LFC_cont_comb, unique(IAP_domain_structure_no_dup_rm[,c("protein_id","gene","Domain_Name")]))
+
+LFC_cont_comb_summary_unique_shared_GENE <- LFC_cont_comb_gene %>% 
+  ungroup() %>%
+  filter(Data_Type == "LFC") %>% 
+  rowwise() %>%
+  mutate(num_groups = sum(group_by(., experiment, Species) %>%
+                            distinct(gene) %>%
+                            ungroup() %>%
+                            select(gene) %>%
+                            unlist() %in% gene)) %>% 
+  arrange(num_groups) 
+
+# Calculate the total number of unique GENES used in each experiment (only counting shared ones once) and the proportion of total identified IAPs
+LFC_cont_comb_proportion_IAP_used_GENE <-  LFC_cont_comb_gene %>%
+  filter(Data_Type == "LFC") %>% 
+  ungroup() %>% 
+  distinct(experiment, gene, .keep_all = TRUE) %>% # include group by sim when getting the full count
+  group_by(experiment) %>%
+  mutate(count = n()) %>%
+  distinct(experiment, count, Species) %>%
+  mutate(proportion_used = as.numeric(case_when(
+    Species == "Crassostrea_virginica"~ as.character(count/69*100),
+    Species == "Crassostrea_gigas"~ as.character(count/40*100),
+    TRUE~NA_character_))) %>%
+  arrange(desc(proportion_used))
+
+# Calculate how many unique GENES in each experiment and proportion unique
+LFC_cont_comb_summary_unique_GENE <- LFC_cont_comb_summary_unique_shared_GENE %>%
+  filter(num_groups == 1) %>%
+  # add up number of unique gene in each experiment
+  distinct(experiment, gene, .keep_all = TRUE) %>%
+  group_by(experiment) %>%
+  dplyr::summarise(total_unique = n()) %>%
+  left_join(. , LFC_cont_comb_proportion_IAP_used_GENE) %>%
+  mutate(percent_not_shared_each_exp = total_unique/count*100)
+
+# Calculate percent of shared GENES between experiments in each experiment 
+LFC_cont_comb_summary_shared_GENE <- LFC_cont_comb_summary_unique_shared_GENE %>%
+  filter(num_groups > 1) %>% # this means it is found across more than 1 experiment
+  # add up number of unique gene in each experiment
+  distinct(experiment, gene, .keep_all = TRUE) %>%
+  # count up the total shared with other experiments
+  group_by(experiment) %>%
+  summarise(total_shared = n()) %>%
+  left_join(., LFC_cont_comb_proportion_IAP_used_GENE) %>%
+  mutate(percent_shared_each_exp = total_shared/count*100)
+
+# create matrix for each row
+
+## define plotting options
+ht_opt(
+  legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
+  legend_labels_gp = gpar(fontsize = 8), 
+  heatmap_column_names_gp = gpar(fontsize = 8),
+  heatmap_column_title_gp = gpar(fontsize = 10),
+  heatmap_row_title_gp = gpar(fontsize = 8)
+)
+
+# plot heatmap list
+
+ht_list = 
+
+experiment = as.data.frame(C_vir_gig_sig_table[,c(1,2)])
+class(experiment)
+ha = ComplexHeatmap::HeatmapAnnotation(type = experiment, annotation_name_side = "left")
+
+ComplexHeatmap::Heatmap(total_DEG_mat, name = "total significant transcripts", row_names_side = "left", row_order = rownames(total_DEG_mat), top_annotation = ha)
+                        
+                        
+                        row_split = factor(rep(c("Zhang", "Rubio", "He","de Lorgeril OsHV-1","ROD","Hatchery Probiotic RI","Dermo","Lab RI,S4, RE22"), 3,7,12,24,26,27,33)))
+
+
+
+
 
 #### IAP AND CONST GENE AND TRANSCRIPT USAGE ####
 
@@ -3436,7 +3583,7 @@ LFC_cont_comb_gene %>% distinct(gene, Data_Type, Species) %>% count(Data_Type, S
   #Data_Type               Species  n
   #1     Const     Crassostrea_gigas 13
   #2     Const Crassostrea_virginica 38
-  #3       LFC     Crassostrea_gigas 25
+  #3       LFC     Crassostrea_gigas 25 (62.5%)
   #4       LFC Crassostrea_virginica 25
 
 # How many transcripts of the total IAP transcripts are being used in each species and data type across experiments
@@ -3462,14 +3609,15 @@ LFC_cont_comb_gene %>% distinct(protein_id, Species) %>% count(Species)
 LFC_cont_comb_gene_transcript_usage <- LFC_cont_comb_gene %>% filter(Data_Type == "LFC") %>% distinct(protein_id, experiment, Species, group_by_sim, gene) %>%
   group_by(experiment, Species, group_by_sim, gene) %>% count() %>% arrange(desc(n)) 
 
-### Are different LFC transcripts within genes being used between experiments?
+#### Are different LFC transcripts withing genes being used between experiments?
 LFC_cont_comb_gene_prot_comb <- LFC_cont_comb_gene %>% filter(Data_Type == "LFC") %>% distinct(protein_id, experiment, Species, group_by_sim, gene)  %>%
   group_by(experiment, group_by_sim, gene) %>% 
   # paste together combo of prot id's
   mutate(comb_prot_id = paste(protein_id, collapse = "_")) %>% distinct(gene, experiment, comb_prot_id, Species)
 
-# find which genes have several different transcript combos
-LFC_cont_comb_gene_prot_comb_diff <- LFC_cont_comb_gene_prot_comb %>% ungroup() %>% distinct(comb_prot_id, gene, Species) %>% group_by(gene) %>% filter(n()>1)
+# find which genes have several different transcript combos across more than one experiment
+LFC_cont_comb_gene_prot_comb_diff <- LFC_cont_comb_gene_prot_comb %>% ungroup() %>% distinct(comb_prot_id, gene, Species, experiment) %>% group_by(gene) %>% filter(n()>1) %>% 
+  ungroup() %>% distinct(gene, experiment) %>% group_by(gene) %>% filter(n()>1)
 
 # How many genes have differential trancript usage between experiments and how many do not?
 LFC_cont_comb_gene_prot_comb_diff %>% ungroup() %>% distinct(gene, Species) %>% count(Species)
@@ -3483,10 +3631,12 @@ LFC_cont_comb_gene_prot_comb_diff %>% ungroup() %>% distinct(gene, Species) %>% 
 LFC_cont_comb_gene_prot_comb_differential_usage <- LFC_cont_comb_gene_prot_comb[LFC_cont_comb_gene_prot_comb$gene %in% LFC_cont_comb_gene_prot_comb_diff$gene,]
 
 # view these genes but with the product and domain type info
-LFC_cont_comb_gene_differential_usage <- LFC_cont_comb_gene[LFC_cont_comb_gene$gene %in% LFC_cont_comb_gene_prot_comb_diff$gene,]
-  
-  
-#### Which annotated IAP genes and transcripts not utilized in any experiment
+LFC_cont_comb_gene_differential_usage <- LFC_cont_comb_gene %>% filter(Data_Type == "LFC") %>% filter(gene %in% LFC_cont_comb_gene_prot_comb_diff$gene)
+
+# Should any of these be collapsed based on having duplicate sequence
+LFC_cont_comb_gene_differential_usage_collapse <- left_join(LFC_cont_comb_gene_differential_usage, BIR_seq_rm_dup_clstr6_CV_CG[,c("protein_id","stat","cluster")])
+     
+### Which annotated IAP genes and transcripts not utilized in any experiment
 Not_used_IAP_prot_gene <- IAP_domain_structure_no_dup_rm[!(IAP_domain_structure_no_dup_rm$protein_id %in% LFC_cont_comb_gene$protein_id),]
 
 # How many genes not used in any experiment?
