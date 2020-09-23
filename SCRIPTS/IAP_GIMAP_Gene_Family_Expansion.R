@@ -3130,17 +3130,20 @@ LFC_cont_comb_domain_type_protein_number <- LFC_cont_comb_domain_type %>%
 LFC_cont_comb_domain_type_protein_number_plot <- ggplot(LFC_cont_comb_domain_type_protein_number, aes(x=Domain_Name, y=n, fill=experiment, color=experiment)) + geom_col() + 
   theme(axis.text.x.bottom = element_text(angle = 90, hjust =1)) + facet_grid(Species~Data_Type) 
 
-### Make aggregate table regarding how many DEG IAPs used out of total in genome, percent shared, percent unique
+### Make aggregate table regarding how many DEG IAP transcripts used out of total in genome, percent shared, percent unique
 # Calculate number of times transcripts are shared across experiments
 LFC_cont_comb_summary_unique_shared <- LFC_cont_comb %>% 
   filter(Data_Type == "LFC") %>% 
   rowwise() %>%
     mutate(num_groups = sum(group_by(., experiment, Species) %>%
-                              distinct(protein_id) %>%
+                              distinct(protein_id, experiment) %>%
                               ungroup() %>%
                               select(protein_id) %>%
                               unlist() %in% protein_id)) %>% 
     arrange(num_groups) 
+
+# check numbers
+LFC_cont_comb_summary_unique_shared %>% distinct(protein_id, group_by_sim, experiment, .keep_all = TRUE) %>% count(experiment) 
   
 # Calculate the total number of proteins used in each experiment (only counting shared ones once) and the proportion of total identified IAPs
 LFC_cont_comb_proportion_IAP_used <-  LFC_cont_comb %>%
@@ -3148,37 +3151,51 @@ LFC_cont_comb_proportion_IAP_used <-  LFC_cont_comb %>%
   ungroup() %>% 
   distinct(experiment, group_by_sim, protein_id, .keep_all = TRUE) %>% # include group by sim when getting the full count
   group_by(experiment) %>%
-  mutate(count = n()) %>%
-  distinct(experiment, count, Species) %>%
+  mutate(total_count = n()) %>%
+  ungroup() %>%
+  distinct(experiment, protein_id, .keep_all = TRUE) %>%
+  group_by(experiment) %>%
+  mutate(experiment_count = n()) %>%
+  distinct(experiment, total_count, experiment_count, Species) %>%
   mutate(proportion_used = as.numeric(case_when(
-           Species == "Crassostrea_virginica"~ as.character(count/158*100),
-           Species == "Crassostrea_gigas"~ as.character(count/74*100),
+           Species == "Crassostrea_virginica"~ as.character(experiment_count/158*100),
+           Species == "Crassostrea_gigas"~ as.character(experiment_count/74*100),
            TRUE~NA_character_))) %>%
   arrange(desc(proportion_used))
   
 # Calculate how many unique transcripts in each experiment and proportion unique
 LFC_cont_comb_summary_unique <- LFC_cont_comb_summary_unique_shared %>%
+  # first make count for the individual proteins across all levels of each experiment rather than the total count
+  distinct(protein_id, experiment, .keep_all = TRUE) %>% 
+  group_by(experiment) %>%
+  mutate(experiment_count = n()) %>% 
+  ungroup() %>%
   filter(num_groups == 1) %>%
   # add up number of unique proteins in each experiment
   distinct(experiment, protein_id, .keep_all = TRUE) %>%
   group_by(experiment) %>%
-  dplyr::summarise(total_unique = n()) %>%
-  left_join(. , LFC_cont_comb_proportion_IAP_used) %>%
-  mutate(percent_not_shared_each_exp = total_unique/count*100)
+  dplyr::mutate(total_unique = n()) %>%
+  distinct(experiment, total_unique, experiment_count) %>%
+  mutate(percent_not_shared_each_exp = total_unique/experiment_count*100)
 
 # Calculate percent of shared transcripts between experiments in each experiment 
 LFC_cont_comb_summary_shared <- LFC_cont_comb_summary_unique_shared %>%
-  filter(num_groups > 1) %>% # this means it is found across more than 1 experiment
+  # first make count for the individual proteins across all levels of each experiment rather than the total count
+  distinct(protein_id, experiment, .keep_all = TRUE) %>% 
+  group_by(experiment) %>%
+  mutate(experiment_count = n()) %>% 
+  ungroup() %>%
+  filter(num_groups > 1) %>%
   # add up number of unique proteins in each experiment
   distinct(experiment, protein_id, .keep_all = TRUE) %>%
-  # count up the total shared with other experiments
   group_by(experiment) %>%
-  summarise(total_shared = n()) %>%
-  left_join(., LFC_cont_comb_proportion_IAP_used) %>%
-  mutate(percent_shared_each_exp = total_shared/count*100)
+  dplyr::mutate(total_shared = n()) %>%
+  distinct(experiment, total_shared, experiment_count) %>%
+  mutate(percent_shared_each_exp = total_shared/experiment_count*100)
 
 ## final df with count, %unique % shared % percent used out of all IAPS
-LFC_cont_comb_summary_shared_unique <- left_join(LFC_cont_comb_summary_shared, LFC_cont_comb_summary_unique)
+LFC_cont_comb_summary_shared_used <- left_join(LFC_cont_comb_proportion_IAP_used, LFC_cont_comb_summary_shared)
+LFC_cont_comb_summary_shared_unique <-   left_join(LFC_cont_comb_summary_shared_used, LFC_cont_comb_summary_unique)
 
 # Make table of summary IAP shared and unique transcripts
 # change C. gigas experiment labels
@@ -3188,7 +3205,7 @@ LFC_cont_comb_summary_shared_unique$experiment <- factor(LFC_cont_comb_summary_s
                                                          labels= c("Hatchery\nPro. RI","Lab Pro. S4, RI\n or RE22",  "ROD","Dermo","Zhang Vibrio spp." ,   
                                                                                                                    "Rubio Vibrio spp.","He OsHV-1","de Lorgeril Sus. OsHV-1", "de Lorgeril Res. OsHV-1"))
 LFC_cont_comb_summary_shared_unique_table <- LFC_cont_comb_summary_shared_unique %>%
-  select(Species, experiment,count,proportion_used,total_shared,percent_shared_each_exp, total_unique, percent_not_shared_each_exp) %>%
+  select(Species, experiment,total_count, proportion_used, experiment_count,total_shared,percent_shared_each_exp, total_unique, percent_not_shared_each_exp) %>%
   # replace all NA's
   mutate(
     across(everything(), ~replace_na(.x, 0)),
@@ -3197,18 +3214,19 @@ LFC_cont_comb_summary_shared_unique_table <- LFC_cont_comb_summary_shared_unique
     percent_not_shared_each_exp = percent_not_shared_each_exp*0.01) %>%
   gt::gt(rowname_col = "experiment", groupname = "Species") %>%
   tab_header(title = gt::md("**Unique and Shared Differentially Expressed IAP Transcripts Across Experiments**")) %>%
-  cols_label( count = md("**Total Differentially<br>Expressed IAP<br>Transcripts**"),
-              proportion_used  =md("**Percent Differentially<br>Expressed of Total<br>IAP Transcripts**"),
-              total_shared = md("**Number IAP Transcripts<br>Significant Across<br>Multiple Experiments**"),
-              total_unique = md("**Number Unique<br>IAP Transcripts**"),
-              percent_shared_each_exp = md("**Percent IAP Transcripts<br>Significant Across<br>Multiple Experiments**"),
-              percent_not_shared_each_exp = md("**Percent Unique<br>Transcripts**")) %>%
+  cols_label( total_count = md("**Total Differentially<br>Expressed IAP<br>Transcripts**"),
+              experiment_count = md("**Number of Different Differentially<br>Expressed IAP<br>Transcripts in Each Experiment**"),
+              proportion_used  =md("**Percent Differentially<br>Expressed of Total<br>Genome IAP Transcripts**"),
+              total_shared = md("**Number of Different IAP Transcripts<br>Significant Across<br>Multiple Experiments**"),
+              total_unique = md("**Number of Different <br>IAP Transcripts Only Expressed<br>in One Experiment**"),
+              percent_shared_each_exp = md("**Percent Different IAP Transcripts<br>Significant Across<br>Multiple Experiments**"),
+              percent_not_shared_each_exp = md("**Percent Different <br>IAP Transcripts Only Expressed<br>in One Experiment**")) %>%
   fmt_percent(columns = vars(proportion_used), decimals = 2) %>% # format as percent
   fmt_percent(columns = vars(percent_shared_each_exp), decimals = 2) %>% # format as percent
   fmt_percent(columns = vars(percent_not_shared_each_exp), decimals = 2) %>% # format as percent
-tab_row_group(group = "Crassostrea virginica",rows = c(3,4,6,7)) %>%
+tab_row_group(group = "Crassostrea virginica",rows = c(6:9)) %>%
   tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea virginica")) %>%
-  tab_row_group(group = "Crassostrea gigas",rows = c(1,2,5,8,9)) %>%
+  tab_row_group(group = "Crassostrea gigas",rows = c(1:5)) %>%
   tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea gigas")) %>%
   summary_rows(groups = TRUE, fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = c("proportion_used","percent_shared_each_exp","percent_not_shared_each_exp")) %>%
   tab_options(table.font.color = "black")
@@ -3271,6 +3289,113 @@ gt::gt(rowname_col = "Domain_Name") %>%
 
 # save as png
 gtsave(unique_shared_by_domain_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/unique_shared_by_domain_table.png")
+
+### Analyze Unique and Shared GENES across experiments
+# Join gene info to LFC and cont table 
+LFC_cont_comb_gene <- left_join(LFC_cont_comb, unique(IAP_domain_structure_no_dup_rm[,c("protein_id","gene","Domain_Name")]))
+
+# Calculate number of times transcripts are shared across experiments
+LFC_cont_comb_summary_unique_shared_GENE <- LFC_cont_comb_gene %>% 
+  filter(Data_Type == "LFC") %>% 
+  rowwise() %>%
+  mutate(num_groups = sum(group_by(., experiment, Species) %>%
+                            distinct(gene, experiment) %>%
+                            ungroup() %>%
+                            select(gene) %>%
+                            unlist() %in% gene)) %>% 
+  arrange(num_groups) 
+
+# check numbers
+LFC_cont_comb_summary_unique_shared_GENE %>% distinct(gene, group_by_sim, experiment, .keep_all = TRUE) %>% count(experiment) 
+
+# Calculate the total number of genes used in each experiment (only counting shared ones once) and the proportion of total identified IAP genes
+LFC_cont_comb_proportion_IAP_used_GENE <-  LFC_cont_comb_gene %>%
+  filter(Data_Type == "LFC") %>% 
+  ungroup() %>% 
+  distinct(experiment, group_by_sim, gene, .keep_all = TRUE) %>% # include group by sim when getting the full count
+  group_by(experiment) %>%
+  mutate(total_count = n()) %>%
+  ungroup() %>%
+  distinct(experiment, gene, .keep_all = TRUE) %>%
+  group_by(experiment) %>%
+  mutate(experiment_count = n()) %>%
+  distinct(experiment, total_count, experiment_count, Species) %>%
+  mutate(proportion_used = as.numeric(case_when(
+    Species == "Crassostrea_virginica"~ as.character(experiment_count/69*100),
+    Species == "Crassostrea_gigas"~ as.character(experiment_count/40*100),
+    TRUE~NA_character_))) %>%
+  arrange(desc(proportion_used))
+
+# Calculate how many unique genes in each experiment and proportion unique
+LFC_cont_comb_summary_unique_GENE <- LFC_cont_comb_summary_unique_shared_GENE %>%
+  # first make count for the individual genes across all levels of each experiment rather than the total count
+  distinct(gene, experiment, .keep_all = TRUE) %>% 
+  group_by(experiment) %>%
+  mutate(experiment_count = n()) %>% 
+  ungroup() %>%
+  filter(num_groups == 1) %>%
+  # add up number of unique genes in each experiment
+  distinct(experiment, gene, .keep_all = TRUE) %>%
+  group_by(experiment) %>%
+  dplyr::mutate(total_unique = n()) %>%
+  distinct(experiment, total_unique, experiment_count) %>%
+  mutate(percent_not_shared_each_exp = total_unique/experiment_count*100)
+
+# Calculate percent of shared genes between experiments in each experiment 
+LFC_cont_comb_summary_shared_GENE <- LFC_cont_comb_summary_unique_shared_GENE %>%
+  # first make count for the individual proteins across all levels of each experiment rather than the total count
+  distinct(gene, experiment, .keep_all = TRUE) %>% 
+  group_by(experiment) %>%
+  mutate(experiment_count = n()) %>% 
+  ungroup() %>%
+  filter(num_groups > 1) %>%
+  # add up number of unique proteins in each experiment
+  distinct(experiment, gene, .keep_all = TRUE) %>%
+  group_by(experiment) %>%
+  dplyr::mutate(total_shared = n()) %>%
+  distinct(experiment, total_shared, experiment_count) %>%
+  mutate(percent_shared_each_exp = total_shared/experiment_count*100)
+
+## final df with count, %unique % shared % percent used out of all IAPS
+LFC_cont_comb_summary_shared_used_GENE <- left_join(LFC_cont_comb_proportion_IAP_used_GENE, LFC_cont_comb_summary_shared_GENE)
+LFC_cont_comb_summary_shared_unique_GENE <-   left_join(LFC_cont_comb_summary_shared_used_GENE, LFC_cont_comb_summary_unique_GENE)
+
+# Make table of summary IAP shared and unique transcripts
+# change C. gigas experiment labels
+levels(factor(LFC_cont_comb_summary_shared_unique_GENE$experiment))
+LFC_cont_comb_summary_shared_unique_GENE$experiment <- factor(LFC_cont_comb_summary_shared_unique_GENE$experiment, levels = c("Hatchery_Probiotic_RI","Lab_Pro_RE22" ,  "ROD","Dermo" ,
+                                                                                                                    "Zhang","Rubio","He","deLorgeril_sus", "deLorgeril_res"),
+                                                         labels= c("Hatchery\nPro. RI","Lab Pro. S4, RI\n or RE22",  "ROD","Dermo","Zhang Vibrio spp." ,   
+                                                                   "Rubio Vibrio spp.","He OsHV-1","de Lorgeril Sus. OsHV-1", "de Lorgeril Res. OsHV-1"))
+LFC_cont_comb_summary_shared_unique_table_GENE <- LFC_cont_comb_summary_shared_unique_GENE %>%
+  select(Species, experiment,total_count, proportion_used, experiment_count,total_shared,percent_shared_each_exp, total_unique, percent_not_shared_each_exp) %>%
+  # replace all NA's
+  mutate(
+    across(everything(), ~replace_na(.x, 0)),
+    proportion_used = proportion_used*0.01,
+    percent_shared_each_exp= percent_shared_each_exp*0.01,
+    percent_not_shared_each_exp = percent_not_shared_each_exp*0.01) %>%
+  gt::gt(rowname_col = "experiment", groupname = "Species") %>%
+  tab_header(title = gt::md("**Unique and Shared Differentially Expressed IAP Genes Across Experiments**")) %>%
+  cols_label( total_count = md("**Total Differentially<br>Expressed IAP<br>Genes**"),
+              experiment_count = md("**Number of Different Differentially<br>Expressed IAP<br>Genes in Each Experiment**"),
+              proportion_used  =md("**Percent Differentially<br>Expressed of Total<br>Genome IAP Genes**"),
+              total_shared = md("**Number of Different IAP Genes<br>Significant Across<br>Multiple Experiments**"),
+              total_unique = md("**Number of Different <br>IAP Genes Only Expressed<br>in One Experiment**"),
+              percent_shared_each_exp = md("**Percent Different IAP Genes<br>Significant Across<br>Multiple Experiments**"),
+              percent_not_shared_each_exp = md("**Percent Different <br>IAP Genes Only Expressed<br>in One Experiment**")) %>%
+  fmt_percent(columns = vars(proportion_used), decimals = 2) %>% # format as percent
+  fmt_percent(columns = vars(percent_shared_each_exp), decimals = 2) %>% # format as percent
+  fmt_percent(columns = vars(percent_not_shared_each_exp), decimals = 2) %>% # format as percent
+  tab_row_group(group = "Crassostrea virginica",rows = c(6:9)) %>%
+  tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea virginica")) %>%
+  tab_row_group(group = "Crassostrea gigas",rows = c(1:5)) %>%
+  tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea gigas")) %>%
+  summary_rows(groups = TRUE, fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = c("proportion_used","percent_shared_each_exp","percent_not_shared_each_exp")) %>%
+  tab_options(table.font.color = "black")
+
+# save as png
+gtsave(LFC_cont_comb_summary_shared_unique_table_GENE, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/LFC_cont_comb_summary_shared_unique_table_GENE.png")
 
 ## Generate const IAP TABLE
 LFC_cont_comb_summary_count_CONST_IAP_TABLE <- LFC_cont_comb_summary_count %>%
@@ -3483,54 +3608,8 @@ propotion_unique_IAP_trans_mat <- LFC_cont_comb_summary_shared_unique %>% select
 
 # generate matrices of shared and unique GENES in each experiment as compared with other experiments
 # Calculate number of times GENES are shared across experiments
-# Join gene info to LFC and cont table 
-LFC_cont_comb_gene <- left_join(LFC_cont_comb, unique(IAP_domain_structure_no_dup_rm[,c("protein_id","gene","Domain_Name")]))
 
-LFC_cont_comb_summary_unique_shared_GENE <- LFC_cont_comb_gene %>% 
-  ungroup() %>%
-  filter(Data_Type == "LFC") %>% 
-  rowwise() %>%
-  mutate(num_groups = sum(group_by(., experiment, Species) %>%
-                            distinct(gene) %>%
-                            ungroup() %>%
-                            select(gene) %>%
-                            unlist() %in% gene)) %>% 
-  arrange(num_groups) 
 
-# Calculate the total number of unique GENES used in each experiment (only counting shared ones once) and the proportion of total identified IAPs
-LFC_cont_comb_proportion_IAP_used_GENE <-  LFC_cont_comb_gene %>%
-  filter(Data_Type == "LFC") %>% 
-  ungroup() %>% 
-  distinct(experiment, gene, .keep_all = TRUE) %>% # include group by sim when getting the full count
-  group_by(experiment) %>%
-  mutate(count = n()) %>%
-  distinct(experiment, count, Species) %>%
-  mutate(proportion_used = as.numeric(case_when(
-    Species == "Crassostrea_virginica"~ as.character(count/69*100),
-    Species == "Crassostrea_gigas"~ as.character(count/40*100),
-    TRUE~NA_character_))) %>%
-  arrange(desc(proportion_used))
-
-# Calculate how many unique GENES in each experiment and proportion unique
-LFC_cont_comb_summary_unique_GENE <- LFC_cont_comb_summary_unique_shared_GENE %>%
-  filter(num_groups == 1) %>%
-  # add up number of unique gene in each experiment
-  distinct(experiment, gene, .keep_all = TRUE) %>%
-  group_by(experiment) %>%
-  dplyr::summarise(total_unique = n()) %>%
-  left_join(. , LFC_cont_comb_proportion_IAP_used_GENE) %>%
-  mutate(percent_not_shared_each_exp = total_unique/count*100)
-
-# Calculate percent of shared GENES between experiments in each experiment 
-LFC_cont_comb_summary_shared_GENE <- LFC_cont_comb_summary_unique_shared_GENE %>%
-  filter(num_groups > 1) %>% # this means it is found across more than 1 experiment
-  # add up number of unique gene in each experiment
-  distinct(experiment, gene, .keep_all = TRUE) %>%
-  # count up the total shared with other experiments
-  group_by(experiment) %>%
-  summarise(total_shared = n()) %>%
-  left_join(., LFC_cont_comb_proportion_IAP_used_GENE) %>%
-  mutate(percent_shared_each_exp = total_shared/count*100)
 
 # create matrix for each row
 
@@ -3609,7 +3688,7 @@ LFC_cont_comb_gene %>% distinct(protein_id, Species) %>% count(Species)
 LFC_cont_comb_gene_transcript_usage <- LFC_cont_comb_gene %>% filter(Data_Type == "LFC") %>% distinct(protein_id, experiment, Species, group_by_sim, gene) %>%
   group_by(experiment, Species, group_by_sim, gene) %>% count() %>% arrange(desc(n)) 
 
-#### Are different LFC transcripts withing genes being used between experiments?
+#### Are different LFC transcripts within genes being used between experiments?
 LFC_cont_comb_gene_prot_comb <- LFC_cont_comb_gene %>% filter(Data_Type == "LFC") %>% distinct(protein_id, experiment, Species, group_by_sim, gene)  %>%
   group_by(experiment, group_by_sim, gene) %>% 
   # paste together combo of prot id's
