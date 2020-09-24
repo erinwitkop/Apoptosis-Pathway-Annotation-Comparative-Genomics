@@ -1052,7 +1052,7 @@ IAP_gene_remove <- c("LOC111111659",
                      "LOC111114070")
 BIR_XP_gff_species_join_haplotig_collapsed <- BIR_XP_gff_species_join[(!BIR_XP_gff_species_join$gene %in%  IAP_gene_remove),]
 
-### Get Gene list after collapsing IAP genes ####
+#### Get Gene and protein list after collapsing IAP genes ####
 All_mollusc_IAP_gene_list_after_haplotig_collapsed <- BIR_XP_gff_species_join_haplotig_collapsed %>%
   ungroup() %>%
   mutate(gene_locus_tag = case_when(
@@ -1088,10 +1088,53 @@ BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG <- BIR_dup_seq_rm_kept_haplotig_
 write.table(unique(BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG$protein_id), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG.txt",
             quote=FALSE, row.names=FALSE, col.names=FALSE)
 
-### EXPORT PROTEIN LIST OF IAP AND GIMAP COLLAPSED GENES FOR DESEQ COMPARISON ###
+#### EXPORT HAPLOTIG COLLAPSED IAP GENE CDS SEQUENCES FOR GENE FUNCTIONAL DIVERSITY TREE ####
 
-#### PLOT IAP GENE TABLE WITH FULL SPECIES TREE ####
+# Use the full list of haplotig collapsed genes above to get exon coordinates to run MAFFT and RAxML in order to assess the potential full domain diversity not just what is expressed
+    # in the transcript variants
+# check for correct gene number
+BIR_XP_gff_species_join_haplotig_collapsed %>% filter(Species == "Crassostrea_gigas" | Species == "Crassostrea_virginica") %>% ungroup() %>% distinct(gene, Species) %>% count(Species)
 
+BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY <- BIR_XP_gff_species_join_haplotig_collapsed %>% filter(Species == "Crassostrea_gigas" | Species == "Crassostrea_virginica" |
+                                                             Species == "Mizuhopecten_yessoensis") %>% ungroup() %>%  distinct(gene, Species)
+  
+# Find the CDS exon coordinates for these genes in the C. gig, C. vir and M. yes gff annotations
+C_vir_rtracklayer %>% filter(type =="CDS") %>% head()
+# Load the MY annotation
+MY_gff <-  readGFF(file="/Volumes/My Passport for Mac/OrthoFinder_Genomes_Mar_2020_Paper1/GFF3/GCF_002113885.1_ASM211388v2_genomic.gff")
+MY_gff <- as.data.frame(MY_gff)
+
+# get the CDS lines for each C. virginica gene 
+BIR_XP_gff_species_join_haplotig_collapsed_CV_CDS <- C_vir_rtracklayer[C_vir_rtracklayer$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "CDS") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+
+# get the CDS lines for each C. gigas gene 
+BIR_XP_gff_species_join_haplotig_collapsed_CG_CDS <- C_gig_rtracklayer[C_gig_rtracklayer$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "CDS") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+
+# get the CDS lines for each M. yessoensis gene 
+BIR_XP_gff_species_join_haplotig_collapsed_MY_CDS <- MY_gff[MY_gff$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "CDS") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+
+# unlist MY annotation to save space in workspace 
+rm(MY_gff)
+
+# Export CDS position lists and load into bluewaves for extraction of sequences from genomes, concatenation, alignment with MAFFT, and phylogenetic inference with RAxML
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_CV_CDS, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_CV_CDS.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_CG_CDS, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_CG_CDS.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_MY_CDS, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_MY_CDS.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
 
 #### PLOT FULL IAP PROTEIN TREE ####
 # Helpful online tutorial regarding tool: https://www.molecularecologist.com/2017/02/phylogenetic-trees-in-r-using-ggtree/
@@ -3632,12 +3675,24 @@ ha = ComplexHeatmap::HeatmapAnnotation(type = experiment, annotation_name_side =
 
 ComplexHeatmap::Heatmap(total_DEG_mat, name = "total significant transcripts", row_names_side = "left", row_order = rownames(total_DEG_mat), top_annotation = ha)
                         
-                        
-                        row_split = factor(rep(c("Zhang", "Rubio", "He","de Lorgeril OsHV-1","ROD","Hatchery Probiotic RI","Dermo","Lab RI,S4, RE22"), 3,7,12,24,26,27,33)))
+                      
 
 
 # Will come back and finish this code later if its necessary 
 
+#### COMPARE BIR TYPE VARIANTS BETWEEN IAP DOMAIN GROUPS ####
+
+# Comparing file with the type 1 BIR variants with the full IAP non collapsed list 
+BIR_domain_model_MY_CV_CG_type_updated
+IAP_domain_structure_no_dup_rm
+
+# Join BIR variant info by protein_id
+IAP_domain_structure_no_dup_rm_BIR_variant <- left_join(IAP_domain_structure_no_dup_rm, BIR_domain_model_MY_CV_CG_type_updated[,c("protein_id","Type","Species")])
+# some NAs are present due to the BIR protein sequences that were collapsed for being identical 
+
+# Do different clusters with the same domain structure have different BIR variant types?
+IAP_domain_structure_no_dup_rm_BIR_variant_distinct_type <- IAP_domain_structure_no_dup_rm_BIR_variant %>% distinct(Domain_Name, Number, Type) %>% arrange(Domain_Name, Type)
+  # results show that where there are two separate clusters with the same overall domain type they mostly have the same type variant. More within cluster diversity than between cluster 
 
 #### IAP AND CONST GENE AND TRANSCRIPT USAGE ####
 
