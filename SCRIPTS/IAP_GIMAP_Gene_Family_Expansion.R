@@ -3224,9 +3224,9 @@ LFC_cont_comb_summary_shared_unique_table <- LFC_cont_comb_summary_shared_unique
   fmt_percent(columns = vars(proportion_used), decimals = 2) %>% # format as percent
   fmt_percent(columns = vars(percent_shared_each_exp), decimals = 2) %>% # format as percent
   fmt_percent(columns = vars(percent_not_shared_each_exp), decimals = 2) %>% # format as percent
-tab_row_group(group = "Crassostrea virginica",rows = c(6:9)) %>%
+tab_row_group(group = "Crassostrea virginica",rows = c(5,6,8,9)) %>%
   tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea virginica")) %>%
-  tab_row_group(group = "Crassostrea gigas",rows = c(1:5)) %>%
+  tab_row_group(group = "Crassostrea gigas",rows = c(1:4,7)) %>%
   tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea gigas")) %>%
   summary_rows(groups = TRUE, fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = c("proportion_used","percent_shared_each_exp","percent_not_shared_each_exp")) %>%
   tab_options(table.font.color = "black")
@@ -3387,9 +3387,9 @@ LFC_cont_comb_summary_shared_unique_table_GENE <- LFC_cont_comb_summary_shared_u
   fmt_percent(columns = vars(proportion_used), decimals = 2) %>% # format as percent
   fmt_percent(columns = vars(percent_shared_each_exp), decimals = 2) %>% # format as percent
   fmt_percent(columns = vars(percent_not_shared_each_exp), decimals = 2) %>% # format as percent
-  tab_row_group(group = "Crassostrea virginica",rows = c(6:9)) %>%
+  tab_row_group(group = "Crassostrea virginica",rows = c(5,6,8,9)) %>%
   tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea virginica")) %>%
-  tab_row_group(group = "Crassostrea gigas",rows = c(1:5)) %>%
+  tab_row_group(group = "Crassostrea gigas",rows = c(1:4,7)) %>%
   tab_style(style = cell_text(style = "italic"),locations = cells_row_groups(groups = "Crassostrea gigas")) %>%
   summary_rows(groups = TRUE, fns = list(Average = "mean", SD = "sd"), formatter = fmt_percent, columns = c("proportion_used","percent_shared_each_exp","percent_not_shared_each_exp")) %>%
   tab_options(table.font.color = "black")
@@ -3636,7 +3636,7 @@ ComplexHeatmap::Heatmap(total_DEG_mat, name = "total significant transcripts", r
                         row_split = factor(rep(c("Zhang", "Rubio", "He","de Lorgeril OsHV-1","ROD","Hatchery Probiotic RI","Dermo","Lab RI,S4, RE22"), 3,7,12,24,26,27,33)))
 
 
-
+# Will come back and finish this code later if its necessary 
 
 
 #### IAP AND CONST GENE AND TRANSCRIPT USAGE ####
