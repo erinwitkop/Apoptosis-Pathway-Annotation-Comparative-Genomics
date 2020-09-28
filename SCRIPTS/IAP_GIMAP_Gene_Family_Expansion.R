@@ -1088,8 +1088,9 @@ BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG <- BIR_dup_seq_rm_kept_haplotig_
 write.table(unique(BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG$protein_id), file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG.txt",
             quote=FALSE, row.names=FALSE, col.names=FALSE)
 
-#### EXPORT HAPLOTIG COLLAPSED IAP GENE CDS SEQUENCES FOR GENE FUNCTIONAL DIVERSITY TREE ####
+#### EXPORT HAPLOTIG COLLAPSED IAP GENE  SEQUENCES FOR GENE FUNCTIONAL DIVERSITY TREE ####
 
+### EXPORT CDS SEQUENCES 
 # Use the full list of haplotig collapsed genes above to get exon coordinates to run MAFFT and RAxML in order to assess the potential full domain diversity not just what is expressed
     # in the transcript variants
 # check for correct gene number
@@ -1107,26 +1108,23 @@ MY_gff <- as.data.frame(MY_gff)
 # get the CDS lines for each C. virginica gene 
 BIR_XP_gff_species_join_haplotig_collapsed_CV_CDS <- C_vir_rtracklayer[C_vir_rtracklayer$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "CDS") %>%
   # sort in order of start position
-  arrange(start) %>%
+  arrange(gene, start) %>%
   # extract in bed format for getfasta: seqid, start, stop, gene 
   distinct(seqid, start, end, gene)
 
 # get the CDS lines for each C. gigas gene 
 BIR_XP_gff_species_join_haplotig_collapsed_CG_CDS <- C_gig_rtracklayer[C_gig_rtracklayer$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "CDS") %>%
   # sort in order of start position
-  arrange(start) %>%
+  arrange(gene,start) %>%
   # extract in bed format for getfasta: seqid, start, stop, gene 
   distinct(seqid, start, end, gene)
 
 # get the CDS lines for each M. yessoensis gene 
 BIR_XP_gff_species_join_haplotig_collapsed_MY_CDS <- MY_gff[MY_gff$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "CDS") %>%
   # sort in order of start position
-  arrange(start) %>%
+  arrange(gene,start) %>%
   # extract in bed format for getfasta: seqid, start, stop, gene 
   distinct(seqid, start, end, gene)
-
-# unlist MY annotation to save space in workspace 
-rm(MY_gff)
 
 # Export CDS position lists and load into bluewaves for extraction of sequences from genomes, concatenation, alignment with MAFFT, and phylogenetic inference with RAxML
 write.table(BIR_XP_gff_species_join_haplotig_collapsed_CV_CDS, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_CV_CDS.bed",
@@ -1135,6 +1133,40 @@ write.table(BIR_XP_gff_species_join_haplotig_collapsed_CG_CDS, file="/Users/erin
             quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
 write.table(BIR_XP_gff_species_join_haplotig_collapsed_MY_CDS, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_MY_CDS.bed",
             quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+
+### EXPORT FULL GENE SEQUENCE
+
+# get the CDS lines for each C. virginica gene 
+BIR_XP_gff_species_join_haplotig_collapsed_CV_gene <- C_vir_rtracklayer[C_vir_rtracklayer$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "gene") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+
+# get the CDS lines for each C. gigas gene 
+BIR_XP_gff_species_join_haplotig_collapsed_CG_gene <- C_gig_rtracklayer[C_gig_rtracklayer$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "gene") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+
+# get the CDS lines for each M. yessoensis gene 
+BIR_XP_gff_species_join_haplotig_collapsed_MY_gene <- MY_gff[MY_gff$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "gene") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+
+# Export CDS position lists and load into bluewaves for extraction of sequences from genomes, concatenation, alignment with MAFFT, and phylogenetic inference with RAxML
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_CV_Gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_CG_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_CG_Gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_MY_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_MY_Gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+
+# unlist MY annotation to save space in workspace 
+rm(MY_gff)
 
 #### PLOT FULL IAP PROTEIN TREE ####
 # Helpful online tutorial regarding tool: https://www.molecularecologist.com/2017/02/phylogenetic-trees-in-r-using-ggtree/
