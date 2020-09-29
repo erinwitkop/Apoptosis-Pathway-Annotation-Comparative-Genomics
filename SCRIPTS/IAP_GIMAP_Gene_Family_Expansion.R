@@ -1168,6 +1168,242 @@ write.table(BIR_XP_gff_species_join_haplotig_collapsed_MY_gene, file="/Users/eri
 # unlist MY annotation to save space in workspace 
 rm(MY_gff)
 
+#### PLOT MY, CV, CG GENE TREE WITH DOMAIN INFO ####
+
+### Load IAP Gene RAxML tree data 
+IAP_GENE_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/")
+IAP_GENE_raxml
+
+# Get information in the features/attributes of the tree (the XP labels) with get_data
+get.fields(IAP_GENE_raxml)
+get.data(IAP_raxml)
+
+# Convert to tibble tree dataframe object with tidytree to add external data
+IAP_GENE_raxml_tibble <- as_tibble(IAP_GENE_raxml)
+
+# Convert to treedata object to store tree plus outside data
+IAP_GENE_raxml_treedata <- as.treedata(IAP_GENE_raxml_tibble)
+
+## Plot IAP gene sequence tree as vertical 
+
+### Load Interproscan data for genes
+IAP_gene_gff <- readGFF(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY_Gene.fa.gff3")
+IAP_gene_gff <- as.data.frame(IAP_gene_gff)
+length(unique(IAP_gene_gff$seqid)) # 892
+
+# how many Interproscan domains were found?
+unique(as.character(IAP_gene_gff$Dbxref)) # 55 unique Interproscan domain types found 
+unique(as.character(IAP_gene_gff$signature_desc)) # 57 unique signature descriptions 
+
+# Were any domain descriptions found here that were not found for the IAP protein Interproscan results?
+  # remember setdiff shows elements in X not in Y
+setdiff(BIR_XP_gff_Interpro_Domains_all$signature_desc, IAP_gene_gff$signature_desc)
+  # [[1]] "Ubiquitin-associated domain (UBA) profile.", "Ubiquitin-conjugating enzymes family profile.", "UBCc", "Ubiquitin-conjugating enzyme","Trp-Asp (WD) repeats signature.", "UBA_IAPs"
+setdiff(IAP_gene_gff$signature_desc, BIR_XP_gff_Interpro_Domains_all$signature_desc) # 45 domains
+# compar Dbxref ids
+setdiff(as.character(IAP_gene_gff$Dbxref), as.character(BIR_XP_gff_Interpro_Domains_all$Dbxref))
+#[1] "character(0)"           "\"InterPro:IPR029526\"" "\"InterPro:IPR002156\"" "\"InterPro:IPR036397\"" "\"InterPro:IPR012337\"" "\"InterPro:IPR043502\"" "\"InterPro:IPR000477\"" "\"InterPro:IPR011010\"" "\"InterPro:IPR002104\""
+#[10] "\"InterPro:IPR013762\"" "\"InterPro:IPR010998\"" "\"InterPro:IPR002492\"" "\"InterPro:IPR036691\"" "\"InterPro:IPR009057\"" "\"InterPro:IPR015368\"" "\"InterPro:IPR027806\"" "\"InterPro:IPR001584\"" "\"InterPro:IPR041588\""
+#[19] "\"InterPro:IPR007275\"" "\"InterPro:IPR011042\"" "\"InterPro:IPR016187\"" "\"InterPro:IPR016186\"" "\"InterPro:IPR006703\"" "\"InterPro:IPR035901\"" "\"InterPro:IPR000305\"" "\"InterPro:IPR041373\"" "\"InterPro:IPR043128\""
+#[28] "\"InterPro:IPR011335\"" "\"InterPro:IPR019080\"" "\"InterPro:IPR011604\"" "\"InterPro:IPR007889\"" "\"InterPro:IPR001878\"" "\"InterPro:IPR003309\"" "\"InterPro:IPR036875\"" "\"InterPro:IPR038269\"" "\"InterPro:IPR036179\""
+#[37] "\"InterPro:IPR007110\"" "\"InterPro:IPR013783\"" "\"InterPro:IPR013098\"" "\"InterPro:IPR038717\"" "\"InterPro:IPR026960\"" "\"InterPro:IPR008593\"" "\"InterPro:IPR001304\"" "\"InterPro:IPR016133\"" "\"InterPro:IPR007527\""
+#[46] "\"InterPro:IPR027805\""
+
+setdiff(as.character(BIR_XP_gff_Interpro_Domains_all$Dbxref), as.character(IAP_gene_gff$Dbxref))
+#"PF13920"                "G3DSA:1.10.1170.10"     "cd16713"                "SSF57924"               "G3DSA:1.10.533.10"      "Coil"                   "G3DSA:1.10.8.10"       
+#[10] "\"InterPro:IPR015940\"" "PIRSF036836"            "\"InterPro:IPR000608\"" "SM00212"                "\"InterPro:IPR016135\"" "\"InterPro:IPR036322\"" "\"InterPro:IPR011047\"" "\"InterPro:IPR019775\"" "cd18316"               
+#[19] "G3DSA:3.30.710.10"      "G3DSA:3.40.50.300"      "G3DSA:1.10.10.2190"     "cd14321" 
+  # the
+
+# It's clear that a variety of Interproscan domains are at the gene level and not at the protein level
+# need to take a closer look at the domains for comparison of which types are wholly absent or just have a slightly different subtype betwene the two methods 
+
+BIR_XP_gff_Interpro_Domains_all %>% filter(grepl("Ig", as.character(signature_desc), ignore.case = TRUE))
+BIR_XP_gff_Interpro_Domains_all %>% filter(grepl("Im", as.character(signature_desc),ignore.case = TRUE))
+BIR_XP_gff_Interpro_Domains_all %>% filter(grepl("AIG", as.character(signature_desc),ignore.case = TRUE))
+BIR_XP_gff_Interpro_Domains_all %>% filter(grepl("transposase", as.character(signature_desc),ignore.case = TRUE))
+
+# Use combination of geom_segment and geom_rect and combine plot with vertical tree using ggarrange from ggpubr
+# Get only the Interproscan domains for my proteins of interest
+IAP_GENE_raxml_tibble <- IAP_GENE_raxml_tibble %>% filter(!is.na(label)) # remove rows with just bootstrap information
+colnames(IAP_GENE_raxml_tibble)[4] <- "seqid"
+IAP_GENE_Interpro_Domains <-  left_join(IAP_MY_CV_CG_raxml_tibble_join[,c("protein_id","node","alias")], BIR_XP_gff)
+IAP_GENE_Interpro_Domains_only <- IAP_GENE_Interpro_Domains %>% 
+  filter(source =="CDD" | grepl("InterPro:IPR", Dbxref) | grepl("G3DSA:1.10.533.10", Name)) # keep Interproscan domain lines, CDD NCBI lines, and death domain structure
+
+BIR_XP_gff_Interpro_Domains_all <- BIR_XP_gff_Interpro_Domains
+
+# Which domains were removed
+BIR_XP_gff_Interpro_Domains_Name <- BIR_XP_gff_Interpro_Domains %>% distinct(Name) 
+BIR_XP_gff_Interpro_Domains_only_Name <- BIR_XP_gff_Interpro_Domains_only%>% distinct(Name) 
+
+BIR_XP_gff_Interpro_Domains_Name[!(BIR_XP_gff_Interpro_Domains_Name$Name %in% BIR_XP_gff_Interpro_Domains_only_Name$Name),] # 13 were removed 
+#  2 SSF57924 : IAP superfamily          
+#  3 G3DSA:1.10.1170.10: CATH Superfamily 1.10.1170.10 , Inhibitor Of Apoptosis Protein (2mihbC-IAP-1); Chain A
+#  4 PF13920: Zinc finger, C3HC4 type (RING finger)           
+#  5 mobidb-lite       
+#  6 G3DSA:1.10.533.10: this includes the Death domains, Fas
+#  7 Coil              
+#  8 G3DSA:1.10.8.10: Ubiquitin-associated (UBA) domain
+#  9 PIRSF036836 : E3 ubiquitin-protein ligase BOI-like      
+#  10 G3DSA:3.30.710.10: Potassium Channel Kv1.1; Chain A 
+#  11 SM00212: Ubiquitin-conjugating enzyme E2, catalytic domain homologues           
+#  12 G3DSA:3.40.50.300 : P-loop containing nucleotide triphosphate hydrolases
+#  13 G3DSA:1.10.10.2190: unnamed domain
+
+# Which domains do I keep since some of these (other than the death domain) are also identified by Interproscan 
+
+# filter out NA source lines
+BIR_XP_gff_Interpro_Domains_fullprot <- BIR_XP_gff_Interpro_Domains %>% 
+  filter(is.na(source))
+BIR_XP_gff_Interpro_Domains_all_fullprot <- BIR_XP_gff_Interpro_Domains_all %>% 
+  filter(is.na(source))
+
+nrow(BIR_XP_gff_Interpro_Domains_fullprot %>% filter(is.na(source))) # 184
+nrow(IAP_MY_CV_CG_raxml_tibble_join %>% filter(!is.na(protein_id))) # 184 - they agree, all proteins were found - number is less because mizuhopecten proteins were collapsed 
+nrow(BIR_XP_gff_Interpro_Domains_all_full_prot) 
+
+# Fill in the CDD rows that have NULL for DBxref with the Name column
+BIR_XP_gff_Interpro_Domains_only$Dbxref[BIR_XP_gff_Interpro_Domains_only$Dbxref == "character(0)" ] <- "CDD"
+BIR_XP_gff_Interpro_Domains_all$Dbxref[BIR_XP_gff_Interpro_Domains_all$Dbxref == "character(0)" ] <- "CDD"
+
+# unlist
+BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref)
+BIR_XP_gff_Interpro_Domains_all <- BIR_XP_gff_Interpro_Domains_all  %>% unnest(Dbxref)
+
+# Change CDD rows to be the Name column
+BIR_XP_gff_Interpro_Domains_only <- BIR_XP_gff_Interpro_Domains_only %>% mutate(Dbxref = ifelse(Dbxref == "CDD", Name, Dbxref))
+BIR_XP_gff_Interpro_Domains_all<- BIR_XP_gff_Interpro_Domains_all  %>% mutate(Dbxref = ifelse(Dbxref == "CDD", Name, Dbxref))
+
+# Get the node order from collapsed IAP tree
+IAP_MY_CV_CG_raxml_treedata_tip  <- fortify(IAP_MY_CV_CG_raxml_treedata_collapsed) # not changing code from here down
+IAP_MY_CV_CG_raxml_treedata_tip <- subset(IAP_MY_CV_CG_raxml_treedata_tip, isTip)
+IAP_MY_CV_CG_raxml_treedata_tip_order <- IAP_MY_CV_CG_raxml_treedata_tip$label[order(IAP_MY_CV_CG_raxml_treedata_tip$y, decreasing=TRUE)]
+
+# Reorder the protein and polygon
+BIR_XP_gff_Interpro_Domains_fullprot <- BIR_XP_gff_Interpro_Domains_fullprot[match(IAP_MY_CV_CG_raxml_treedata_tip_order, BIR_XP_gff_Interpro_Domains_fullprot$protein_id),]
+IAP_MY_CV_CG_raxml_treedata_tip_order <- as.data.frame(IAP_MY_CV_CG_raxml_treedata_tip_order)
+colnames(IAP_MY_CV_CG_raxml_treedata_tip_order)[1] <- "protein_id"
+BIR_XP_gff_Interpro_Domains_only <- full_join(IAP_MY_CV_CG_raxml_treedata_tip_order, BIR_XP_gff_Interpro_Domains_only)
+
+BIR_XP_gff_Interpro_Domains_all_fullprot <- BIR_XP_gff_Interpro_Domains_all_fullprot[match(IAP_MY_CV_CG_raxml_treedata_tip_order, BIR_XP_gff_Interpro_Domains_all_fullprot$protein_id),]
+BIR_XP_gff_Interpro_Domains_all <- full_join(IAP_MY_CV_CG_raxml_treedata_tip_order, BIR_XP_gff_Interpro_Domains_all)
+
+# Add polygon height
+BIR_XP_gff_Interpro_Domains_only_ID  <- BIR_XP_gff_Interpro_Domains_only  %>% distinct(protein_id) 
+BIR_XP_gff_Interpro_Domains_only_ID <- BIR_XP_gff_Interpro_Domains_only_ID %>% 
+  mutate(height_start = rev(as.numeric(row.names(BIR_XP_gff_Interpro_Domains_only_ID )) - 0.25)) %>%
+  mutate(height_end = rev(as.numeric(row.names(BIR_XP_gff_Interpro_Domains_only_ID)) + .5))
+
+BIR_XP_gff_Interpro_Domains_all_ID  <- BIR_XP_gff_Interpro_Domains_all  %>% distinct(protein_id) 
+BIR_XP_gff_Interpro_Domains_all_ID <- BIR_XP_gff_Interpro_Domains_all_ID %>% 
+  mutate(height_start = rev(as.numeric(row.names(BIR_XP_gff_Interpro_Domains_all_ID )) - 0.25)) %>%
+  mutate(height_end = rev(as.numeric(row.names(BIR_XP_gff_Interpro_Domains_all_ID)) + .5))
+
+# Join back in height
+BIR_XP_gff_Interpro_Domains_only <- left_join(BIR_XP_gff_Interpro_Domains_only , BIR_XP_gff_Interpro_Domains_only_ID )
+BIR_XP_gff_Interpro_Domains_all <- left_join(BIR_XP_gff_Interpro_Domains_all , BIR_XP_gff_Interpro_Domains_all_ID )
+
+# Set factor level order of the nodes set levels in reverse order
+BIR_XP_gff_Interpro_Domains_only$node <- factor(BIR_XP_gff_Interpro_Domains_only$node, levels = unique(BIR_XP_gff_Interpro_Domains_only$node))
+BIR_XP_gff_Interpro_Domains_only$Dbxref <- factor(BIR_XP_gff_Interpro_Domains_only$Dbxref, levels = unique(BIR_XP_gff_Interpro_Domains_only$Dbxref))
+BIR_XP_gff_Interpro_Domains_fullprot$node <- factor(BIR_XP_gff_Interpro_Domains_fullprot$node, levels = rev(BIR_XP_gff_Interpro_Domains_fullprot$node))
+
+BIR_XP_gff_Interpro_Domains_all$node <-   factor(BIR_XP_gff_Interpro_Domains_all$node, levels = unique(BIR_XP_gff_Interpro_Domains_all$node))
+BIR_XP_gff_Interpro_Domains_all$Dbxref <- factor(BIR_XP_gff_Interpro_Domains_all$Dbxref, levels = unique(BIR_XP_gff_Interpro_Domains_all$Dbxref))
+BIR_XP_gff_Interpro_Domains_all_fullprot$node <- factor(BIR_XP_gff_Interpro_Domains_all_fullprot$node, levels = rev(BIR_XP_gff_Interpro_Domains_all_fullprot$node))
+
+### Stats
+# How many unique domains in MY, CV, CG
+BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref) %>% distinct(Dbxref)
+
+# How many proteins with three BIR domains MY, CV, CG? This is difficult because often times the cddBIR and the
+BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref) %>% filter(Dbxref == "\"InterPro:IPR001370\"") %>% group_by(protein_id) %>% 
+  filter(n() >=3) %>% distinct(protein_id)
+
+
+# Plotting all domains 
+IAP_Interproscan_all_domain_plot <- ggplot() + 
+  # plot length of each protein as line
+  geom_segment(data =BIR_XP_gff_Interpro_Domains_all_fullprot,
+               aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
+  # add boxes with geom_rect 
+  geom_rect(data=BIR_XP_gff_Interpro_Domains_all,
+            aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Dbxref)) +
+  #add labels
+  labs(y = NULL, x = "Protein Domain Position (aa)") +
+  # add text labels
+  #geom_text(data=BIR_XP_gff_Interpro_Domains_fullprot,aes(x= end, y = node, label=alias),
+  #          size=2.0, hjust=-.15, check_overlap = TRUE) + 
+  # text theme
+  theme_bw() + 
+  # plot theme
+  theme(axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black"),
+        legend.position = "bottom",
+        legend.box = "vertical",
+        legend.text = element_text(size=8, family="sans"),
+        legend.title = element_text(size=12, family="sans"))+
+  # Change y axis ticks
+  scale_x_continuous(breaks=c(0,500,1000,1500,2000,3000), expand = c(0,0)) + 
+  # Change domain labels 
+  scale_fill_manual(values=c("#d44172","#6d8dd7","#c972c4","#ca8853","#cd9c2e","#92b540",
+                             "#da83b4","#45c097","#cba950","#65c874","#5b3788","#8a371d","#b1457b",
+                             "#be4a5b","#6971d7","#50893b","#d55448","#c46a2f","#8a8a39","#d1766b"), 
+                    name="Functional Domains",
+                    breaks=c("cd16713",
+                             "\"InterPro:IPR001370\"",
+                             "\"InterPro:IPR013083\"",
+                             "\"InterPro:IPR001841\"",
+                             "\"InterPro:IPR015940\"",
+                             "\"InterPro:IPR003131\"",
+                             "cd18316",
+                             "\"InterPro:IPR011333\"",
+                             "\"InterPro:IPR000210\"",
+                             "\"InterPro:IPR000608\"",
+                             "\"InterPro:IPR016135\"",
+                             "\"InterPro:IPR022103\"",
+                             "\"InterPro:IPR036322\"",
+                             "\"InterPro:IPR011047\"",
+                             "\"InterPro:IPR019775\"",
+                             "\"InterPro:IPR017907\"",
+                             "\"InterPro:IPR038765\"",
+                             "\"InterPro:IPR032171\"",
+                             "\"InterPro:IPR027417\"",
+                             "cd14321"),
+                    labels=c("RING-HC_BIRC2_3_7",
+                             "BIR repeat",
+                             "Zinc finger, RING/FYVE/PHD-type",
+                             "Zinc finger, RING-type",
+                             "Ubiquitin-associated domain",
+                             "Potassium channel tetramerisation-type BTB domain",
+                             "BTB/POZ domain",
+                             "SKP1/BTB/POZ domain superfamily",
+                             "BTB/POZ domain",
+                             "Ubiquitin-conjugating enzyme E2",
+                             "Ubiquitin-conjugating enzyme/RWD-like",
+                             "Baculoviral IAP repeat-containing protein 6",
+                             "WD40-repeat-containing domain superfamily",
+                             "Quinoprotein alcohol dehydrogenase-like superfamily",
+                             "WD40 repeat, conserved site",
+                             "Zinc finger, RING-type, conserved site",
+                             "Papain-like cysteine peptidase superfamily",
+                             "C-terminal of Roc (COR) domain",
+                             "P-loop containing nucleoside triphosphate hydrolase",
+                             "Ubiquitin-associated domain")) +
+  # change number of legend columns and put the legend title on top
+  guides(fill=guide_legend(ncol=3, title.position="top"))
+
+
+
+
+
+
+
 #### PLOT FULL IAP PROTEIN TREE ####
 # Helpful online tutorial regarding tool: https://www.molecularecologist.com/2017/02/phylogenetic-trees-in-r-using-ggtree/
 # Tree data vignette https://yulab-smu.github.io/treedata-book/faq.html#different-x-labels-for-different-facet-panels
