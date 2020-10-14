@@ -1345,7 +1345,38 @@ IAP_GENE_Interpro_Domains_Name[!(IAP_GENE_Interpro_Domains_Name$Name %in% IAP_GE
 #G3DSA:1.10.8.10,PS51900,SSF47823,PS51898,G3DSA:3.10.10.10,SSF47391,SSF58113,G3DSA:2.160.20.80,SSF141571,G3DSA:3.30.420.470,
 # PF13518,PR01345,G3DSA:1.10.340.70,SSF101898,G3DSA:3.10.20.370,G3DSA:1.10.10.60,SSF47353,G3DSA:4.10.60.10
 
-# Get full length of gene from IAP_GENE_Interpro_Domains_all
+## Compare with list from the protein Interproscan
+BIR_XP_gff_Interpro_Domains_all_IP_cdd <- BIR_XP_gff_Interpro_Domains_all %>% ungroup() %>% 
+  # make Dbxref a character
+  mutate(Dbxref = as.character(Dbxref)) %>% filter(grepl("cd", Dbxref) | grepl("InterPro",Dbxref)) %>% distinct(Dbxref) %>% mutate(Type = "protein")
+BIR_XP_gff_Interpro_Domains_all_IP_cdd$Dbxref <- gsub('[\"]', '', BIR_XP_gff_Interpro_Domains_all_IP_cdd$Dbxref)
+
+IAP_GENE_Interpro_Domains_all_IP_cdd <- IAP_GENE_Interpro_Domains_all %>% ungroup() %>% 
+  # make Dbxref a character
+  mutate(Dbxref = as.character(Dbxref)) %>%
+  filter(grepl("cd", Dbxref) | grepl("InterPro",Dbxref)) %>% distinct(Dbxref) %>% mutate(Type = "gene")
+IAP_GENE_Interpro_Domains_all_IP_cdd$Dbxref <- gsub('[\"]', '', IAP_GENE_Interpro_Domains_all_IP_cdd$Dbxref)
+
+# Compare lists
+gene_prot_shared <- merge(BIR_XP_gff_Interpro_Domains_all_IP_cdd[1],IAP_GENE_Interpro_Domains_all_IP_cdd[1]) # use merge to find what they both share
+prot_unique <- BIR_XP_gff_Interpro_Domains_all_IP_cdd[!(BIR_XP_gff_Interpro_Domains_all_IP_cdd$Dbxref) %in% IAP_GENE_Interpro_Domains_all_IP_cdd$Dbxref,]
+gene_unique <- IAP_GENE_Interpro_Domains_all_IP_cdd[!(IAP_GENE_Interpro_Domains_all_IP_cdd$Dbxref) %in% BIR_XP_gff_Interpro_Domains_all_IP_cdd$Dbxref,]
+
+## Prioritize Gene Interproscan domains to plot: which domain terms are most common across genes?
+IAP_GENE_Interpro_Domains_all %>% ungroup() %>% 
+  # make Dbxref a character
+  mutate(Dbxref = as.character(Dbxref)) %>%
+  # filter for cd and Interpro
+  filter(grepl("cd", Dbxref) | grepl("InterPro",Dbxref)) %>% 
+  # get distinct gene and term
+  distinct(gene,Dbxref) %>% 
+  # count frequency of each term across genes
+  count(Dbxref) %>% arrange(desc(n)) %>% View()
+
+    # I ORGANIZED THIS DATA AND ADDED DESCRIPTIONS FOR EACH TERM IN THE SPREADSHEET "Interproscan_term_Gene_Protein_level.xlsx" 
+    # - came up with a list of 44 terms based on high frequency in genes, the ones most shared with the protein level, and the ones containing interesting transposon related domains 
+
+## Get full length of gene from IAP_GENE_Interpro_Domains_all
 IAP_GENE_Interpro_Domains_all_full_prot <- IAP_GENE_Interpro_Domains_all %>% filter(is.na(Interpro_tag)) %>% distinct()
 nrow(IAP_GENE_Interpro_Domains_all_full_prot) # 176
 
@@ -1406,22 +1437,34 @@ IAP_GENE_Interpro_Domains_all_full_prot_shortened_list <- IAP_GENE_Interpro_Doma
 IAP_GENE_Interpro_Domains_all_full_prot_shortened_list_coord <- left_join(IAP_GENE_Interpro_Domains_all_full_prot_shortened_list, IAP_GENE_Interpro_Domains_only_reorder) %>% distinct(gene, height_start, height_end)
           
 # Add in set of railroad tracks for genes over 1500
-IAP_GENE_Interpro_Domains_only_reorder_railroad <-  IAP_GENE_Interpro_Domains_all_full_prot_shortened_list_coord %>% mutate(Type = "gene_shortened", start = 1480, end = 1490)
+IAP_GENE_Interpro_Domains_only_reorder_railroad <-  IAP_GENE_Interpro_Domains_all_full_prot_shortened_list_coord %>% mutate(Dbxref = "gene_shortened", start = 1490, end = 1495)
 
 # Add in new rows 
 IAP_GENE_Interpro_Domains_only_reorder <- plyr::rbind.fill(IAP_GENE_Interpro_Domains_only_reorder, IAP_GENE_Interpro_Domains_only_reorder_railroad)
+class(IAP_GENE_Interpro_Domains_only_reorder$Dbxref)
+
+# Subset for particular domains of interest
+IAP_Gene_Interproscan_cdd_list <- c("InterPro:IPR043128","InterPro:IPR006703","InterPro:IPR022103","InterPro:IPR001370","InterPro:IPR016187","InterPro:IPR001304",
+                                    "InterPro:IPR016186","InterPro:IPR011010","InterPro:IPR008593","cd00397","InterPro:IPR043502","InterPro:IPR036691","InterPro:IPR011604",
+                                    "InterPro:IPR000305","InterPro:IPR035901","InterPro:IPR009057","InterPro:IPR013098","InterPro:IPR007110","InterPro:IPR036179",
+                                    "InterPro:IPR013783","InterPro:IPR041588","InterPro:IPR013762","InterPro:IPR001584","InterPro:IPR002104","InterPro:IPR010998",
+                                    "cd09276","InterPro:IPR011335","InterPro:IPR000477","InterPro:IPR026960","InterPro:IPR002156","InterPro:IPR036397","InterPro:IPR012337",
+                                    "cd16713","cd09275","cd03714","cd01647","cd01650","InterPro:IPR038717","InterPro:IPR027805","InterPro:IPR002492","cd09274",
+                                    "InterPro:IPR019080","InterPro:IPR001841","InterPro:IPR013083","gene_shortened")
+
+# subset for the Interproscan and cdd domains of interest 
+IAP_GENE_Interpro_Domains_only_reorder$Dbxref <- gsub('[\"]', '', IAP_GENE_Interpro_Domains_only_reorder$Dbxref)
+
+IAP_GENE_Interpro_Domains_only_reorder_subset <- IAP_GENE_Interpro_Domains_only_reorder %>% filter(Dbxref %in% IAP_Gene_Interproscan_cdd_list)
 
 # Set factor level order of the nodes set levels in reverse order
-IAP_GENE_Interpro_Domains_only_reorder$node <- factor(IAP_GENE_Interpro_Domains_only_reorder$node, levels = unique(IAP_GENE_Interpro_Domains_only_reorder$node))
-IAP_GENE_Interpro_Domains_only_reorder$Dbxref <- factor(IAP_GENE_Interpro_Domains_only_reorder$Dbxref, levels = unique(IAP_GENE_Interpro_Domains_only_reorder$Dbxref))
+IAP_GENE_Interpro_Domains_only_reorder_subset$node <- factor(IAP_GENE_Interpro_Domains_only_reorder_subset$node, levels = rev(unique(IAP_GENE_Interpro_Domains_only_reorder_subset$node)))
+IAP_GENE_Interpro_Domains_only_reorder_subset$Dbxref <- factor(IAP_GENE_Interpro_Domains_only_reorder_subset$Dbxref, levels = unique(IAP_GENE_Interpro_Domains_only_reorder_subset$Dbxref))
 
 IAP_GENE_Interpro_Domains_all_reorder$node <-   factor(IAP_GENE_Interpro_Domains_all_reorder$node, levels = unique(IAP_GENE_Interpro_Domains_all_reorder$node))
-IAP_GENE_Interpro_Domains_all_reorder$Dbxref <- factor(IAP_GENE_Interpro_Domains_all_reorder$Dbxref, levels = unique(IAP_GENE_Interpro_Domains_all_reorder$Dbxref))
+#IAP_GENE_Interpro_Domains_all_reorder$Dbxref <- factor(IAP_GENE_Interpro_Domains_all_reorder$Dbxref, levels = unique(IAP_GENE_Interpro_Domains_all_reorder$Dbxref))
 
-IAP_GENE_Interpro_Domains_all_full_prot_shortened$node <- factor(IAP_GENE_Interpro_Domains_all_full_prot_shortened$node, levels = unique(IAP_GENE_Interpro_Domains_all_full_prot_shortened$node))
-
-# find levels to create key:
-IAP_GENE_Interpro_Domains_all_reorder %>% distinct(Dbxref) %>% filter(grepl("Inter", Dbxref) | grepl("cd", Dbxref))
+IAP_GENE_Interpro_Domains_all_full_prot_shortened$node <- factor(IAP_GENE_Interpro_Domains_all_full_prot_shortened$node, levels = rev(unique(IAP_GENE_Interpro_Domains_all_full_prot_shortened$node)))
 
 ## Create main plot
 IAP_GENE_Interproscan_domain_plot_domain_subset <- ggplot() + 
@@ -1429,7 +1472,7 @@ IAP_GENE_Interproscan_domain_plot_domain_subset <- ggplot() +
   geom_segment(data = IAP_GENE_Interpro_Domains_all_full_prot_shortened,
                aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
   # add protein domain boxes with geom_rect 
-  geom_rect(data=IAP_GENE_Interpro_Domains_only_reorder,inherit.aes = FALSE,
+  geom_rect(data=IAP_GENE_Interpro_Domains_only_reorder_subset,inherit.aes = FALSE,
             aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Dbxref)) +
   #add labels
   labs(y = NULL, x = "Nucleotide position") +
@@ -1451,108 +1494,141 @@ IAP_GENE_Interproscan_domain_plot_domain_subset <- ggplot() +
   # Change y axis ticks
   scale_x_continuous(breaks=c(0,500,1000,1500,1800), expand = c(0,0)) + 
   # Change domain labels 
-  scale_fill_manual(values=c( 
-    "#5db8de",
-    "#b2dbfe",
-    "#5ba6a6",
-    "#524ed4",
-    "#b6eee2",
-    "#53e1a1",
-    "#d393d4",
-    # "Non_Zinc_binding", "T1","T2","T3","T4","Unique",
-    "black",
-    "#cd6137",
-    "#d27b3d",
-    "#d04d8f",
-    "#89599b",
-    "#c058c6",
-    "#8aaa75",
-    "#50803d",
-    "#a6b348",
-    "#85c967",
-    "#b77853",
-    "#55b793",
-    "#dadd48",
-    "grey", # dummy values
-    "grey",
-    "grey",
-    "grey",
-    "grey",
-    "grey",
-    "grey",
-    "grey"), 
+  scale_fill_manual(values=c("#5db8de",
+                             "#b2dbfe",
+                             "#5ba6a6",
+                             "#524ed4",
+                             "#b6eee2",
+                             "#b6eee2",
+                             "#b6eee2",
+                             "#53e1a1",
+                             "#d393d4",
+                             "#b77853",
+                             "#9fac3a",
+                             "#cd6137",
+                             "#d27b3d",
+                             "#d04d8f",
+                             "#d04d8f",
+                             "#89599b",
+                             "#c058c6",
+                             "#c058c6",
+                             "#c058c6",
+                             "#c058c6",
+                             "#8aaa75",
+                             "#8aaa75",
+                             "#8aaa75",
+                             "#8aaa75",
+                             "#8aaa75",
+                             "#50803d",
+                             "#a6b348",
+                             "#85c967",
+                             "#85c967",
+                             "#55b793",
+                             "#55b793",
+                             "#55b793",
+                             "#dadd48",
+                             "#ba4c46",
+                             "#59388a",
+                             "#59388a",
+                             "#59388a",
+                             "#6d82d9",
+                             "#6d82d9",
+                             "#6d82d9",
+                             "#45c097",
+                             "#b84873",
+                             "#b4592b",
+                             "#b4592b","black"), 
     name="Functional Domains",
-    breaks=c( 
-                 "InterPro:IPR001841",
-                            "cd16713",
-                 "InterPro:IPR001370",
-                 "InterPro:IPR002492",
-                 "InterPro:IPR009057",
-                 "InterPro:IPR038717",
-                 "InterPro:IPR013083",
-                 "InterPro:IPR016187",
-                 "InterPro:IPR016186",
-                 "InterPro:IPR001304",
-                            "cd00037",
-                 "InterPro:IPR029526",
-                            "cd08022",
-                 "InterPro:IPR016133",
-                            "cd14580",
-                 "InterPro:IPR015368",
-                 "InterPro:IPR038765",
-                 "InterPro:IPR007275",
-                            "cd18564",
-                 "InterPro:IPR000477"
-                            "cd01650",
-                 "InterPro:IPR043502",
-                 "InterPro:IPR026960",
-                 "InterPro:IPR011010",
-                 "InterPro:IPR002104",
-                 "InterPro:IPR013762",
-                 "InterPro:IPR010998",
-                            "cd00397",
-                            "cd03714",
-                            "cd09275",
-                 "InterPro:IPR008593",
-                 "InterPro:IPR043128",
-                 "InterPro:IPR022103",
-                            "cd14619",
-                 "InterPro:IPR036691",
-                 "InterPro:IPR027806",
-                 "InterPro:IPR007527",
-                 "InterPro:IPR027805",
-                            "cd09276",
-                 "InterPro:IPR002156",
-                 "InterPro:IPR036397",
-                 "InterPro:IPR012337",
-                 "InterPro:IPR000210",
-                            "cd18316",
-                 "InterPro:IPR003131",
-                 "InterPro:IPR011333",
-                 "InterPro:IPR032171",
-                 "InterPro:IPR035901",
-                 "InterPro:IPR000305",
-                 "InterPro:IPR011335",
-                 "InterPro:IPR019080",
-                 "InterPro:IPR011604",
-                 "InterPro:IPR027417",
-                 "InterPro:IPR036179",
-                 "InterPro:IPR007110",
-                 "InterPro:IPR013783",
-                 "InterPro:IPR013098",
-                 "InterPro:IPR001584",
-                 "InterPro:IPR041588",
-                 "InterPro:IPR011042",
-                 "InterPro:IPR006703",
-                 "InterPro:IPR041373",
-                            "cd09274",
-                            "cd01647",
-                 "InterPro:IPR007889",
-                 "InterPro:IPR001878",
-                 "InterPro:IPR003309",
-                 "InterPro:IPR036875",
-                 "InterPro:IPR038269"),
-    labels=c()) +
+    breaks=c( "InterPro:IPR043128",
+              "InterPro:IPR006703",
+              "InterPro:IPR022103",
+              "InterPro:IPR001370",
+              "InterPro:IPR016187",
+              "InterPro:IPR001304",
+              "InterPro:IPR016186",
+              "InterPro:IPR011010",
+              "InterPro:IPR008593",
+              "cd00397",
+              "InterPro:IPR043502",
+              "InterPro:IPR036691",
+              "InterPro:IPR011604",
+              "InterPro:IPR000305",
+              "InterPro:IPR035901",
+              "InterPro:IPR009057",
+              "InterPro:IPR013098",
+              "InterPro:IPR007110",
+              "InterPro:IPR036179",
+              "InterPro:IPR013783",
+              "InterPro:IPR041588",
+              "InterPro:IPR013762",
+              "InterPro:IPR001584",
+              "InterPro:IPR002104",
+              "InterPro:IPR010998",
+              "cd09276",
+              "InterPro:IPR011335",
+              "InterPro:IPR000477",
+              "InterPro:IPR026960",
+              "InterPro:IPR002156",
+              "InterPro:IPR036397",
+              "InterPro:IPR012337",
+              "cd16713",
+              "cd09275",
+              "cd03714",
+              "cd01647",
+              "cd01650",
+              "InterPro:IPR038717",
+              "InterPro:IPR027805",
+              "InterPro:IPR002492",
+              "cd09274",
+              "InterPro:IPR019080",
+              "InterPro:IPR001841",
+              "InterPro:IPR013083",
+              "gene_shortened"),
+    labels=c("Reverse transcriptase/Diguanylate cyclase domain",
+             "AIG1-type guanine nucleotide-binding (G) domain",
+             "Baculoviral IAP repeat-containing protein 6",
+             "BIR repeat",
+             "C-type lectin fold",
+             "C-type lectin-like",
+             "C-type lectin-like/link domain superfamily",
+             "DNA breaking-rejoining enzyme, catalytic core",
+             "DNA N-6-adenine-methyltransferase",
+             "DNA_BRE_C ",
+             "DNA/RNA polymerase superfamily",
+             "Endonuclease/exonuclease/phosphatase superfamily",
+             "Exonuclease, phage-type/RecB, C-terminal",
+             "GIY-YIG endonuclease",
+             "GIY-YIG endonuclease superfamily",
+             "Homeobox-like domain superfamily",
+             "Immunoglobulin I-set",
+             "Immunoglobulin-like domain",
+             "Immunoglobulin-like domain superfamily",
+             "Immunoglobulin-like fold",
+             "Integrase zinc-binding domain",
+             "Integrase-like, catalytic domain superfamily",
+             "Integrase, catalytic core",
+             "Integrase, catalytic domain",
+             "Integrase/recombinase, N-terminal",
+             "non-LTR RNase HI domain of reverse transcriptases",
+             "Restriction endonuclease type II-like",
+             "Reverse transcriptase domain",
+             "Reverse transcriptase zinc-binding domain",
+             "Ribonuclease H domain",
+             "Ribonuclease H superfamily",
+             "Ribonuclease H-like superfamily",
+             "RING-HC_BIRC2_3_7",
+             "RNase_HI_RT_DIRS1",
+             "RT_DIRS1 ",
+             "RT_LTR: Reverse transcriptases (RTs) from retrotransposons and retroviruses",
+             "RT_nLTR_like ",
+             "Tc1-like transposase, DDE domain",
+             "Transposase, Helix-turn-helix domain",
+             "Transposase, Tc1-like",
+             "Ty3/Gypsy family of RNase HI in long-term repeat retroelements",
+             "YqaJ viral recombinase",
+             "Zinc finger, RING-type",
+             "Zinc finger, RING/FYVE/PHD-type",
+             "Full Gene Length Shortened")) +
   # change number of legend columns and put the legend title on top
   guides(fill=guide_legend(ncol=3, title.position="top")) 
 
@@ -1577,34 +1653,27 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text <-
 #          size = 6)  
 
 ###  Export and arrange domain plot with tree
-IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed)
-IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed + 
+IAP_GENE_raxml_treedata_vertical_legend <- cowplot::get_legend(IAP_GENE_raxml_treedata_vertical)
+IAP_GENE_raxml_treedata_vertical_no_legend <- IAP_GENE_raxml_treedata_vertical + 
   theme(legend.position='none')
 
-IAP_MY_CV_CG_tree <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(IAP_Interproscan_domain_plot_no_legend)
-IAP_Interproscan_domain_plot_no_legend <- IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text + theme(legend.position='none')
-IAP_Interproscan_domain_plot_legend <- cowplot::get_legend(IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text)
+IAP_GENE_Interproscan_domain_plot_domain_subset_plot_no_legend <- IAP_GENE_Interproscan_domain_plot_domain_subset + theme(legend.position='none')
+IAP_GENE_Interproscan_domain_plot_domain_subset_plot_legend <- cowplot::get_legend(IAP_GENE_Interproscan_domain_plot_domain_subset)
+IAP_GENE_MY_CV_CG_tree <- IAP_GENE_raxml_treedata_vertical_no_legend + aplot::ylim2(IAP_GENE_Interproscan_domain_plot_domain_subset_plot_no_legend)
 
-IAP_tr_dom_collapsed <- plot_grid(NULL,IAP_MY_CV_CG_tree, IAP_Interproscan_domain_plot_no_legend, ncol=3, align='h', rel_widths = c(0.2, 0.7,0.8)) +
+IAP_GENE_tr_dom_collapsed <- plot_grid(NULL,IAP_GENE_MY_CV_CG_tree, IAP_GENE_Interproscan_domain_plot_domain_subset_plot_no_legend, ncol=3, align='h', rel_widths = c(0.1, 0.75,0.8)) +
   # Add some space at top for labels
   theme(plot.margin = unit(c(1,0.0,0.0,0.0), "cm")) 
-IAP_tr_dom_collapsed_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_legend, IAP_Interproscan_domain_plot_legend,
-                                         nrow = 1, align="hv", rel_widths  =c(0.7, 0.7,1)) 
+IAP_GENE_tr_dom_collapsed_legend <- plot_grid(NULL, IAP_GENE_raxml_treedata_vertical_legend, IAP_GENE_Interproscan_domain_plot_domain_subset_plot_legend,
+                                         nrow = 1, align="hv", rel_widths  =c(0.4, 1,0.7)) 
 
 ## Create combined figure for publication
-IAP_tr_dom_plus_legend <- plot_grid(IAP_tr_dom_collapsed, IAP_tr_dom_collapsed_legend,  ncol=1, rel_heights  = c(0.8, 0.1)) +
+IAP_GENE_tr_dom_plus_legend <- plot_grid(IAP_GENE_tr_dom_collapsed, IAP_GENE_tr_dom_collapsed_legend,  ncol=1, rel_heights  = c(0.7, 0.1)) +
   # add labels for plot components
-  draw_plot_label(c("A","B","C"), x= c(0.38, 0.53, 0.9), y = c(1,1,1), size = 30, family = "sans")
+  draw_plot_label(c("A","B"), x= c(0.35, 0.51), y = c(1,1), size = 30, family = "sans")
 
 ## Export plot with tree and domains aligned : USE THIS FOR PUBLICATION
-#ggsave(filename = "IAP_tr_dom_plus_legend_plot_07302020.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
-#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
-#       width = 34,
-#       height = 27,
-#       units = "in",
-#       dpi=300)
-
-ggsave(filename = "IAP_tr_dom_plus_legend_plot_09172020.tiff", plot=IAP_tr_dom_plus_legend, device="tiff",
+ggsave(filename = "IAP_GENE_tr_dom_plus_legend_plot_10142020.tiff", plot=IAP_GENE_tr_dom_plus_legend, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
        width = 34,
        height = 27,
