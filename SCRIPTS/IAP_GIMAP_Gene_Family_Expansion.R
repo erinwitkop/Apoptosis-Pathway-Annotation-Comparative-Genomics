@@ -234,7 +234,7 @@ save(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP_XM, file="/Users/erinroberts/Documents/PhD
 
 # How many IAP proteins in each 
 length(BIR_XP_gff_CG_uniq_XP) # 74
-length(BIR_XP_gff_CV_uniq_XP) # 164
+length(BIR_XP_gff_CV_uniq_XP) # 164 (is 158 later after haplotigs are collapsed)
 length(AIG1_XP_ALL_gff_GIMAP_CG_uniq_XP) # 31
 length(AIG1_XP_ALL_gff_GIMAP_CV_uniq_XP) # 109
 
@@ -1090,7 +1090,7 @@ write.table(unique(BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG$protein_id), 
 
 #### EXPORT HAPLOTIG COLLAPSED IAP GENE SEQUENCES FOR GENE FUNCTIONAL DIVERSITY TREE ####
 
-### EXPORT CDS SEQUENCES 
+### EXPORT CDS SEQUENCES - didnt end up needing the CDS because interproscan does this internally 
 # Use the full list of haplotig collapsed genes above to get exon coordinates to run MAFFT and RAxML in order to assess the potential full domain diversity not just what is expressed
     # in the transcript variants
 # check for correct gene number
@@ -1136,7 +1136,7 @@ write.table(BIR_XP_gff_species_join_haplotig_collapsed_MY_CDS, file="/Users/erin
 
 ### EXPORT FULL GENE SEQUENCE
 
-# get the CDS lines for each C. virginica gene 
+# get the full gene line for each C. virginica gene 
 BIR_XP_gff_species_join_haplotig_collapsed_CV_gene <- C_vir_rtracklayer[C_vir_rtracklayer$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "gene") %>%
   # sort in order of start position
   arrange(start) %>%
@@ -1144,7 +1144,7 @@ BIR_XP_gff_species_join_haplotig_collapsed_CV_gene <- C_vir_rtracklayer[C_vir_rt
   distinct(seqid, start, end, gene)
 nrow(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene) # 69
 
-# get the CDS lines for each C. gigas gene 
+# get the full gene line for each C. gigas gene 
 BIR_XP_gff_species_join_haplotig_collapsed_CG_gene <- C_gig_rtracklayer[C_gig_rtracklayer$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "gene") %>%
   # sort in order of start position
   arrange(start) %>%
@@ -1152,7 +1152,7 @@ BIR_XP_gff_species_join_haplotig_collapsed_CG_gene <- C_gig_rtracklayer[C_gig_rt
   distinct(seqid, start, end, gene)
 nrow(BIR_XP_gff_species_join_haplotig_collapsed_CG_gene) # 40
 
-# get the CDS lines for each M. yessoensis gene 
+# get the full gene line for each M. yessoensis gene 
 BIR_XP_gff_species_join_haplotig_collapsed_MY_gene <- MY_gff[MY_gff$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,] %>% filter(type == "gene") %>%
   # sort in order of start position
   arrange(start) %>%
@@ -1160,7 +1160,7 @@ BIR_XP_gff_species_join_haplotig_collapsed_MY_gene <- MY_gff[MY_gff$gene %in% BI
   distinct(seqid, start, end, gene)
 nrow(BIR_XP_gff_species_join_haplotig_collapsed_MY_gene) # 68
 
-# Export CDS position lists and load into bluewaves for extraction of sequences from genomes, concatenation, alignment with MAFFT, and phylogenetic inference with RAxML
+# Export gene position lists and load into bluewaves for extraction of sequences from genomes, concatenation, alignment with MAFFT, and phylogenetic inference with RAxML
 write.table(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_CV_Gene.bed",
             quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
 write.table(BIR_XP_gff_species_join_haplotig_collapsed_CG_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_CG_Gene.bed",
@@ -1182,6 +1182,169 @@ CV_CG_MY_gene_species <- rbind(BIR_XP_gff_species_join_haplotig_collapsed_CV_gen
 
 # total genes
 nrow(CV_CG_MY_gene_species) # 177 because some were collapsed
+
+### REPEAT TO EXPORT IAP GENE COORDINATES FROM OTHER 7 MOLLUSCS SO I CAN I MAKE A GENE TREE WITH ALL THE SPECIES ###
+
+# which species do I need to add to tree
+BIR_XP_gff_species_join_haplotig_collapsed %>% ungroup() %>% distinct(Species)
+    #2 Biomphalaria_glabrata  
+    #4 Octopus_bimaculoides   
+    #5 Pomacea_canaliculata   
+    #6 Lottia_gigantea        
+    #8 Aplysia_californica    
+    #9 Octopus_vulgaris       
+    #10 Elysia_chlorotica   
+
+BIR_XP_gff_species_join_haplotig_collapsed_Octopus_bimaculoides <- BIR_XP_gff_species_join_haplotig_collapsed %>% ungroup() %>% filter(Species== "Octopus_bimaculoides") %>% distinct(gene)  %>% mutate(Species = "Octopus_bimaculoides")
+BIR_XP_gff_species_join_haplotig_collapsed_Pomacea_canaliculata <- BIR_XP_gff_species_join_haplotig_collapsed %>% ungroup() %>% filter(Species== "Pomacea_canaliculata") %>% distinct(gene) %>% mutate(Species = "Pomacea_canaliculata")
+BIR_XP_gff_species_join_haplotig_collapsed_Lottia_gigantea      <- BIR_XP_gff_species_join_haplotig_collapsed %>% ungroup() %>% filter(Species== "Lottia_gigantea") %>% distinct(locus_tag) %>% rename(gene = locus_tag) %>% mutate(Species = "Lottia_gigantea")
+BIR_XP_gff_species_join_haplotig_collapsed_Biomphalaria_glabrata  <- BIR_XP_gff_species_join_haplotig_collapsed %>% ungroup() %>% filter(Species== "Biomphalaria_glabrata") %>% distinct(gene) %>% mutate(Species = "Biomphalaria_glabrata")
+BIR_XP_gff_species_join_haplotig_collapsed_Aplysia_californica  <- BIR_XP_gff_species_join_haplotig_collapsed %>% ungroup() %>% filter(Species== "Aplysia_californica") %>% distinct(gene) %>% mutate(Species = "Aplysia_californica")
+BIR_XP_gff_species_join_haplotig_collapsed_Octopus_vulgaris     <- BIR_XP_gff_species_join_haplotig_collapsed %>% ungroup() %>% filter(Species== "Octopus_vulgaris") %>% distinct(gene) %>% mutate(Species = "Octopus_vulgaris")
+BIR_XP_gff_species_join_haplotig_collapsed_Elysia_chlorotica   <- BIR_XP_gff_species_join_haplotig_collapsed %>%  ungroup() %>% filter(Species==  "Elysia_chlorotica") %>% distinct(locus_tag)  %>% rename(gene = locus_tag) %>% mutate(Species = "Elysia_chlorotica")
+
+# get the full gene line for each Octopus_bimaculoides gene 
+BIR_XP_gff_species_join_haplotig_collapsed_OB_gene <- All_mollusc_gene_gff[All_mollusc_gene_gff$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_Octopus_bimaculoides$gene,] %>% 
+  filter(type == "gene") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+nrow(BIR_XP_gff_species_join_haplotig_collapsed_OB_gene) # 11
+
+# get the full gene line for each Pomacea_canaliculata gene 
+BIR_XP_gff_species_join_haplotig_collapsed_PC_gene <- All_mollusc_gene_gff[All_mollusc_gene_gff$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_Pomacea_canaliculata$gene,] %>% 
+  filter(type == "gene") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+nrow(BIR_XP_gff_species_join_haplotig_collapsed_PC_gene) # 27 
+
+# get the full gene line for each Lottia_gigantea gene 
+BIR_XP_gff_species_join_haplotig_collapsed_LG_gene <- All_mollusc_gene_gff[All_mollusc_gene_gff$locus_tag %in% BIR_XP_gff_species_join_haplotig_collapsed_Lottia_gigantea$gene,] %>% 
+  filter(type == "gene") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, locus_tag) 
+nrow(BIR_XP_gff_species_join_haplotig_collapsed_LG_gene) # 23
+
+# get the full gene line for each Biomphalaria_glabrata gene 
+BIR_XP_gff_species_join_haplotig_collapsed_BG_gene <- All_mollusc_gene_gff[All_mollusc_gene_gff$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_Biomphalaria_glabrata$gene,] %>% 
+  filter(type == "gene") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+nrow(BIR_XP_gff_species_join_haplotig_collapsed_BG_gene) # 88
+
+# get the full gene line for each Aplysia_californica gene 
+BIR_XP_gff_species_join_haplotig_collapsed_AC_gene <- All_mollusc_gene_gff[All_mollusc_gene_gff$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_Aplysia_californica$gene,] %>% 
+  filter(type == "gene") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+nrow(BIR_XP_gff_species_join_haplotig_collapsed_AC_gene) # 23
+
+# get the full gene line for each Octopus_vulgaris gene 
+BIR_XP_gff_species_join_haplotig_collapsed_OV_gene <- All_mollusc_gene_gff[All_mollusc_gene_gff$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_Octopus_vulgaris $gene,] %>% 
+  filter(type == "gene") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, gene)
+nrow(BIR_XP_gff_species_join_haplotig_collapsed_OV_gene) # 10
+
+# get the full gene line for each Elysia_chlorotica gene 
+BIR_XP_gff_species_join_haplotig_collapsed_EC_gene <- All_mollusc_gene_gff[All_mollusc_gene_gff$locus_tag %in% BIR_XP_gff_species_join_haplotig_collapsed_Elysia_chlorotica$gene,] %>% 
+  filter(type == "gene") %>%
+  # sort in order of start position
+  arrange(start) %>%
+  # extract in bed format for getfasta: seqid, start, stop, gene 
+  distinct(seqid, start, end, locus_tag) 
+nrow(BIR_XP_gff_species_join_haplotig_collapsed_EC_gene) # 15
+
+# Export gene position lists and load into bluewaves for extraction of sequences from genomes, concatenation, alignment with MAFFT, and phylogenetic inference with RAxML
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_OB_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_OB_Gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_PC_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_PC_Gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_LG_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_LG_Gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_BG_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_BG_Gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_AC_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_AC_Gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_OV_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_OV_Gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+write.table(BIR_XP_gff_species_join_haplotig_collapsed_EC_gene, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species_join_haplotig_collapsed_EC_Gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE, sep="\t")
+
+# make list with full gene and species
+
+All_gene_species <- rbind(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_species,
+                          BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_species,
+                          BIR_XP_gff_species_join_haplotig_collapsed_MY_gene_species,
+                          BIR_XP_gff_species_join_haplotig_collapsed_Octopus_bimaculoides [,c("gene","Species")],
+                          BIR_XP_gff_species_join_haplotig_collapsed_Pomacea_canaliculata [,c("gene","Species")],
+                          BIR_XP_gff_species_join_haplotig_collapsed_Lottia_gigantea[,c("gene","Species")],
+                          BIR_XP_gff_species_join_haplotig_collapsed_Biomphalaria_glabrata[,c("gene","Species")],
+                          BIR_XP_gff_species_join_haplotig_collapsed_Aplysia_californica[,c("gene","Species")],
+                          BIR_XP_gff_species_join_haplotig_collapsed_Octopus_vulgaris[,c("gene","Species")],
+                          BIR_XP_gff_species_join_haplotig_collapsed_Elysia_chlorotica[,c("gene","Species")])
+
+# total genes
+nrow(All_gene_species) # 374 because some were collapsed
+
+#### PLOT ALL MOLLLUSC GENE TREE ####
+### Load IAP Gene RAxML tree data 
+IAP_GENE_all_species_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_XP_gff_species_join_haplotig_collapsed_all_species_Gene_MSA_RAxML")
+IAP_GENE_all_species_raxml
+
+# Convert to tibble tree dataframe object with tidytree to add external data
+IAP_GENE_all_species_raxml_tibble <- as_tibble(IAP_GENE_all_species_raxml)
+colnames(IAP_GENE_all_species_raxml_tibble)[4] <- "gene"
+# add species data 
+IAP_GENE_all_species_raxml_tibble_join <- left_join(IAP_GENE_all_species_raxml_tibble, All_gene_species)
+colnames(IAP_GENE_all_species_raxml_tibble_join)[4] <- "label"
+# Convert to treedata object to store tree plus outside data
+IAP_GENE_all_species_raxml_treedata <- as.treedata(IAP_GENE_all_species_raxml_tibble_join)
+
+# check total gene number in tree
+IAP_GENE_all_species_raxml_tibble_join %>% filter(!is.na(Species)) %>% nrow() # 373
+
+## Plot IAP gene sequence tree as circular first 
+IAP_GENE_all_species_raxml_treedata_circular_gene <- ggtree(IAP_GENE_all_species_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
+  geom_tiplab2(aes(label=label,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
+  #Edit theme
+  theme(legend.position = "bottom", 
+        legend.text = element_text(face = "italic", size=8, family="sans"),
+        legend.title = element_text(size=12, family="sans")) +
+  #xlim(-100,100)  +
+  # add circle for 90-100 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  # add triangle for 70-89 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  # add upside down traingle for 50-69 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  # fix legend appearance
+  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")) ) + # need to override aes to get rid of "a"
+  scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32",  "#a68340",
+                                                 "#a3c763", "#c257b0", "#c083d0","#59a1cf","#c2134a","#ead76b"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis", 
+                                                                                                                                             "Elysia_chlorotica","Lottia_gigantea", "Octopus_bimaculoides", "Octopus_vulgaris", "Pomacea_canaliculata", "Biomphalaria_glabrata","Aplysia_californica"),
+                      labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis", 
+                                 "Elysia chlorotica","Lottia gigantea", "Octopus bimaculoides", "Octopus vulgaris", "Pomacea canaliculata", "Biomphalaria glabrata", "Aplysia californica")) 
+
+# Export plot to file to put together with gene tree for paper
+ggsave(filename = "IAP_all_species_GENE_circular_tree.tiff", plot= IAP_GENE_all_species_raxml_treedata_circular_gene, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
+       width = 10 ,
+       height = 10,
+       units = "in",
+       dpi=300)
+
 
 #### PLOT MY, CV, CG GENE TREE WITH DOMAIN INFO ####
 
@@ -1487,7 +1650,7 @@ Interproscan_term_Gene_Protein_level <- readxl::read_xlsx("/Users/erinroberts/Do
                                                           sheet = 2, col_names = c("Dbxref","Dbxref_list", "title","color","old_color"))
 IAP_GENE_Interpro_Domains_only_reorder_subset_distinct_title <- left_join(IAP_GENE_Interpro_Domains_only_reorder_subset_distinct, Interproscan_term_Gene_Protein_level[,c("Dbxref","title")])
 
-# Search for particular terms
+## Search for particular terms
 # transposase 
 IAP_GENE_Interpro_Domains_only_reorder_subset_distinct_title %>% filter(grepl("transposase", ignore.case = TRUE, title)) # 3 genes with transposase
     # 1 LOC110460644 InterPro:IPR002492                Transposase, Tc1-like
@@ -1508,12 +1671,19 @@ IAP_GENE_Interpro_Domains_only_reorder_subset_distinct_title %>% filter(grepl("T
     #8 LOC111100017 InterPro:IPR012337                                Ribonuclease H-like superfamily # C. vir
     #9 LOC111100017            cd09274 Ty3/Gypsy family of RNase HI in long-term repeat retroelements # C. vir
   
-    
+#Immunoglobulin    
 IAP_GENE_Interpro_Domains_only_reorder_subset_distinct_title %>% filter(grepl("immunoglobulin", ignore.case = TRUE, title)) 
     #1 LOC111100407 InterPro:IPR036179 Immunoglobulin-like domain superfamily
     #2 LOC111100407 InterPro:IPR007110             Immunoglobulin-like domain
     #3 LOC111100407 InterPro:IPR013783               Immunoglobulin-like fold
     #4 LOC111100407 InterPro:IPR013098                   Immunoglobulin I-set
+#C-lectin     
+IAP_GENE_Interpro_Domains_only_reorder_subset_distinct_title %>% filter(grepl("C-type lectin", ignore.case = TRUE, title)) 
+    #gene             Dbxref                                      title
+    #1 LOC111103155 InterPro:IPR016187                         C-type lectin fold
+    #2 LOC111103155 InterPro:IPR016186 C-type lectin-like/link domain superfamily
+    #3 LOC111103155 InterPro:IPR001304                         C-type lectin-like
+
 # endonuclease
 IAP_GENE_Interpro_Domains_only_reorder_subset_distinct_title %>% filter(grepl("endonuclease", ignore.case = TRUE, title)) 
     #gene             Dbxref                                            title
@@ -1905,12 +2075,12 @@ IAP_raxml_treedata_artifact_tree <- ggtree(IAP_raxml_treedata_artifact, aes(colo
 
 #### PLOT GENE TREE AND PROTEIN TREE SIDE BY SIDE FOR FIGURE ####
 
-combined_trees <- plot_grid(IAP_GENE_raxml_treedata_circular_gene, IAP_raxml_treedata_circular_product) +
+combined_trees <- plot_grid(IAP_GENE_all_species_raxml_treedata_circular_gene, IAP_raxml_treedata_circular_product) +
                             draw_plot_label(c("A","B"), x= c(0, 0.5), y = c(0.8,0.8), size = 30, family = "sans") +
                   theme(plot.margin = unit(c(0,0,0,0),"cm"))
 
 ## Export plot with tree and domains aligned : USE THIS FOR PUBLICATION
-ggsave(filename = "IAP_gene_prot_combined_trees_10162020.tiff", plot=combined_trees, device="tiff",
+ggsave(filename = "IAP_gene_prot_combined_trees_10232020.tiff", plot=combined_trees, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
        units = "in",
        height = 15, width = 18,
@@ -3697,7 +3867,11 @@ C_vir_apop_LFC_IAP_OG_domain_structure_count <- C_vir_C_gig_apop_LFC_IAP_OG_doma
   # add up number of TOTAL proteins in each experiment
   group_by(Domain_Name) %>%
   dplyr::summarise(CV_total_per_domain = n()) %>%
-  mutate(CV_percent_of_total = CV_total_per_domain/sum(CV_total_per_domain)) %>% arrange(desc(CV_total_per_domain))
+  mutate(CV_percent_of_total = CV_total_per_domain/sum(CV_total_per_domain)) %>% arrange(desc(CV_total_per_domain)) 
+
+    # add in missing row for TII-DD-RING
+Cvir_TII_DD_RING <- data.frame(Domain_Name = c("TII-DD-RING"), CV_total_per_domain = 0, CV_percent_of_total = 0)
+C_vir_apop_LFC_IAP_OG_domain_structure_count <- rbind(C_vir_apop_LFC_IAP_OG_domain_structure_count, Cvir_TII_DD_RING)
 
 C_gig_apop_LFC_IAP_OG_domain_structure_count <- C_vir_C_gig_apop_LFC_IAP_OG_domain_structure %>%
   filter(Species == "Crassostrea_gigas") %>% 
@@ -3705,6 +3879,9 @@ C_gig_apop_LFC_IAP_OG_domain_structure_count <- C_vir_C_gig_apop_LFC_IAP_OG_doma
   group_by(Domain_Name) %>%
   dplyr::summarise(CG_total_per_domain = n()) %>%
   mutate(CG_percent_of_total = CG_total_per_domain/sum(CG_total_per_domain)) %>% arrange(desc(CG_total_per_domain))
+    # add in missing row for NZBIR-TII-UBA-DD-RING
+Cgig_NZBIR <- data.frame(Domain_Name = c("NZBIR-TII-UBA-DD-RING"), CG_total_per_domain = 0, CG_percent_of_total = 0)
+C_gig_apop_LFC_IAP_OG_domain_structure_count <- rbind(C_gig_apop_LFC_IAP_OG_domain_structure_count, Cgig_NZBIR)
 
 # join 
 C_vir_C_gig_apop_LFC_IAP_OG_domain_structure_count <- left_join(C_vir_apop_LFC_IAP_OG_domain_structure_count, C_gig_apop_LFC_IAP_OG_domain_structure_count)
@@ -3988,7 +4165,7 @@ gtsave(unique_shared_by_domain_table, "/Users/erinroberts/Documents/PhD_Research
 # Join gene info to LFC and cont table 
 LFC_cont_comb_gene <- left_join(LFC_cont_comb, unique(IAP_domain_structure_no_dup_rm[,c("protein_id","gene","Domain_Name")]))
 
-# Calculate number of times transcripts are shared across experiments
+# Calculate number of times genes are shared across experiments
 LFC_cont_comb_summary_unique_shared_GENE <- LFC_cont_comb_gene %>% 
   filter(Data_Type == "LFC") %>% 
   rowwise() %>%
@@ -4043,7 +4220,7 @@ LFC_cont_comb_summary_shared_GENE <- LFC_cont_comb_summary_unique_shared_GENE %>
   mutate(experiment_count = n()) %>% 
   ungroup() %>%
   filter(num_groups > 1) %>%
-  # add up number of unique proteins in each experiment
+  # add up number of shared genes in each experiment
   distinct(experiment, gene, .keep_all = TRUE) %>%
   group_by(experiment) %>%
   dplyr::mutate(total_shared = n()) %>%
@@ -4363,7 +4540,7 @@ IAP_domain_structure_no_dup_rm %>% distinct(protein_id, Species) %>% count(Speci
 # Join gene info to LFC and cont table 
 LFC_cont_comb_gene <- left_join(LFC_cont_comb, unique(IAP_domain_structure_no_dup_rm[,c("protein_id","gene","Domain_Name")]))
 
-# How many genes of the total IAP genes are being used in each species and data type across experiments
+# How many genes of the total IAP genes are being used in each species and data type across experiments - this includes ones that overlap between!
 LFC_cont_comb_gene %>% distinct(gene, Data_Type, Species) %>% count(Data_Type, Species)
   #Data_Type               Species  n
   #1     Const     Crassostrea_gigas 13
@@ -4402,14 +4579,14 @@ LFC_cont_comb_gene_prot_comb <- LFC_cont_comb_gene %>% filter(Data_Type == "LFC"
 
 # find which genes have several different transcript combos across more than one experiment
 LFC_cont_comb_gene_prot_comb_diff <- LFC_cont_comb_gene_prot_comb %>% ungroup() %>% distinct(comb_prot_id, gene, Species, experiment) %>% group_by(gene) %>% filter(n()>1) %>% 
-  ungroup() %>% distinct(gene, experiment) %>% group_by(gene) %>% filter(n()>1)
+  ungroup() %>% distinct(gene, Species,experiment) %>% group_by(gene) %>% filter(n()>1)
 
 # How many genes have differential trancript usage between experiments and how many do not?
 LFC_cont_comb_gene_prot_comb_diff %>% ungroup() %>% distinct(gene, Species) %>% count(Species)
 # 6 genes in each have differential transcript usage - a small percentage of the total genes express a different set of transcripts between experiments
 #Species                   n
 #<chr>                 <int>
-#  1 Crassostrea_gigas         6
+#  1 Crassostrea_gigas         17
 #2 Crassostrea_virginica     6
 
 # Which genes are those that have differential transcript usage?
@@ -4423,14 +4600,15 @@ LFC_cont_comb_gene_differential_usage_collapse <- left_join(LFC_cont_comb_gene_d
      
 ### Which annotated IAP genes and transcripts not utilized in any experiment
 Not_used_IAP_prot_gene <- IAP_domain_structure_no_dup_rm[!(IAP_domain_structure_no_dup_rm$protein_id %in% LFC_cont_comb_gene$protein_id),]
+Not_used_IAP_gene <- IAP_domain_structure_no_dup_rm[!(IAP_domain_structure_no_dup_rm$gene %in% LFC_cont_comb_gene$gene),]
 
 # How many genes not used in any experiment?
-Not_used_IAP_prot_gene_uniq <- Not_used_IAP_prot_gene %>% distinct(Species, gene)
-Not_used_IAP_prot_gene %>% distinct(Species, gene) %>% count(Species)
-#   Species                   n
+Not_used_IAP_gene_uniq <- Not_used_IAP_gene %>% distinct(Species, gene)
+Not_used_IAP_gene %>% distinct(Species, gene) %>% count(Species)
+#Species                   n
 #<chr>                 <int>
-#1 Crassostrea_gigas        15
-#2 Crassostrea_virginica    43
+#  1 Crassostrea_gigas         7
+#2 Crassostrea_virginica    16
 
 # How many transcripts not used in any experiment?
 Not_used_IAP_prot_gene %>% distinct(Species, protein_id) %>% count(Species)
@@ -4439,7 +4617,21 @@ Not_used_IAP_prot_gene %>% distinct(Species, protein_id) %>% count(Species)
   #  1 Crassostrea_gigas        21
   #2 Crassostrea_virginica    82
 
-# Are the const genes different from the LFC genes 
+# For those genes that shared between experiments- are different transcripts being used in the different experiments?
+LFC_cont_comb_summary_unique_shared_GENE %>%
+  # first make count for the individual proteins across all levels of each experiment rather than the total count
+  distinct(gene, experiment, .keep_all = TRUE) %>% 
+  ungroup() %>%
+  filter(num_groups > 1) %>% 
+  # concatenate gene and protein ID to compare 
+  group_by(gene,protein_id,experiment) %>%
+  mutate(gene_prot_comb = paste(protein_id, gene, sep = "_")) %>%
+  # get distinct combos
+  ungroup() %>%
+  distinct(gene,gene_prot_comb, Species) %>%
+  # any time where there is more than one gene row means there are two different transcript combos
+  group_by(gene, Species) %>%
+  summarize(count = n()) %>% arrange(Species, desc(count)) %>% View()
 
 ## Are any genes both cont and DEG?
 LFC_cont_comb_gene_shared_LFC_cont_gene <- LFC_cont_comb_gene %>% distinct(Species, gene, Data_Type) %>% group_by(gene, Species) %>% filter(n() > 1) %>% ungroup() %>% distinct(gene, Species)
