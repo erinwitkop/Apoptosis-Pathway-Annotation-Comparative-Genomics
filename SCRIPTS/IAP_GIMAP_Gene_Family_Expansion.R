@@ -2859,7 +2859,7 @@ BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename_msa <- ggmsa(
                                            seq_name = TRUE) +
   # increase text size
   theme(text = element_text(size=12),
-        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
+        plot.margin = unit(c(0.25,0.5,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct 
 
 ### plot Type I C_vir C_gig M yessoensis
@@ -2889,14 +2889,14 @@ BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset$seq.name
 
 BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset %>%
   mutate(seq.name = case_when(
-    seq.name == "XP_011423762.1_BIR1_LOC105325768" ~   "C. gigas BIR1 Type I",
-    seq.name == "XP_021360744.1_BIR1_BIRC8-like"   ~  "M. yessoensis BIR1 Type I",
-    seq.name == "XP_022287996.1_BIR1_BIRC7-like"   ~  "C. virginica BIR1 Type I",
-    seq.name == "XP_011444161.1_BIR1_LOC105340029" ~  "C. gigas BIR1 Type I-like 3",
-    seq.name == "XP_022288684.1_BIR1_LOC111100858" ~  "C. virginica BIR1 Type I-like 3",
-    seq.name == "XP_021363602.1_BIR1_BIRC3-like" ~  "M. yessoensis BIR1 Type I-like 4",
-    seq.name == "XP_019919899.1_BIR1_BIRC7"        ~  "C. gigas BIR1 Type I-like 1",
-    seq.name == "XP_022288097.1_BIR1_BIRC3-like"  ~  "C. virginica BIR1 TI-like 2"))
+    seq.name == "XP_011423762.1_BIR1_LOC105325768" ~   "C. gigas Type I",
+    seq.name == "XP_021360744.1_BIR1_BIRC8-like"   ~  "M. yessoensis Type I",
+    seq.name == "XP_022287996.1_BIR1_BIRC7-like"   ~  "C. virginica Type I",
+    seq.name == "XP_011444161.1_BIR1_LOC105340029" ~  "C. gigas Type I-like 3",
+    seq.name == "XP_022288684.1_BIR1_LOC111100858" ~  "C. virginica Type I-like 3",
+    seq.name == "XP_021363602.1_BIR1_BIRC3-like" ~  "M. yessoensis Type I-like 4",
+    seq.name == "XP_019919899.1_BIR1_BIRC7"        ~  "C. gigas Type I-like 1",
+    seq.name == "XP_022288097.1_BIR1_BIRC3-like"  ~  "C. virginica Type I-like 2"))
 
 # put in reverse and correct order
 BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename[c(6,4,5,8,7,2,1,3),] 
@@ -2915,7 +2915,7 @@ BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa <- ggmsa(BIR_dom
                                                                                 seq_name = TRUE) +
   # increase text size
   theme(text = element_text(size=12),
-        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
+        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct 
 
 ### plot Type II C_vir C_gig M yessoensis
@@ -2948,20 +2948,20 @@ BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset$seq.name
 
 BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset %>%
   mutate(seq.name = case_when(
-    seq.name == "XP_011412926.1_BIR2_BIRC7A"  ~ "C. gigas BIR2 Type II",
-    seq.name == "XP_021341279.1_BIR3_BIRC3-like"  ~ "M. yessoensis BIR3 Type II",
-    seq.name == "XP_022287929.1_BIR1_LOC111100400"~ "C. virginica BIR1 Type II",
-    seq.name == "XP_011416423.1_BIR1_BIRC7B"      ~ "C. gigas BIR1 Type II-like 3",
-    seq.name == "XP_022287912.1_BIR2_LOC111100394"~ "C. virginica BIR2 Type II-like 3",
-    seq.name == "XP_022292343.1_BIR1_BIRC7A-like" ~ "C. virginica BIR1 Type II-like 4",
-    seq.name == "XP_021350197.1_BIR2_BIRC3-like"  ~ "M. yessoensis BIR2 Type II-like 5",
+    seq.name == "XP_011412926.1_BIR2_BIRC7A"  ~ "C. gigas Type II",
+    seq.name == "XP_021341279.1_BIR3_BIRC3-like"  ~ "M. yessoensis Type II",
+    seq.name == "XP_022287929.1_BIR1_LOC111100400"~ "C. virginica Type II",
+    seq.name == "XP_011416423.1_BIR1_BIRC7B"      ~ "C. gigas Type II-like 3",
+    seq.name == "XP_022287912.1_BIR2_LOC111100394"~ "C. virginica Type II-like 3",
+    seq.name == "XP_022292343.1_BIR1_BIRC7A-like" ~ "C. virginica Type II-like 4",
+    seq.name == "XP_021350197.1_BIR2_BIRC3-like"  ~ "M. yessoensis Type II-like 5",
     seq.name == "XP_011427116.1_BIR1_BIRC7A"      ~ "C. gigas BIR1 Type II-like 1",
-    seq.name == "XP_022291629.1_BIR1_BIRC2-like"  ~ "C. virginica BIR1 Type II-like 1",
+    seq.name == "XP_022291629.1_BIR1_BIRC2-like"  ~ "C. virginica Type II-like 1",
     seq.name == "XP_011431980.1_BIR2_BIRC7"       ~ "C. gigas BIR2 Type II-like 2",
-    seq.name == "XP_022287996.1_BIR2_BIRC7-like"  ~ "C. virginica BIR2 Type II-like 2"))
+    seq.name == "XP_022287996.1_BIR2_BIRC7-like"  ~ "C. virginica Type II-like 2"))
       
 # put in reverse and correct order
-BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename[c(7,6,4,5,10,11,2,1,3),] 
+BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename[c(7,6,4,5,10,11,8,9,2,1,3),] 
 
 # export back to then reload in correct order
 dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename.fa")
@@ -2977,7 +2977,7 @@ BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename_msa <- ggmsa(BIR_dom
                                                                          seq_name = TRUE) +
   # increase text size
   theme(text = element_text(size=12),
-        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
+        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct  
 
 ### plot Type X 
@@ -2999,7 +2999,7 @@ BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset$seq.name
 
 BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset %>%
   mutate(seq.name = case_when(
-    seq.name == "XP_022287912.1_BIR1_LOC111100394"  ~ "C. virginica BIR1 Type X"))
+    seq.name == "XP_022287912.1_BIR1_LOC111100394"  ~ "C. virginica Type X"))
 
 # export back to then reload in correct order
 dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename.fa")
@@ -3015,7 +3015,7 @@ BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename_msa <- ggmsa(BIR_dom
                                                                          seq_name = TRUE) +
   # increase text size
   theme(text = element_text(size=12),
-        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
+        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct  
 
 ### plot Type Y 
@@ -3038,8 +3038,8 @@ BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset$seq.name
 
 BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset %>%
   mutate(seq.name = case_when(
-    seq.name == "XP_011437445.1_BIR1_BIRC2"  ~ "C. gigas BIR1 Type Y",
-    seq.name == "XP_022287934.1_BIR1_LOC111100402" ~ "C. virginica BIR1 Type Y"))
+    seq.name == "XP_011437445.1_BIR1_BIRC2"  ~ "C. gigas Type Y",
+    seq.name == "XP_022287934.1_BIR1_LOC111100402" ~ "C. virginica Type Y"))
 
 # export back to then reload in correct order
 dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename.fa")
@@ -3055,7 +3055,7 @@ BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename_msa <- ggmsa(BIR_dom
                                                                          seq_name = TRUE) +
   # increase text size
   theme(text = element_text(size=12),
-        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
+        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct 
 
 ### plot NZBIR 
@@ -3078,8 +3078,8 @@ BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset$seq.name
 
 BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset %>%
   mutate(seq.name = case_when(
-    seq.name == "XP_019922709.1_BIR1_DIAP2"  ~ "C. gigas BIR1 Non Zinc Binding",
-    seq.name == "XP_022291916.1_BIR1_BIRC3-like" ~ "C. virginica BIR1 Non Zinc Binding"))
+    seq.name == "XP_019922709.1_BIR1_DIAP2"  ~ "C. gigas Non Zinc Binding",
+    seq.name == "XP_022291916.1_BIR1_BIRC3-like" ~ "C. virginica Non Zinc Binding"))
 
 # export back to then reload in correct order
 dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename.fa")
@@ -3095,12 +3095,13 @@ BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename_msa <- ggmsa(BIR_dom
                                                                          seq_name = TRUE) +
   # increase text size
   theme(text = element_text(size=12),
-        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
+        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct 
 
 ## Plot all MSAs on a grid
 # arrange with ggarrange
-MSA_arrange <- ggarrange(BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa,
+MSA_arrange <- ggarrange(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename_msa,
+                         BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa,
                         BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename_msa,
                         BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename_msa,
                         BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename_msa,
@@ -3117,7 +3118,7 @@ ggsave(filename = "BIR_MSA_by_type.tiff", plot=MSA_arrange, device="tiff",
 
 
 ## Make table of statistics for the number of individual domains 
-BIR_domain_model_MY_CV_CG_type_updated_domain_number <- BIR_domain_model_MY_CV_CG_type_updated %>% filter(Species != "Homo_sapiens") %>% 
+BIR_domain_model_MY_CV_CG_type_updated_domain_number <- BIR_domain_model_MY_CV_CG_type_updated %>% 
   count(Type,Species)
 
 
