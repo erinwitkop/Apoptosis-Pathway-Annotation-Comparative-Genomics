@@ -2509,12 +2509,61 @@ BIR_domain_model_MY_CV_CG_type_updated  <- BIR_domain_model_MY_CV_CG_type_distin
     grepl("EHLDK", seq.text) ~ "T2_like_4",
     grepl("EH.KY", seq.text) ~ "T2_like_5",
     TRUE ~ "Unique")) # final line is a catch all for things that don't match 
-# Fill in NAs
-BIR_domain_model_MY_CV_CG_type_updated <- 
-  BIR_domain_model_MY_CV_CG_type_updated %>%
-  mutate(Species = case_when(
-    is.na(.$Species) ~ "Homo_sapiens",
-    TRUE ~ Species))
+
+# Fill in NAs after checking which species they come from 
+BIR_domain_model_MY_CV_CG_type_updated %>% filter(is.na(Species))
+model_org_species <- data.frame(seq.name = c("NP_001261918.1_BIR2_T2_DIAP1" ,"NP_001261918.1_BIR1_T2_DIAP1" ,"NP_477127.1_BIR3_T2_DIAP2" ,"NP_477127.1_BIR2_T2_DIAP2" ,
+                                             "NP_477127.1_BIR1_T1_DIAP2" ,"NP_001243092.1_BIR3_T3_cIAP1" ,"NP_001243092.1_BIR2_T2_cIAP1" ,"NP_001243092.1_BIR1_T1_cIAP1"
+                                             ,"NP_919376.1_BIR3_T2_cIAP1" ,"NP_919376.1_BIR2_T2_cIAP1" ,"NP_919376.1_BIR1_T1_cIAP1" ,"NP_892007.1_BIR3_T2_cIAP2" ,
+                                             "NP_892007.1_BIR2_T2_cIAP2" ,"NP_892007.1_BIR1_T1_cIAP2" ,"NP_031490.2_BIR3_T2_cIAP2" ,"NP_031490.2_BIR2_T2_cIAP2" ,
+                                             "NP_031490.2_BIR1_T1_cIAP2" ,"NP_001159.2_BIR1_T2_BIRC5" ,"NP_919378.1_BIR1_T2_BIRC5a" ,"NP_057336.3_BIR1_T2_BIRC6" ,
+                                             "XP_009291311.1_BIR1_T2_BIRC6" ,"NP_001158.2_BIR3_T2_XIAP" ,"NP_001158.2_BIR2_T2_XIAP" ,"NP_001158.2_BIR1_T1_XIAP" ,
+                                             "NP_919377.2_BIR3_T2_XIAP" ,"NP_919377.2_BIR2_T2_XIAP" ,"NP_919377.2_BIR1_T1_XIAP" ,"NP_647478.1_BIR1_T2_BIRC7a" ,
+                                             "NP_071444.1_BIR1_T2_BIRC7b" ,"AAH39318.1_BIR1_T2_BIRC8"),
+                                Species = c("Drosophila_melanogaster","Drosophila_melanogaster","Drosophila_melanogaster","Drosophila_melanogaster",
+                                            "Drosophila_melanogaster","Homo_sapiens","Homo_sapiens","Homo_sapiens","Danio_rerio ","Danio_rerio ","Danio_rerio ",
+                                            "Homo_sapiens","Homo_sapiens","Homo_sapiens","Mus_musculus","Mus_musculus","Mus_musculus","Homo_sapiens","Danio_rerio",
+                                            "Homo_sapiens","Danio_rerio","Homo_sapiens","Homo_sapiens","Homo_sapiens","Danio_rerio","Danio_rerio","Danio_rerio",
+                                            "Homo_sapiens","Homo_sapiens","Homo_sapiens "))
+
+#NP_001261918.1_BIR2_T2_DIAP1     "Drosophila_melanogaster",
+#NP_001261918.1_BIR1_T2_DIAP1     "Drosophila_melanogaster",
+#NP_477127.1_BIR3_T2_DIAP2        "Drosophila_melanogaster",
+#NP_477127.1_BIR2_T2_DIAP2        "Drosophila_melanogaster",
+#NP_477127.1_BIR1_T1_DIAP2        "Drosophila_melanogaster",
+#NP_001243092.1_BIR3_T3_cIAP1     "Homo_sapiens",
+#NP_001243092.1_BIR2_T2_cIAP1     "Homo_sapiens",
+#NP_001243092.1_BIR1_T1_cIAP1     "Homo_sapiens",
+#NP_919376.1_BIR3_T2_cIAP1        "Danio_rerio ",
+#NP_919376.1_BIR2_T2_cIAP1        "Danio_rerio ",
+#NP_919376.1_BIR1_T1_cIAP1        "Danio_rerio ",
+#NP_892007.1_BIR3_T2_cIAP2        "Homo_sapiens",
+#NP_892007.1_BIR2_T2_cIAP2        "Homo_sapiens",
+#NP_892007.1_BIR1_T1_cIAP2        "Homo_sapiens",
+#NP_031490.2_BIR3_T2_cIAP2        "Mus_musculus",
+#NP_031490.2_BIR2_T2_cIAP2        "Mus_musculus",
+#NP_031490.2_BIR1_T1_cIAP2        "Mus_musculus",
+#NP_001159.2_BIR1_T2_BIRC5        "Homo_sapiens",
+#NP_919378.1_BIR1_T2_BIRC5a       "Danio_rerio",
+#NP_057336.3_BIR1_T2_BIRC6        "Homo_sapiens",
+#XP_009291311.1_BIR1_T2_BIRC6     "Danio_rerio",
+#NP_001158.2_BIR3_T2_XIAP         "Homo_sapiens",
+#NP_001158.2_BIR2_T2_XIAP         "Homo_sapiens",
+#NP_001158.2_BIR1_T1_XIAP         "Homo_sapiens",
+#NP_919377.2_BIR3_T2_XIAP         "Danio_rerio",
+#NP_919377.2_BIR2_T2_XIAP         "Danio_rerio",
+#NP_919377.2_BIR1_T1_XIAP         "Danio_rerio",
+#NP_647478.1_BIR1_T2_BIRC7a       "Homo_sapiens",
+#NP_071444.1_BIR1_T2_BIRC7b       "Homo_sapiens",
+#AAH39318.1_BIR1_T2_BIRC8         "Homo_sapiens ",
+
+# join this updated species info
+BIR_domain_model_MY_CV_CG_type_updated <-  
+BIR_domain_model_MY_CV_CG_type_updated %>%
+  left_join(model_org_species, by = c("seq.name")) %>%
+  mutate(Species = ifelse(is.na(Species.x), Species.y, Species.x)) %>% 
+  select(-c(Species.x, Species.y))
+
 
 # Look at stastics
 BIR_domain_model_MY_CV_CG_type_updated_stats <- BIR_domain_model_MY_CV_CG_type_updated %>% 
@@ -2546,7 +2595,8 @@ BIR_IAP_raxml_tibble <- left_join(BIR_IAP_raxml_tibble, BIR_domain_model_MY_CV_C
 # Make a shortened species column
 BIR_IAP_raxml_tibble$Species_shortened <- recode(BIR_IAP_raxml_tibble$Species, "Crassostrea_gigas"="C. gigas",
                                                  "Crassostrea_virginica"="C. virginica", "Mizuhopecten_yessoensis"="M. yessoensis",
-                                                 "Homo_sapiens"="H. sapiens")
+                                                 "Homo_sapiens"="H. sapiens", "Drosophila_melanogaster" = "D. melanogaster", "Danio_rerio"="D. rerio",
+                                                 "Mus_musculus"="M. musculus")
 # add color to tibble in order to plot geom_hilight below
 BIR_type_color <- data.frame(color= c("#d14e3a", 
                                       "#65c95d", 
@@ -2639,6 +2689,15 @@ for(j in 1:dim(BIR_IAP_raxml_tibble_color)[1]){
 #       units = "in",
 #       dpi=300)
 #
+
+# save figure that has the correct species names updated on Feb. 4th, 2021
+ggsave(filename = "BIR_tree_type_2_4_21.tiff", plot=BIR_IAP_raxml_tree, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/BIR_Type_MSA_figure/",
+       width = 15 ,
+       height = 25,
+       units = "in",
+       dpi=300)
+
 ### View the BIR tree of IAP domains that didn't match consensus Type 1 and Type II above ###
 #BIR_IAP_non_T2_T1_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_domain_model_MY_CV_CG_non_T1_T2_MSA")
 #BIR_IAP_non_T2_T1_raxml
@@ -2702,6 +2761,16 @@ BIR_IAP_all_MSA <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Docum
 #   theme(text = element_text(size=10),
 #         plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
 
+# Plot revised MSA with the full BIR seqeuence
+BIR_IAP_all_MSA_treeorder_revised <- ggmsa(BIR_IAP_all_MSA, 
+                                   color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
+                                   none_bg = TRUE, # keeps only the letters and not the full color background
+                                   posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84), # specify specific positions to highlight in the alignment 
+                                   seq_name = FALSE) +  # checked that the order is correct so I fixed this, add the sequence name so I can check its plotting in the right order
+  # increase text size
+  theme(text = element_text(size=10),
+        plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
+
 ## Plotting the tree with the MSA side by side (though it doesn't align well)
 # MSA with same axis spacing as the tree
 #BIR_tree <- BIR_IAP_raxml_tree +
@@ -2715,8 +2784,8 @@ plot_grid(BIR_tree, BIR_IAP_all_MSA_treeorder, ncol=2, align="h", axis ="tb",
           labels = c("A","B"), rel_heights = c(0.8,1))
 
 # Remove in between white space in plot in Inkscape
-ggsave(filename = "BIR_tree_MSA_plot.tiff", plot=BIR_tree_type_MSA, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/",
+ggsave(filename = "BIR_tree_MSA_plot_2_4_21.tiff", plot=BIR_IAP_all_MSA_treeorder_revised, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/BIR_Type_MSA_figure",
        width = 16 ,
        height = 25,
        units = "in",
@@ -2789,8 +2858,8 @@ BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename_msa <- ggmsa(
                                            posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84), # specify specific positions to highlight in the alignment 
                                            seq_name = TRUE) +
   # increase text size
-  theme(text = element_text(size=16),
-        plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct 
 
 ### plot Type I C_vir C_gig M yessoensis
@@ -2845,8 +2914,8 @@ BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa <- ggmsa(BIR_dom
                                                                                 posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84), # specify specific positions to highlight in the alignment 
                                                                                 seq_name = TRUE) +
   # increase text size
-  theme(text = element_text(size=16),
-        plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct 
 
 ### plot Type II C_vir C_gig M yessoensis
@@ -2907,8 +2976,8 @@ BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename_msa <- ggmsa(BIR_dom
                                                                          posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
                                                                          seq_name = TRUE) +
   # increase text size
-  theme(text = element_text(size=16),
-        plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct  
 
 ### plot Type X 
@@ -2945,8 +3014,8 @@ BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename_msa <- ggmsa(BIR_dom
                                                                          posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
                                                                          seq_name = TRUE) +
   # increase text size
-  theme(text = element_text(size=16),
-        plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct  
 
 ### plot Type Y 
@@ -2985,8 +3054,8 @@ BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename_msa <- ggmsa(BIR_dom
                                                                          posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
                                                                          seq_name = TRUE) +
   # increase text size
-  theme(text = element_text(size=16),
-        plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct 
 
 ### plot NZBIR 
@@ -3025,13 +3094,13 @@ BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename_msa <- ggmsa(BIR_dom
                                                                          posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
                                                                          seq_name = TRUE) +
   # increase text size
-  theme(text = element_text(size=16),
-        plot.margin = unit(c(0, 0, 0, 0), "cm")) # remove the y axis which just shows the counts of sequences 
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) # remove the y axis which just shows the counts of sequences 
 # checked and the order is correct 
 
 ## Plot all MSAs on a grid
 # arrange with ggarrange
-ggarrange(BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa,
+MSA_arrange <- ggarrange(BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa,
                         BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename_msa,
                         BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename_msa,
                         BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename_msa,
@@ -3039,12 +3108,20 @@ ggarrange(BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa,
           ncol = 1)
 
 # Export the table to save
-ggsave(filename = "BIR_IAP_all_MSA_figure_subset_grid.tiff", plot=BIR_IAP_all_MSA_figure_subset_grid, device="tiff",
+ggsave(filename = "BIR_MSA_by_type.tiff", plot=MSA_arrange, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_full_tree_MSA",
        width = 13 ,
-       height = 13,
+       height = 6,
        units = "in",
        dpi=300)
+
+
+## Make table of statistics for the number of individual domains 
+BIR_domain_model_MY_CV_CG_type_updated_domain_number <- BIR_domain_model_MY_CV_CG_type_updated %>% filter(Species != "Homo_sapiens") %>% 
+  count(Type,Species)
+
+
+
 
 #### PLOT IAP COLLAPSED TREE WITH IAP PROTEIN DOMAINS ####
 
