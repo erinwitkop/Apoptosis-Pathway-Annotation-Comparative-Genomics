@@ -3456,29 +3456,28 @@ ggsave(filename = "IAP_tr_dom_plus_legend_plot_09172020.tiff", plot=IAP_tr_dom_p
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   # filter by BIR types that were plotted 
   filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
-           Type == "T2" | Type == "TX" | Type =="TY" | Type == "Unique") %>%
+           Type == "T2" | Type == "TX" | Type =="TY" | Type == "Unique") %>% filter(source == "CDD") %>%
   # filter out lines that have the exact same Target (meaning had two Interproscan BIR hits)
   distinct(Target, .keep_all = TRUE) %>% 
   group_by(protein_id) %>% mutate(total_CDD_BIR_per_protein = n()) %>% 
 # Keep only one row for each protein
-  distinct(protein_id, .keep_all = TRUE) %>% 
+  distinct(protein_id, .keep_all = TRUE) %>%
   ungroup() %>% 
   count(total_CDD_BIR_per_protein, Species) %>% 
   arrange(desc(total_CDD_BIR_per_protein, n, Species))
 
-#   total_CDD_BIR_per_protein Species                     n
-#                       <int> <chr>                   <int>
-# 1                         4 Mizuhopecten_yessoensis     1
-# 2                         3 Crassostrea_gigas           1
-# 3                         3 Crassostrea_virginica       2
-# 4                         3 Mizuhopecten_yessoensis     2
-# 5                         2 Crassostrea_gigas          26
-# 6                         2 Crassostrea_virginica      35
-# 7                         2 Mizuhopecten_yessoensis    15
-# 8                         2 NA                         15
-# 9                         1 Crassostrea_gigas          13
-#10                         1 Crassostrea_virginica      37
-#11                         1 Mizuhopecten_yessoensis    10
+#total_CDD_BIR_per_protein Species                     n
+#<int> <chr>                   <int>
+#1                         4 Mizuhopecten_yessoensis     1
+#2                         3 Crassostrea_gigas           1
+#3                         3 Crassostrea_virginica       2
+#4                         3 Mizuhopecten_yessoensis     2
+#5                         2 Crassostrea_gigas          26
+#6                         2 Crassostrea_virginica      35
+#7                         2 Mizuhopecten_yessoensis    14
+#8                         1 Crassostrea_gigas          18
+#9                         1 Crassostrea_virginica      47
+#10                         1 Mizuhopecten_yessoensis    11
 
 # these don't add up to the full number of proteins cited in the paper because exact duplicates were removed..its just what was plotted after duplicates were removed
 
