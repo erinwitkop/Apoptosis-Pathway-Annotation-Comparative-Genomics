@@ -2794,335 +2794,6 @@ ggsave(filename = "BIR_tree_MSA_plot_2_4_21.tiff", plot=BIR_IAP_all_MSA_treeorde
 # final solution was to export the tree and MSA seperately and put them together in inkscape because I kept getting so many errors and the MSA
   # takes and extremely long time to render.
 
-#### BIR TYPE MULTIPANEL FIGURE ####
-
-## GOAL: build a multipanel figure showing the sequence of model organism BIR types, the sequence of C. vir and C. gig types, the number of domains, and the number of total proteins those domains are in. 
-  # this will be the top panel of the figure (A). Panel A will also display above the sequences what their predicted secondary structure is. 
-  # Panel B will be a table with the number of BIR proteins that have one two or three BIR repeats.
-
-## Generate individual figures showing the MSA of each type of sequences 
-
-## MSA of model organism sequences ###
-BIR_domain_model_MY_CV_CG_type_updated_H_sapiens <- BIR_domain_model_MY_CV_CG_type_updated %>% filter(Species == "Homo_sapiens") 
-
-# only keep a few of each type 
-BIR_domain_model_MY_CV_CG_type_updated_H_sapiens
-
-H_sapiens_keep <- data.frame(label = c("NP_001243092.1_BIR1_T1_cIAP1","NP_892007.1_BIR1_T1_cIAP2","NP_001158.2_BIR1_T1_XIAP","NP_001261918.1_BIR2_T2_DIAP1","NP_477127.1_BIR3_T2_DIAP2",
-                                       "NP_001243092.1_BIR2_T2_cIAP1","NP_001159.2_BIR1_T2_BIRC5","NP_001158.2_BIR2_T2_XIAP","AAH39318.1_BIR1_T2_BIRC8"))
-BIR_domain_model_MY_CV_CG_type_updated_H_sapiens <- BIR_domain_model_MY_CV_CG_type_updated_H_sapiens[BIR_domain_model_MY_CV_CG_type_updated_H_sapiens$label %in% H_sapiens_keep$label,] %>% arrange(Type)
-
-    # noticed a mistake, the DIAP proteins were called H sapiens when they aren't!..need to check all of these now
-
-# Subset MSA
-BIR_IAP_all_MSA_subset <- phylotools::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa")
-BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens$label, BIR_IAP_all_MSA_subset[,1]),]
-
-# edit seq name for figure
-BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset$seq.name
-#[1] "AAH39318.1_BIR1_T2_BIRC8"     H sapiens
-#"NP_001158.2_BIR2_T2_XIAP"     H sapiens
-#"NP_001159.2_BIR1_T2_BIRC5"   H. sapiens
-#"NP_001243092.1_BIR2_T2_cIAP1" H. sapiens
-#"NP_477127.1_BIR3_T2_DIAP2"   D. melanogaster
-#[6] "NP_001261918.1_BIR2_T2_DIAP1" D. melanogaster
-#"NP_001158.2_BIR1_T1_XIAP"   H. sapiens  
-#"NP_892007.1_BIR1_T1_cIAP2"   H. sapiens
-#"NP_001243092.1_BIR1_T1_cIAP1" H. sapiens
-
-BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset %>%
-  mutate(seq.name = case_when(
-   seq.name == "NP_001243092.1_BIR1_T1_cIAP1" ~ "H. sapiens cIAP1 BIR1 Type I",
-   seq.name ==   "NP_892007.1_BIR1_T1_cIAP2"    ~ "H. sapiens cIAP2 BIR1 Type I",
-   seq.name ==   "NP_001158.2_BIR1_T1_XIAP"     ~  "H. sapiens XIAP BIR1 Type I",
-   seq.name ==  "NP_001261918.1_BIR2_T2_DIAP1" ~ "D. melanogaster DIAP1 BIR2 Type II",
-   seq.name ==  "NP_477127.1_BIR3_T2_DIAP2"    ~ "D. melanogaster DIAP2 BIR3 Type II",
-   seq.name ==  "NP_001243092.1_BIR2_T2_cIAP1" ~ "H. sapiens cIAP1 BIR2 Type II",
-   seq.name ==  "NP_001158.2_BIR2_T2_XIAP"  ~ "H. sapiens XIAP BIR2 Type II",
-   seq.name ==  "NP_001159.2_BIR1_T2_BIRC5"  ~ "H. sapiens BIRC5 BIR1 Type II",
-   seq.name ==  "AAH39318.1_BIR1_T2_BIRC8" ~ "H. sapiens BIRC8 BIR1 Type II"))
-
-# put in reverse order
-BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename %>% arrange(desc(row_number()))
-
-# export back to then reload in correct order
-dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename.fa")
-
-# reload as AAMultipleAlignment object 
-BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename.fa", format = "fasta")
-
-# Plot MSA with ggmsa
-BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename, 
-                                           color = "Shapely_AA", 
-                                           none_bg = TRUE, # keeps only the letters and not the full color background
-                                           posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84), # specify specific positions to highlight in the alignment 
-                                           seq_name = TRUE) +
-  # increase text size
-  theme(text = element_text(size=12),
-        plot.margin = unit(c(0.25,0.5,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
-# checked and the order is correct 
-
-### plot Type I C_vir C_gig M yessoensis
-BIR_domain_model_MY_CV_CG_type_updated_Type_1 <- BIR_domain_model_MY_CV_CG_type_updated %>% 
-  # filter out just the type 1 and the type 1 variants
-  filter(grepl("T1", Type)) %>%
-  # keep C. vir and C. gigas and  M yessoensis
-  filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
-  # only keep one distinct example from each type and species, do this by just keeping the top row in each group randomly for an example
-  group_by(Type, Species) %>%
-  arrange(Type) %>%
-  filter(row_number() ==1)
-  
-# Subset MSA
-BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_Type_1$label, BIR_IAP_all_MSA_subset[,1]),]
-
-# edit seq name for figure
-BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset$seq.name
-"XP_011423762.1_BIR1_LOC105325768" 
-"XP_021360744.1_BIR1_BIRC8-like"   
-"XP_022287996.1_BIR1_BIRC7-like"   
-"XP_011444161.1_BIR1_LOC105340029" 
-"XP_022288684.1_BIR1_LOC111100858"
-"XP_021363602.1_BIR1_BIRC3-like"
-"XP_019919899.1_BIR1_BIRC7"        
-"XP_022288097.1_BIR1_BIRC3-like" 
-
-BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset %>%
-  mutate(seq.name = case_when(
-    seq.name == "XP_011423762.1_BIR1_LOC105325768" ~   "C. gigas Type I",
-    seq.name == "XP_021360744.1_BIR1_BIRC8-like"   ~  "M. yessoensis Type I",
-    seq.name == "XP_022287996.1_BIR1_BIRC7-like"   ~  "C. virginica Type I",
-    seq.name == "XP_011444161.1_BIR1_LOC105340029" ~  "C. gigas Type I-like 3",
-    seq.name == "XP_022288684.1_BIR1_LOC111100858" ~  "C. virginica Type I-like 3",
-    seq.name == "XP_021363602.1_BIR1_BIRC3-like" ~  "M. yessoensis Type I-like 4",
-    seq.name == "XP_019919899.1_BIR1_BIRC7"        ~  "C. gigas Type I-like 1",
-    seq.name == "XP_022288097.1_BIR1_BIRC3-like"  ~  "C. virginica Type I-like 2"))
-
-# put in reverse and correct order
-BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename[c(6,4,5,8,7,2,1,3),] 
-
-# export back to then reload in correct order
-dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename.fa")
-
-# reload as AAMultipleAlignment object 
-BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename.fa", format = "fasta")
-
-# Plot MSA with ggmsa
-BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename, 
-                                                                                color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
-                                                                                none_bg = TRUE, # keeps only the letters and not the full color background
-                                                                                posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84), # specify specific positions to highlight in the alignment 
-                                                                                seq_name = TRUE) +
-  # increase text size
-  theme(text = element_text(size=12),
-        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
-# checked and the order is correct 
-
-### plot Type II C_vir C_gig M yessoensis
-BIR_domain_model_MY_CV_CG_type_updated_Type_2 <- BIR_domain_model_MY_CV_CG_type_updated %>% 
-  # filter out just the type 2 and the type 2 variants
-  filter(grepl("T2", Type)) %>%
-  # keep C. vir and C. gigas and  M yessoensis
-  filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
-  # only keep one distinct example from each type and species, do this by just keeping the top row in each group randomly for an example
-  group_by(Type, Species) %>%
-  arrange(Type) %>%
-  filter(row_number() ==1)
-
-# Subset MSA
-BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_Type_2$label, BIR_IAP_all_MSA_subset[,1]),]
-
-# edit seq name for figure
-BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset$seq.name
-#"XP_011412926.1_BIR2_BIRC7A"  
-#"XP_021341279.1_BIR3_BIRC3-like"  
-#"XP_022287929.1_BIR1_LOC111100400" 
-#"XP_011416423.1_BIR1_BIRC7B"      
-#"XP_022287912.1_BIR2_LOC111100394"
-#"XP_022292343.1_BIR1_BIRC7A-like"  
-#"XP_021350197.1_BIR2_BIRC3-like"   
-#"XP_011427116.1_BIR1_BIRC7A"      
-#"XP_022291629.1_BIR1_BIRC2-like"   
-#"XP_011431980.1_BIR2_BIRC7"       
-#"XP_022287996.1_BIR2_BIRC7-like"   
-
-BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset %>%
-  mutate(seq.name = case_when(
-    seq.name == "XP_011412926.1_BIR2_BIRC7A"  ~ "C. gigas Type II",
-    seq.name == "XP_021341279.1_BIR3_BIRC3-like"  ~ "M. yessoensis Type II",
-    seq.name == "XP_022287929.1_BIR1_LOC111100400"~ "C. virginica Type II",
-    seq.name == "XP_011416423.1_BIR1_BIRC7B"      ~ "C. gigas Type II-like 3",
-    seq.name == "XP_022287912.1_BIR2_LOC111100394"~ "C. virginica Type II-like 3",
-    seq.name == "XP_022292343.1_BIR1_BIRC7A-like" ~ "C. virginica Type II-like 4",
-    seq.name == "XP_021350197.1_BIR2_BIRC3-like"  ~ "M. yessoensis Type II-like 5",
-    seq.name == "XP_011427116.1_BIR1_BIRC7A"      ~ "C. gigas BIR1 Type II-like 1",
-    seq.name == "XP_022291629.1_BIR1_BIRC2-like"  ~ "C. virginica Type II-like 1",
-    seq.name == "XP_011431980.1_BIR2_BIRC7"       ~ "C. gigas BIR2 Type II-like 2",
-    seq.name == "XP_022287996.1_BIR2_BIRC7-like"  ~ "C. virginica Type II-like 2"))
-      
-# put in reverse and correct order
-BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename[c(7,6,4,5,10,11,8,9,2,1,3),] 
-
-# export back to then reload in correct order
-dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename.fa")
-
-# reload as AAMultipleAlignment object 
-BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename.fa", format = "fasta")
-
-# Plot MSA with ggmsa
-BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename, 
-                                                                         color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
-                                                                         none_bg = TRUE, # keeps only the letters and not the full color background
-                                                                         posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
-                                                                         seq_name = TRUE) +
-  # increase text size
-  theme(text = element_text(size=12),
-        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
-# checked and the order is correct  
-
-### plot Type X 
-BIR_domain_model_MY_CV_CG_type_updated_Type_X <- BIR_domain_model_MY_CV_CG_type_updated %>% 
-  filter(grepl("TX", Type)) %>%
-  # keep C. vir and C. gigas and  M yessoensis
-  filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
-  # only keep one distinct example from each type and species, do this by just keeping the top row in each group randomly for an example
-  group_by(Type, Species) %>%
-  arrange(Type) %>%
-  filter(row_number() ==1)
-
-# Subset MSA
-BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_Type_X$label, BIR_IAP_all_MSA_subset[,1]),]
-
-# edit seq name for figure
-BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset$seq.name
-#"XP_022287912.1_BIR1_LOC111100394"  
-
-BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset %>%
-  mutate(seq.name = case_when(
-    seq.name == "XP_022287912.1_BIR1_LOC111100394"  ~ "C. virginica Type X"))
-
-# export back to then reload in correct order
-dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename.fa")
-
-# reload as AAMultipleAlignment object 
-BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename.fa", format = "fasta")
-
-# Plot MSA with ggmsa
-BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename, 
-                                                                         color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
-                                                                         none_bg = TRUE, # keeps only the letters and not the full color background
-                                                                         posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
-                                                                         seq_name = TRUE) +
-  # increase text size
-  theme(text = element_text(size=12),
-        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
-# checked and the order is correct  
-
-### plot Type Y 
-BIR_domain_model_MY_CV_CG_type_updated_Type_Y <- BIR_domain_model_MY_CV_CG_type_updated %>% 
-  filter(grepl("TY", Type)) %>%
-  # keep C. vir and C. gigas and  M yessoensis
-  filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
-  # only keep one distinct example from each type and species, do this by just keeping the top row in each group randomly for an example
-  group_by(Type, Species) %>%
-  arrange(Type) %>%
-  filter(row_number() ==1)
-
-# Subset MSA
-BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_Type_Y$label, BIR_IAP_all_MSA_subset[,1]),]
-
-# edit seq name for figure
-BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset$seq.name
-#"XP_011437445.1_BIR1_BIRC2"       
-#"XP_022287934.1_BIR1_LOC111100402" 
-
-BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset %>%
-  mutate(seq.name = case_when(
-    seq.name == "XP_011437445.1_BIR1_BIRC2"  ~ "C. gigas Type Y",
-    seq.name == "XP_022287934.1_BIR1_LOC111100402" ~ "C. virginica Type Y"))
-
-# export back to then reload in correct order
-dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename.fa")
-
-# reload as AAMultipleAlignment object 
-BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename.fa", format = "fasta")
-
-# Plot MSA with ggmsa
-BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename, 
-                                                                         color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
-                                                                         none_bg = TRUE, # keeps only the letters and not the full color background
-                                                                         posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
-                                                                         seq_name = TRUE) +
-  # increase text size
-  theme(text = element_text(size=12),
-        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
-# checked and the order is correct 
-
-### plot NZBIR 
-BIR_domain_model_MY_CV_CG_type_updated_Type_NZ <- BIR_domain_model_MY_CV_CG_type_updated %>% 
-  filter(grepl("Non", Type)) %>%
-  # keep C. vir and C. gigas and  M yessoensis
-  filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
-  # only keep one distinct example from each type and species, do this by just keeping the top row in each group randomly for an example
-  group_by(Type, Species) %>%
-  arrange(Type) %>%
-  filter(row_number() ==1)
-
-# Subset MSA
-BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_Type_NZ$label, BIR_IAP_all_MSA_subset[,1]),]
-
-# edit seq name for figure
-BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset$seq.name
-#"XP_019922709.1_BIR1_DIAP2"      
-#"XP_022291916.1_BIR1_BIRC3-like" 
-
-BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset %>%
-  mutate(seq.name = case_when(
-    seq.name == "XP_019922709.1_BIR1_DIAP2"  ~ "C. gigas Non Zinc Binding",
-    seq.name == "XP_022291916.1_BIR1_BIRC3-like" ~ "C. virginica Non Zinc Binding"))
-
-# export back to then reload in correct order
-dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename.fa")
-
-# reload as AAMultipleAlignment object 
-BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename.fa", format = "fasta")
-
-# Plot MSA with ggmsa
-BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename,  
-                                                                         color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
-                                                                         none_bg = TRUE, # keeps only the letters and not the full color background
-                                                                         posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
-                                                                         seq_name = TRUE) +
-  # increase text size
-  theme(text = element_text(size=12),
-        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
-# checked and the order is correct 
-
-## Plot all MSAs on a grid
-# arrange with ggarrange
-MSA_arrange <- ggarrange(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename_msa,
-                         BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa,
-                        BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename_msa,
-                        BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename_msa,
-                        BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename_msa,
-                        BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename_msa,
-          ncol = 1)
-
-# Export the table to save
-ggsave(filename = "BIR_MSA_by_type.tiff", plot=MSA_arrange, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_full_tree_MSA",
-       width = 13 ,
-       height = 6,
-       units = "in",
-       dpi=300)
-
-
-## Make table of statistics for the number of individual domains 
-BIR_domain_model_MY_CV_CG_type_updated_domain_number <- BIR_domain_model_MY_CV_CG_type_updated %>% 
-  count(Type,Species)
-
-
-
 
 #### PLOT IAP COLLAPSED TREE WITH IAP PROTEIN DOMAINS ####
 
@@ -3520,6 +3191,380 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR %>%
   ungroup() %>%
   distinct(gene,total_CDD_BIR_per_protein, Species) %>%
   count(total_CDD_BIR_per_protein, Species)
+
+
+#### BIR TYPE MULTIPANEL FIGURE ####
+
+## GOAL: build a multipanel figure showing the sequence of model organism BIR types, the sequence of C. vir and C. gig types, the number of domains, and the number of total proteins those domains are in. 
+# this will be the top panel of the figure (A). Panel A will also display above the sequences what their predicted secondary structure is. 
+# Panel B will be a table with the number of BIR proteins that have one two or three BIR repeats.
+
+## Generate individual figures showing the MSA of each type of sequences 
+
+## MSA of model organism sequences ###
+BIR_domain_model_MY_CV_CG_type_updated_H_sapiens <- BIR_domain_model_MY_CV_CG_type_updated %>% filter(Species == "Homo_sapiens") 
+
+# only keep a few of each type 
+BIR_domain_model_MY_CV_CG_type_updated_H_sapiens
+
+H_sapiens_keep <- data.frame(label = c("NP_001243092.1_BIR1_T1_cIAP1","NP_892007.1_BIR1_T1_cIAP2","NP_001158.2_BIR1_T1_XIAP","NP_001261918.1_BIR2_T2_DIAP1","NP_477127.1_BIR3_T2_DIAP2",
+                                       "NP_001243092.1_BIR2_T2_cIAP1","NP_001159.2_BIR1_T2_BIRC5","NP_001158.2_BIR2_T2_XIAP","AAH39318.1_BIR1_T2_BIRC8"))
+BIR_domain_model_MY_CV_CG_type_updated_H_sapiens <- BIR_domain_model_MY_CV_CG_type_updated_H_sapiens[BIR_domain_model_MY_CV_CG_type_updated_H_sapiens$label %in% H_sapiens_keep$label,] %>% arrange(Type)
+
+# noticed a mistake, the DIAP proteins were called H sapiens when they aren't!..need to check all of these now
+
+# Subset MSA
+BIR_IAP_all_MSA_subset <- phylotools::read.fasta("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_model_prot_IAP_prot_BIR_seq_MSA.fa")
+BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens$label, BIR_IAP_all_MSA_subset[,1]),]
+
+# edit seq name for figure
+BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset$seq.name
+#[1] "AAH39318.1_BIR1_T2_BIRC8"     H sapiens
+#"NP_001158.2_BIR2_T2_XIAP"     H sapiens
+#"NP_001159.2_BIR1_T2_BIRC5"   H. sapiens
+#"NP_001243092.1_BIR2_T2_cIAP1" H. sapiens
+#"NP_477127.1_BIR3_T2_DIAP2"   D. melanogaster
+#[6] "NP_001261918.1_BIR2_T2_DIAP1" D. melanogaster
+#"NP_001158.2_BIR1_T1_XIAP"   H. sapiens  
+#"NP_892007.1_BIR1_T1_cIAP2"   H. sapiens
+#"NP_001243092.1_BIR1_T1_cIAP1" H. sapiens
+
+BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset %>%
+  mutate(seq.name = case_when(
+    seq.name == "NP_001243092.1_BIR1_T1_cIAP1" ~ "H. sapiens cIAP1 BIR1 Type I",
+    seq.name ==   "NP_892007.1_BIR1_T1_cIAP2"    ~ "H. sapiens cIAP2 BIR1 Type I",
+    seq.name ==   "NP_001158.2_BIR1_T1_XIAP"     ~  "H. sapiens XIAP BIR1 Type I",
+    seq.name ==  "NP_001261918.1_BIR2_T2_DIAP1" ~ "D. melanogaster DIAP1 BIR2 Type II",
+    seq.name ==  "NP_477127.1_BIR3_T2_DIAP2"    ~ "D. melanogaster DIAP2 BIR3 Type II",
+    seq.name ==  "NP_001243092.1_BIR2_T2_cIAP1" ~ "H. sapiens cIAP1 BIR2 Type II",
+    seq.name ==  "NP_001158.2_BIR2_T2_XIAP"  ~ "H. sapiens XIAP BIR2 Type II",
+    seq.name ==  "NP_001159.2_BIR1_T2_BIRC5"  ~ "H. sapiens BIRC5 BIR1 Type II",
+    seq.name ==  "AAH39318.1_BIR1_T2_BIRC8" ~ "H. sapiens BIRC8 BIR1 Type II"))
+
+# put in reverse order
+BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename %>% arrange(desc(row_number()))
+
+# export back to then reload in correct order
+dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename.fa")
+
+# reload as AAMultipleAlignment object 
+BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename.fa", format = "fasta")
+
+# Plot MSA with ggmsa
+BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename, 
+                                                                                color = "Shapely_AA", 
+                                                                                none_bg = TRUE, # keeps only the letters and not the full color background
+                                                                                posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84), # specify specific positions to highlight in the alignment 
+                                                                                seq_name = TRUE) +
+  # increase text size
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.25,0.5,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
+# checked and the order is correct 
+
+### plot Type I C_vir C_gig M yessoensis
+BIR_domain_model_MY_CV_CG_type_updated_Type_1 <- BIR_domain_model_MY_CV_CG_type_updated %>% 
+  # filter out just the type 1 and the type 1 variants
+  filter(grepl("T1", Type)) %>%
+  # keep C. vir and C. gigas and  M yessoensis
+  filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
+  # only keep one distinct example from each type and species, do this by just keeping the top row in each group randomly for an example
+  group_by(Type, Species) %>%
+  arrange(Type) %>%
+  filter(row_number() ==1)
+
+# Subset MSA
+BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_Type_1$label, BIR_IAP_all_MSA_subset[,1]),]
+
+# edit seq name for figure
+BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset$seq.name
+"XP_011423762.1_BIR1_LOC105325768" 
+"XP_021360744.1_BIR1_BIRC8-like"   
+"XP_022287996.1_BIR1_BIRC7-like"   
+"XP_011444161.1_BIR1_LOC105340029" 
+"XP_022288684.1_BIR1_LOC111100858"
+"XP_021363602.1_BIR1_BIRC3-like"
+"XP_019919899.1_BIR1_BIRC7"        
+"XP_022288097.1_BIR1_BIRC3-like" 
+
+BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset %>%
+  mutate(seq.name = case_when(
+    seq.name == "XP_011423762.1_BIR1_LOC105325768" ~   "C. gigas Type I",
+    seq.name == "XP_021360744.1_BIR1_BIRC8-like"   ~  "M. yessoensis Type I",
+    seq.name == "XP_022287996.1_BIR1_BIRC7-like"   ~  "C. virginica Type I",
+    seq.name == "XP_011444161.1_BIR1_LOC105340029" ~  "C. gigas Type I-like 3",
+    seq.name == "XP_022288684.1_BIR1_LOC111100858" ~  "C. virginica Type I-like 3",
+    seq.name == "XP_021363602.1_BIR1_BIRC3-like" ~  "M. yessoensis Type I-like 4",
+    seq.name == "XP_019919899.1_BIR1_BIRC7"        ~  "C. gigas Type I-like 1",
+    seq.name == "XP_022288097.1_BIR1_BIRC3-like"  ~  "C. virginica Type I-like 2"))
+
+# put in reverse and correct order
+BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename[c(6,4,5,8,7,2,1,3),] 
+
+# export back to then reload in correct order
+dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename.fa")
+
+# reload as AAMultipleAlignment object 
+BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename.fa", format = "fasta")
+
+# Plot MSA with ggmsa
+BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename, 
+                                                                         color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
+                                                                         none_bg = TRUE, # keeps only the letters and not the full color background
+                                                                         posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84), # specify specific positions to highlight in the alignment 
+                                                                         seq_name = TRUE) +
+  # increase text size
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
+# checked and the order is correct 
+
+### plot Type II C_vir C_gig M yessoensis
+BIR_domain_model_MY_CV_CG_type_updated_Type_2 <- BIR_domain_model_MY_CV_CG_type_updated %>% 
+  # filter out just the type 2 and the type 2 variants
+  filter(grepl("T2", Type)) %>%
+  # keep C. vir and C. gigas and  M yessoensis
+  filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
+  # only keep one distinct example from each type and species, do this by just keeping the top row in each group randomly for an example
+  group_by(Type, Species) %>%
+  arrange(Type) %>%
+  filter(row_number() ==1)
+
+# Subset MSA
+BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_Type_2$label, BIR_IAP_all_MSA_subset[,1]),]
+
+# edit seq name for figure
+BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset$seq.name
+#"XP_011412926.1_BIR2_BIRC7A"  
+#"XP_021341279.1_BIR3_BIRC3-like"  
+#"XP_022287929.1_BIR1_LOC111100400" 
+#"XP_011416423.1_BIR1_BIRC7B"      
+#"XP_022287912.1_BIR2_LOC111100394"
+#"XP_022292343.1_BIR1_BIRC7A-like"  
+#"XP_021350197.1_BIR2_BIRC3-like"   
+#"XP_011427116.1_BIR1_BIRC7A"      
+#"XP_022291629.1_BIR1_BIRC2-like"   
+#"XP_011431980.1_BIR2_BIRC7"       
+#"XP_022287996.1_BIR2_BIRC7-like"   
+
+BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset %>%
+  mutate(seq.name = case_when(
+    seq.name == "XP_011412926.1_BIR2_BIRC7A"  ~ "C. gigas Type II",
+    seq.name == "XP_021341279.1_BIR3_BIRC3-like"  ~ "M. yessoensis Type II",
+    seq.name == "XP_022287929.1_BIR1_LOC111100400"~ "C. virginica Type II",
+    seq.name == "XP_011416423.1_BIR1_BIRC7B"      ~ "C. gigas Type II-like 3",
+    seq.name == "XP_022287912.1_BIR2_LOC111100394"~ "C. virginica Type II-like 3",
+    seq.name == "XP_022292343.1_BIR1_BIRC7A-like" ~ "C. virginica Type II-like 4",
+    seq.name == "XP_021350197.1_BIR2_BIRC3-like"  ~ "M. yessoensis Type II-like 5",
+    seq.name == "XP_011427116.1_BIR1_BIRC7A"      ~ "C. gigas BIR1 Type II-like 1",
+    seq.name == "XP_022291629.1_BIR1_BIRC2-like"  ~ "C. virginica Type II-like 1",
+    seq.name == "XP_011431980.1_BIR2_BIRC7"       ~ "C. gigas BIR2 Type II-like 2",
+    seq.name == "XP_022287996.1_BIR2_BIRC7-like"  ~ "C. virginica Type II-like 2"))
+
+# put in reverse and correct order
+BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename[c(7,6,4,5,10,11,8,9,2,1,3),] 
+
+# export back to then reload in correct order
+dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename.fa")
+
+# reload as AAMultipleAlignment object 
+BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename.fa", format = "fasta")
+
+# Plot MSA with ggmsa
+BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename, 
+                                                                         color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
+                                                                         none_bg = TRUE, # keeps only the letters and not the full color background
+                                                                         posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
+                                                                         seq_name = TRUE) +
+  # increase text size
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
+# checked and the order is correct  
+
+### plot Type X 
+BIR_domain_model_MY_CV_CG_type_updated_Type_X <- BIR_domain_model_MY_CV_CG_type_updated %>% 
+  filter(grepl("TX", Type)) %>%
+  # keep C. vir and C. gigas and  M yessoensis
+  filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
+  # only keep one distinct example from each type and species, do this by just keeping the top row in each group randomly for an example
+  group_by(Type, Species) %>%
+  arrange(Type) %>%
+  filter(row_number() ==1)
+
+# Subset MSA
+BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_Type_X$label, BIR_IAP_all_MSA_subset[,1]),]
+
+# edit seq name for figure
+BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset$seq.name
+#"XP_022287912.1_BIR1_LOC111100394"  
+
+BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset %>%
+  mutate(seq.name = case_when(
+    seq.name == "XP_022287912.1_BIR1_LOC111100394"  ~ "C. virginica Type X"))
+
+# export back to then reload in correct order
+dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename.fa")
+
+# reload as AAMultipleAlignment object 
+BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename.fa", format = "fasta")
+
+# Plot MSA with ggmsa
+BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename, 
+                                                                         color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
+                                                                         none_bg = TRUE, # keeps only the letters and not the full color background
+                                                                         posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
+                                                                         seq_name = TRUE) +
+  # increase text size
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
+# checked and the order is correct  
+
+### plot Type Y 
+BIR_domain_model_MY_CV_CG_type_updated_Type_Y <- BIR_domain_model_MY_CV_CG_type_updated %>% 
+  filter(grepl("TY", Type)) %>%
+  # keep C. vir and C. gigas and  M yessoensis
+  filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
+  # only keep one distinct example from each type and species, do this by just keeping the top row in each group randomly for an example
+  group_by(Type, Species) %>%
+  arrange(Type) %>%
+  filter(row_number() ==1)
+
+# Subset MSA
+BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_Type_Y$label, BIR_IAP_all_MSA_subset[,1]),]
+
+# edit seq name for figure
+BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset$seq.name
+#"XP_011437445.1_BIR1_BIRC2"       
+#"XP_022287934.1_BIR1_LOC111100402" 
+
+BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset %>%
+  mutate(seq.name = case_when(
+    seq.name == "XP_011437445.1_BIR1_BIRC2"  ~ "C. gigas Type Y",
+    seq.name == "XP_022287934.1_BIR1_LOC111100402" ~ "C. virginica Type Y"))
+
+# export back to then reload in correct order
+dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename.fa")
+
+# reload as AAMultipleAlignment object 
+BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename.fa", format = "fasta")
+
+# Plot MSA with ggmsa
+BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename, 
+                                                                         color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
+                                                                         none_bg = TRUE, # keeps only the letters and not the full color background
+                                                                         posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
+                                                                         seq_name = TRUE) +
+  # increase text size
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
+# checked and the order is correct 
+
+### plot NZBIR 
+BIR_domain_model_MY_CV_CG_type_updated_Type_NZ <- BIR_domain_model_MY_CV_CG_type_updated %>% 
+  filter(grepl("Non", Type)) %>%
+  # keep C. vir and C. gigas and  M yessoensis
+  filter(Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
+  # only keep one distinct example from each type and species, do this by just keeping the top row in each group randomly for an example
+  group_by(Type, Species) %>%
+  arrange(Type) %>%
+  filter(row_number() ==1)
+
+# Subset MSA
+BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset <- BIR_IAP_all_MSA_subset[match(BIR_domain_model_MY_CV_CG_type_updated_Type_NZ$label, BIR_IAP_all_MSA_subset[,1]),]
+
+# edit seq name for figure
+BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset$seq.name
+#"XP_019922709.1_BIR1_DIAP2"      
+#"XP_022291916.1_BIR1_BIRC3-like" 
+
+BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename <- BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset %>%
+  mutate(seq.name = case_when(
+    seq.name == "XP_019922709.1_BIR1_DIAP2"  ~ "C. gigas Non Zinc Binding",
+    seq.name == "XP_022291916.1_BIR1_BIRC3-like" ~ "C. virginica Non Zinc Binding"))
+
+# export back to then reload in correct order
+dat2fasta(BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename, outfile ="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename.fa")
+
+# reload as AAMultipleAlignment object 
+BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename <- Biostrings::readAAMultipleAlignment("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename.fa", format = "fasta")
+
+# Plot MSA with ggmsa
+BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename_msa <- ggmsa(BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename,  
+                                                                         color = "Zappo_AA",  # Zappo colors by amino acid chemical characteristics 
+                                                                         none_bg = TRUE, # keeps only the letters and not the full color background
+                                                                         posHighligthed = c(2,30,31,33,34,48,53,55,57,58, 60, 67, 77,80,82,84),  # specify specific positions to highlight in the alignment 
+                                                                         seq_name = TRUE) +
+  # increase text size
+  theme(text = element_text(size=12),
+        plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")) # remove the y axis which just shows the counts of sequences 
+# checked and the order is correct 
+
+## Plot all MSAs on a grid
+# arrange with ggarrange
+MSA_arrange <- ggarrange(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset_rename_msa,
+                         BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset_rename_msa,
+                         BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset_rename_msa,
+                         BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset_rename_msa,
+                         BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset_rename_msa,
+                         BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset_rename_msa,
+                         ncol = 1)
+
+# Export the table to save
+ggsave(filename = "BIR_MSA_by_type.tiff", plot=MSA_arrange, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_full_tree_MSA",
+       width = 13 ,
+       height = 6,
+       units = "in",
+       dpi=300)
+
+
+## Make table of statistics for the number of individual domains 
+BIR_domain_model_MY_CV_CG_type_updated_domain_number <- BIR_domain_model_MY_CV_CG_type_updated %>% 
+  count(Type,Species)
+
+## need to edit this code below
+
+### Load IAP Gene RAxML tree data 
+IAP_GENE_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY_Gene_MSA_RAxML")
+IAP_GENE_raxml
+
+# Convert to tibble tree dataframe object with tidytree to add external data
+IAP_GENE_raxml_tibble <- as_tibble(IAP_GENE_raxml)
+colnames(IAP_GENE_raxml_tibble)[4] <- "gene"
+# add species data 
+IAP_GENE_raxml_tibble_join <- left_join(IAP_GENE_raxml_tibble, CV_CG_MY_gene_species)
+colnames(IAP_GENE_raxml_tibble_join)[4] <- "label"
+# Convert to treedata object to store tree plus outside data
+IAP_GENE_raxml_treedata <- as.treedata(IAP_GENE_raxml_tibble_join)
+
+# check total gene number in tree
+IAP_GENE_raxml_tibble_join %>% filter(!is.na(Species)) %>% nrow() # 177
+
+## Plot IAP gene sequence tree as circular first 
+IAP_GENE_raxml_treedata_circular_gene <- ggtree(IAP_GENE_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
+  geom_tiplab2(aes(label=label,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
+  #Edit theme
+  theme(legend.position = "bottom", 
+        legend.text = element_text(face = "italic", size=8, family="sans"),
+        legend.title = element_text(size=12, family="sans")) +
+  #xlim(-100,100)  +
+  # add circle for 90-100 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  # add triangle for 70-89 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  # add upside down traingle for 50-69 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  # fix legend appearance
+  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")) ) + # need to override aes to get rid of "a"
+  scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
+                      labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
+  guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
+
+# Export plot to file 
+ggsave(filename = "IAP_CV_CG_MY_GENE_circular_tree.tiff", plot=IAP_GENE_raxml_treedata_circular_gene, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
+       width = 10 ,
+       height = 10,
+       units = "in",
+       dpi=300)
 
 
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
