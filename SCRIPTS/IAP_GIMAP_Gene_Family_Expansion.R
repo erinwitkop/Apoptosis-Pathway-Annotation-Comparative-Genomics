@@ -3479,11 +3479,47 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
 #9                         1 Crassostrea_virginica      47
 #10                         1 Mizuhopecten_yessoensis    11
 
-# these don't add up to the full number of proteins cited in the paper because exact duplicates were removed..its just what was plotted after duplicates were removed
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR <- BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
+  # filter by BIR types that were plotted 
+  filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
+           Type == "T2" | Type == "TX" | Type =="TY" | Type == "Unique") %>% filter(source == "CDD") %>%
+  # filter out lines that have the exact same Target (meaning had two Interproscan BIR hits)
+  distinct(Target, .keep_all = TRUE) %>% 
+  group_by(protein_id) %>% mutate(total_CDD_BIR_per_protein = n()) %>% 
+  # Keep only one row for each protein
+  distinct(protein_id, .keep_all = TRUE)
 
+# number of Proteins with each type
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
-  distinct(protein_id, Species) %>%
-  count(Species)
+  # filter by BIR types that were plotted 
+  filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
+           Type == "T2" | Type == "TX" | Type =="TY" | Type == "Unique") %>% filter(source == "CDD") %>%
+  # filter out lines that have the exact same Target (meaning had two Interproscan BIR hits)
+  distinct(Target, .keep_all = TRUE) %>% 
+  distinct(protein_id, Type, .keep_all = TRUE) %>% 
+  count(Type, Species)
+
+# Number of genes containing each type 
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
+  # filter by BIR types that were plotted 
+  filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
+           Type == "T2" | Type == "TX" | Type =="TY" | Type == "Unique") %>% filter(source == "CDD") %>%
+  # filter out lines that have the exact same Target (meaning had two Interproscan BIR hits)
+  distinct(Target, .keep_all = TRUE) %>% 
+  distinct(protein_id, Type, .keep_all = TRUE) %>% 
+  left_join(., unique(All_molluscs_CDS_gff[,c("gene","protein_id")]), by = "protein_id") %>%
+  ungroup() %>%
+  distinct(gene,Type, Species) %>%
+  count(Type, Species)
+
+# How many genes have one two or three BIRs? Including this in my summary table 
+# join with gene info
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR %>% 
+  # join with gene info
+  left_join(., unique(All_molluscs_CDS_gff[,c("gene","protein_id")]), by = "protein_id") %>%
+  ungroup() %>%
+  distinct(gene,total_CDD_BIR_per_protein, Species) %>%
+  count(total_CDD_BIR_per_protein, Species)
 
 
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
