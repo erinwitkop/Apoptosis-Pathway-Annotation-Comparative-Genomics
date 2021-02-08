@@ -2319,14 +2319,6 @@ BIR_XP_gff_Interpro_Domains_all$node <-   factor(BIR_XP_gff_Interpro_Domains_all
 BIR_XP_gff_Interpro_Domains_all$Dbxref <- factor(BIR_XP_gff_Interpro_Domains_all$Dbxref, levels = unique(BIR_XP_gff_Interpro_Domains_all$Dbxref))
 BIR_XP_gff_Interpro_Domains_all_fullprot$node <- factor(BIR_XP_gff_Interpro_Domains_all_fullprot$node, levels = rev(BIR_XP_gff_Interpro_Domains_all_fullprot$node))
 
-### Stats
-# How many unique domains in MY, CV, CG
-BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref) %>% distinct(Dbxref)
-
-# How many proteins with three BIR domains MY, CV, CG? This is difficult because often times the cddBIR and the
-BIR_XP_gff_Interpro_Domains_only %>% unnest(Dbxref) %>% filter(Dbxref == "\"InterPro:IPR001370\"") %>% group_by(protein_id) %>% 
-    filter(n() >=3) %>% distinct(protein_id)
-
 
 # Plotting all domains 
 IAP_Interproscan_all_domain_plot <- ggplot() + 
@@ -3121,8 +3113,18 @@ ggsave(filename = "IAP_tr_dom_plus_legend_plot_09172020.tiff", plot=IAP_tr_dom_p
        units = "in",
        dpi=300)
 
+
+#### BIR TYPE MULTIPANEL FIGURE ####
+
+## GOAL: build a multipanel figure showing the sequence of model organism BIR types, the sequence of C. vir and C. gig types, the number of domains, and the number of total proteins those domains are in. 
+# this will be the top panel of the figure (A). Panel A will also display above the sequences what their predicted secondary structure is. 
+# Panel B will be a table with the number of BIR proteins that have one two or three BIR repeats.
+
+## Get statistics to report in paper regarding BIR domains 
 ### Statistics for looking at Domains ###
 # code not correct, edited and fixed on 2/5/21
+# do genes match the list in BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY
+
 # Number of proteins with a certain number of BIR domains
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   # filter by BIR types that were plotted 
@@ -3131,7 +3133,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   # filter out lines that have the exact same Target (meaning had two Interproscan BIR hits)
   distinct(Target, .keep_all = TRUE) %>% 
   group_by(protein_id) %>% mutate(total_CDD_BIR_per_protein = n()) %>% 
-# Keep only one row for each protein
+  # Keep only one row for each protein
   distinct(protein_id, .keep_all = TRUE) %>%
   ungroup() %>% 
   count(total_CDD_BIR_per_protein, Species) %>% 
@@ -3192,12 +3194,28 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR %>%
   distinct(gene,total_CDD_BIR_per_protein, Species) %>%
   count(total_CDD_BIR_per_protein, Species)
 
+# gene BIR number
+BIR_gene_number <-  # join with gene info
+  BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR %>% 
+  # join with gene info
+  left_join(., unique(All_molluscs_CDS_gff[,c("gene","protein_id")]), by = "protein_id") %>%
+  ungroup() %>%
+  distinct(gene,total_CDD_BIR_per_protein, Species)
 
-#### BIR TYPE MULTIPANEL FIGURE ####
+## testing whether the above code is correct? seems like some genes are missing 
+# genes in the original gene list are not in my BIR_gene_number list...figuring out why 
+left_join(BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY, BIR_gene_number) %>% View()
 
-## GOAL: build a multipanel figure showing the sequence of model organism BIR types, the sequence of C. vir and C. gig types, the number of domains, and the number of total proteins those domains are in. 
-# this will be the top panel of the figure (A). Panel A will also display above the sequences what their predicted secondary structure is. 
-# Panel B will be a table with the number of BIR proteins that have one two or three BIR repeats.
+# is it a problem with the original data frame used to plot protein domains, or is it in my post processing ,testing upstream data frame to see if genes are missing there
+BIR_XP_gff_Interpro_Domains_only_BIR_type_gene_test <- BIR_XP_gff_Interpro_Domains_only_BIR_type  %>% 
+  left_join(.,  BIR_XP_gff_species_join_haplotig_collapsed[,c("protein_id","gene","Species")], by = "protein_id") %>% distinct(gene, Species.y) 
+
+# which genes are missing in the BIR type data frame that were in the original counting data frame?
+View(BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY[!(BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene %in% BIR_XP_gff_Interpro_Domains_only_BIR_type_gene_test$gene),])
+
+# we are missing the Mizuhopecten genes that were collapsed for the purpose of figure plotting, need to use a different data frame to get these BIR number stats 
+
+
 
 ## Generate individual figures showing the MSA of each type of sequences 
 
@@ -3520,17 +3538,20 @@ ggsave(filename = "BIR_MSA_by_type.tiff", plot=MSA_arrange, device="tiff",
 BIR_domain_model_MY_CV_CG_type_updated_domain_number <- BIR_domain_model_MY_CV_CG_type_updated %>% 
   count(Type,Species)
 
-## need to edit this code below
-
-### Load IAP Gene RAxML tree data 
+### Make tree showing the number of BIR domains in each  
 IAP_GENE_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY_Gene_MSA_RAxML")
 IAP_GENE_raxml
 
+BIR_gene_number
+
 # Convert to tibble tree dataframe object with tidytree to add external data
-IAP_GENE_raxml_tibble <- as_tibble(IAP_GENE_raxml)
-colnames(IAP_GENE_raxml_tibble)[4] <- "gene"
-# add species data 
-IAP_GENE_raxml_tibble_join <- left_join(IAP_GENE_raxml_tibble, CV_CG_MY_gene_species)
+IAP_GENE_raxml_tibble_BIR <- as_tibble(IAP_GENE_raxml)
+colnames(IAP_GENE_raxml_tibble_BIR)[4] <- "gene"
+# add species data and dta
+# BIR_gene_number, CV_CG_MY_gene_species
+IAP_GENE_raxml_tibble_BIR_join <- left_join(IAP_GENE_raxml_tibble_BIR, BIR_gene_number)
+IAP_GENE_raxml_tibble_BIR_join %>% filter(is.na(bootstrap) & is.na(Species) & !is.na(gene)) %>% View()
+
 colnames(IAP_GENE_raxml_tibble_join)[4] <- "label"
 # Convert to treedata object to store tree plus outside data
 IAP_GENE_raxml_treedata <- as.treedata(IAP_GENE_raxml_tibble_join)
