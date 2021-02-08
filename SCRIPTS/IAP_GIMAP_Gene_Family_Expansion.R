@@ -3120,12 +3120,18 @@ ggsave(filename = "IAP_tr_dom_plus_legend_plot_09172020.tiff", plot=IAP_tr_dom_p
 # this will be the top panel of the figure (A). Panel A will also display above the sequences what their predicted secondary structure is. 
 # Panel B will be a table with the number of BIR proteins that have one two or three BIR repeats.
 
-## Get statistics to report in paper regarding BIR domains 
-
-### Statistics for looking at Domains ###
+### Statistics for BIR domains ###
 # code not correct, edited and fixed on 2/5/21
 ## The code below is only applicable for C. gigas and C. virginica. In my previous analysis when I collapsed the proteins for M. yessonsis, I did not carry through with analyzing 
-  # these proteins. In order to get accurate numbers for M. yessonensis, I will need to go back and add these back in and repeat this analysis.
+  # these proteins. In order to get accurate numbers for M. yessonensis, I will need to go back and add these back in and repeat this analysis. This will be relatively straightforward to
+  # do to get the correct number of BIR domains each protein has, but not so straightforward for analyzing new BIR types 
+
+## Make table of statistics for how many genes of each type and variant type for C. gigas and C. virginica
+# join table with gene info 
+BIR_domain_model_MY_CV_CG_type_updated_gene <- left_join(BIR_domain_model_MY_CV_CG_type_updated, unique(All_molluscs_CDS_gff[,c("gene","protein_id")]), by = "protein_id") 
+BIR_domain_model_MY_CV_CG_type_updated_gene %>% distinct(gene, Type, Species) %>% count(Type, Species) %>% 
+  # remember the M. yessoensis is not totally accurate because it was collapsed before analysis 
+  filter(Species== "Crassostrea_virginica" | Species == "Crassostrea_gigas")
 
 # Number of proteins with a certain number of BIR domains
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
@@ -3162,7 +3168,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR <- BIR_
   # Keep only one row for each protein
   distinct(protein_id, .keep_all = TRUE)
 
-# number of Proteins with each type
+# number of Proteins with each type (summarized for all the Type I or Type I-like or Type II and Type II-like)
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   # filter by BIR types that were plotted 
   filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
@@ -3173,7 +3179,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   distinct(protein_id, Type, .keep_all = TRUE) %>% 
   count(Type, Species)
 
-# Number of genes containing each type 
+# Number of genes containing each type (summarized for all the Type I or Type I-like or Type II and Type II-like)
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   # filter by BIR types that were plotted 
   filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
@@ -3196,14 +3202,6 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR %>%
   distinct(gene,total_CDD_BIR_per_protein, Species) %>%
    filter( Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas") %>%
   count(total_CDD_BIR_per_protein, Species)
-
-# gene BIR number
-BIR_gene_number <-  # join with gene info
-  BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR %>% 
-  # join with gene info
-  left_join(., unique(All_molluscs_CDS_gff[,c("gene","protein_id")]), by = "protein_id") %>%
-  ungroup() %>%
-  distinct(gene,total_CDD_BIR_per_protein, Species)
 
 
 ## Generate individual figures showing the MSA of each type of sequences 
@@ -3521,11 +3519,6 @@ ggsave(filename = "BIR_MSA_by_type.tiff", plot=MSA_arrange, device="tiff",
        height = 6,
        units = "in",
        dpi=300)
-
-
-## Make table of statistics for the number of individual domains 
-BIR_domain_model_MY_CV_CG_type_updated_domain_number <- BIR_domain_model_MY_CV_CG_type_updated %>% 
-  count(Type,Species)
 
 ### Make tree showing the number of BIR domains in each  
 IAP_GENE_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY_Gene_MSA_RAxML")
