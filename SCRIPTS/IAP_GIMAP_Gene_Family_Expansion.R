@@ -3121,9 +3121,11 @@ ggsave(filename = "IAP_tr_dom_plus_legend_plot_09172020.tiff", plot=IAP_tr_dom_p
 # Panel B will be a table with the number of BIR proteins that have one two or three BIR repeats.
 
 ## Get statistics to report in paper regarding BIR domains 
+
 ### Statistics for looking at Domains ###
 # code not correct, edited and fixed on 2/5/21
-# do genes match the list in BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY
+## The code below is only applicable for C. gigas and C. virginica. In my previous analysis when I collapsed the proteins for M. yessonsis, I did not carry through with analyzing 
+  # these proteins. In order to get accurate numbers for M. yessonensis, I will need to go back and add these back in and repeat this analysis.
 
 # Number of proteins with a certain number of BIR domains
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
@@ -3136,26 +3138,24 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   # Keep only one row for each protein
   distinct(protein_id, .keep_all = TRUE) %>%
   ungroup() %>% 
-  count(total_CDD_BIR_per_protein, Species) %>% 
+  count(total_CDD_BIR_per_protein, Species) %>% filter( Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas") %>%
   arrange(desc(total_CDD_BIR_per_protein, n, Species))
 
-#total_CDD_BIR_per_protein Species                     n
-#<int> <chr>                   <int>
-#1                         4 Mizuhopecten_yessoensis     1
-#2                         3 Crassostrea_gigas           1
-#3                         3 Crassostrea_virginica       2
-#4                         3 Mizuhopecten_yessoensis     2
-#5                         2 Crassostrea_gigas          26
-#6                         2 Crassostrea_virginica      35
-#7                         2 Mizuhopecten_yessoensis    14
-#8                         1 Crassostrea_gigas          18
-#9                         1 Crassostrea_virginica      47
-#10                         1 Mizuhopecten_yessoensis    11
+## A tibble: 6 x 3
+#total_CDD_BIR_per_protein Species                   n
+#<int> <chr>                 <int>
+#  1                         3 Crassostrea_gigas         1
+#2                         3 Crassostrea_virginica     2
+#3                         2 Crassostrea_gigas        26
+#4                         2 Crassostrea_virginica    35
+#5                         1 Crassostrea_gigas        18
+#6                         1 Crassostrea_virginica    47
 
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR <- BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   # filter by BIR types that were plotted 
   filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
            Type == "T2" | Type == "TX" | Type =="TY" | Type == "Unique") %>% filter(source == "CDD") %>%
+   filter( Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas") %>%
   # filter out lines that have the exact same Target (meaning had two Interproscan BIR hits)
   distinct(Target, .keep_all = TRUE) %>% 
   group_by(protein_id) %>% mutate(total_CDD_BIR_per_protein = n()) %>% 
@@ -3167,6 +3167,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   # filter by BIR types that were plotted 
   filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
            Type == "T2" | Type == "TX" | Type =="TY" | Type == "Unique") %>% filter(source == "CDD") %>%
+  filter( Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas") %>%
   # filter out lines that have the exact same Target (meaning had two Interproscan BIR hits)
   distinct(Target, .keep_all = TRUE) %>% 
   distinct(protein_id, Type, .keep_all = TRUE) %>% 
@@ -3177,6 +3178,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   # filter by BIR types that were plotted 
   filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
            Type == "T2" | Type == "TX" | Type =="TY" | Type == "Unique") %>% filter(source == "CDD") %>%
+  filter( Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas") %>%
   # filter out lines that have the exact same Target (meaning had two Interproscan BIR hits)
   distinct(Target, .keep_all = TRUE) %>% 
   distinct(protein_id, Type, .keep_all = TRUE) %>% 
@@ -3192,6 +3194,7 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR %>%
   left_join(., unique(All_molluscs_CDS_gff[,c("gene","protein_id")]), by = "protein_id") %>%
   ungroup() %>%
   distinct(gene,total_CDD_BIR_per_protein, Species) %>%
+   filter( Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas") %>%
   count(total_CDD_BIR_per_protein, Species)
 
 # gene BIR number
@@ -3201,20 +3204,6 @@ BIR_gene_number <-  # join with gene info
   left_join(., unique(All_molluscs_CDS_gff[,c("gene","protein_id")]), by = "protein_id") %>%
   ungroup() %>%
   distinct(gene,total_CDD_BIR_per_protein, Species)
-
-## testing whether the above code is correct? seems like some genes are missing 
-# genes in the original gene list are not in my BIR_gene_number list...figuring out why 
-left_join(BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY, BIR_gene_number) %>% View()
-
-# is it a problem with the original data frame used to plot protein domains, or is it in my post processing ,testing upstream data frame to see if genes are missing there
-BIR_XP_gff_Interpro_Domains_only_BIR_type_gene_test <- BIR_XP_gff_Interpro_Domains_only_BIR_type  %>% 
-  left_join(.,  BIR_XP_gff_species_join_haplotig_collapsed[,c("protein_id","gene","Species")], by = "protein_id") %>% distinct(gene, Species.y) 
-
-# which genes are missing in the BIR type data frame that were in the original counting data frame?
-View(BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY[!(BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene %in% BIR_XP_gff_Interpro_Domains_only_BIR_type_gene_test$gene),])
-
-# we are missing the Mizuhopecten genes that were collapsed for the purpose of figure plotting, need to use a different data frame to get these BIR number stats 
-
 
 
 ## Generate individual figures showing the MSA of each type of sequences 
@@ -3549,10 +3538,15 @@ IAP_GENE_raxml_tibble_BIR <- as_tibble(IAP_GENE_raxml)
 colnames(IAP_GENE_raxml_tibble_BIR)[4] <- "gene"
 # add species data and dta
 # BIR_gene_number, CV_CG_MY_gene_species
-IAP_GENE_raxml_tibble_BIR_join <- left_join(IAP_GENE_raxml_tibble_BIR, BIR_gene_number)
-IAP_GENE_raxml_tibble_BIR_join %>% filter(is.na(bootstrap) & is.na(Species) & !is.na(gene)) %>% View()
+IAP_GENE_raxml_tibble_BIR_join <- left_join(IAP_GENE_raxml_tibble_BIR, BIR_gene_number) %>% mutate(label = case_when(
+  Species == "Crassostrea_gigas" ~ paste("C.gig",gene, sep = "-"),
+  Species == "Crassostrea_virginica" ~ paste("C.vir",gene, sep = "-"),
+))
+IAP_GENE_raxml_tibble_BIR_join %>% filter(is.na(bootstrap) & is.na(Species) & !is.na(gene)) %>% View() # M. yessoensis genes have no designation
 
-colnames(IAP_GENE_raxml_tibble_join)[4] <- "label"
+IAP_GENE_raxml_tibble_BIR_join 
+
+colnames(IAP_GENE_raxml_tibble_BIR_join)[4] <- "label"
 # Convert to treedata object to store tree plus outside data
 IAP_GENE_raxml_treedata <- as.treedata(IAP_GENE_raxml_tibble_join)
 
