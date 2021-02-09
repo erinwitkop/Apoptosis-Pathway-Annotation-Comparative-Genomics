@@ -3338,8 +3338,7 @@ BIR_type_color_gene <- data.frame(color= c("#d14e3a",
                                            "#65c95d",
                                            "#cb958a",
                                            "#c4d648",
-                                           "#9944cd"
-                                           ),
+                                           "#9944cd"),
                              total_CDD_BIR_per_protein = c("1","2","3","non_CDD", "4"))
 IAP_GENE_raxml_tibble_BIR_join_color <- left_join(IAP_GENE_raxml_tibble_BIR_join, BIR_type_color_gene)
 
@@ -3392,7 +3391,6 @@ ggsave(filename = "IAP_GENE_BIR_number_circular_gene.tiff", plot=IAP_GENE_BIR_nu
        height = 10,
        units = "in",
        dpi=300)
-
 
 ## MSA of model organism sequences ###
 BIR_domain_model_MY_CV_CG_type_updated_H_sapiens <- BIR_domain_model_MY_CV_CG_type_updated %>% filter(Species == "Homo_sapiens" | Species == "Drosophila_melanogaster") 
@@ -3713,6 +3711,26 @@ ggsave(filename = "BIR_MSA_by_type_2_8_21.tiff", plot=MSA_arrange, device="tiff"
        units = "in",
        dpi=300)
 
+## Get example sequences to run in secondary protein prediction software RaptorX
+BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset$seq.name
+BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset$seq.name
+BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset$seq.name
+BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset$seq.name
+BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset$seq.name
+BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset$seq.name
+
+BIR_example_list <- rbind(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_subset,
+                          BIR_domain_model_MY_CV_CG_type_updated_T1_MSA_subset,
+                          BIR_domain_model_MY_CV_CG_type_updated_T2_MSA_subset,
+                          BIR_domain_model_MY_CV_CG_type_updated_TY_MSA_subset,
+                          BIR_domain_model_MY_CV_CG_type_updated_NZ_MSA_subset,
+                          BIR_domain_model_MY_CV_CG_type_updated_TX_MSA_subset)
+
+# get the non-MSA version of these sequences 
+BIR_example_list_sequences <- BIR_domain_model_MY_CV_CG_type_distinct[BIR_domain_model_MY_CV_CG_type_distinct$seq.name %in% BIR_example_list$seq.name,]
+
+# export as fasta 
+dat2fasta(BIR_example_list_sequences[,c(1,2)], "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_Artifact_Investigation/BIR_example_list_sequences.fa")
 
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
 # for plotting here, proteins with identical sequence are collaped for the purpose of plotting 
@@ -3824,7 +3842,6 @@ colnames(IAP_domain_structure_node_order)[1] <- "protein_id"
     # subtract half from bottom and add half to top 
     mutate(ymax = as.numeric(ymax) + 0.5,
            ymin = as.numeric(ymin) - 0.5)
-  
 
 ## Plot C. virginica
 # set factor levels 
