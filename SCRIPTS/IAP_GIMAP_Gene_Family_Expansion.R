@@ -2555,7 +2555,6 @@ BIR_domain_model_MY_CV_CG_type_updated %>%
   mutate(Species = ifelse(is.na(Species.x), Species.y, Species.x)) %>% 
   select(-c(Species.x, Species.y))
 
-
 # Look at stastics
 BIR_domain_model_MY_CV_CG_type_updated_stats <- BIR_domain_model_MY_CV_CG_type_updated %>% 
   group_by(Type, Species) %>% 
@@ -3123,7 +3122,8 @@ ggsave(filename = "IAP_tr_dom_plus_legend_plot_09172020.tiff", plot=IAP_tr_dom_p
 # code not correct, edited and fixed on 2/5/21
 ## The code below is only applicable for C. gigas and C. virginica. In my previous analysis when I collapsed the proteins for M. yessonsis, I did not carry through with analyzing 
   # these proteins. In order to get accurate numbers for M. yessonensis, I will need to go back and add these back in and repeat this analysis. This will be relatively straightforward to
-  # do to get the correct number of BIR domains each protein has, but not so straightforward for analyzing new BIR types 
+  # do to get the correct number of BIR domains each protein has, but not so straightforward for analyzing new BIR types.
+## Also, the BIR domain analysis was only conducted for BIR domains that were confirmed by CDD, which is why the full gene lists don't match the whole gene list
 
 ## Make table of statistics for how many genes of each type and variant type for C. gigas and C. virginica
 # join table with gene info 
@@ -3132,12 +3132,51 @@ BIR_domain_model_MY_CV_CG_type_updated_gene %>% distinct(gene, Type, Species) %>
   # remember the M. yessoensis is not totally accurate because it was collapsed before analysis 
   filter(Species== "Crassostrea_virginica" | Species == "Crassostrea_gigas")
 
+BIR_domain_model_MY_CV_CG_type_updated_gene %>% distinct(gene, Species) %>% count(Species) 
+#Species  n
+#1       Crassostrea_gigas 35  ..... 5 genes missing from C. gig
+#2   Crassostrea_virginica 59  ..... 10 missing from C. vir...why?
 
-BIR_domain_model_MY_CV_CG_type_updated_gene_BIR_number <- 
-  BIR_domain_model_MY_CV_CG_type_updated_gene %>% count(protein_id, Species, gene) %>% distinct(gene,Species,n) %>% rename(BIR_number = n) # only 121 total genes 
+## Testing to determine where my gene numbers changed and why
+# were genes lost in my calling of types? (check the DF right before the BIRs were called into types)
+left_join(BIR_domain_model_MY_CV_CG_type_distinct, BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG) %>% distinct(gene,Species) %>% count(Species) 
+    # no seems like they were lost before this 
+    # Species  n
+    # 1       Crassostrea_gigas 35
+    # 2   Crassostrea_virginica 59
+    # 3 Mizuhopecten_yessoensis 27
+    # 4                    <NA>  1
 
+# are all the genes listed in this original Interproscan DF? YES
+left_join(BIR_XP_gff_Interpro_Domains, BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG) %>% distinct(gene,Species) %>% count(Species) 
+#Species                     n
+#<chr>                   <int>
+#1 Crassostrea_gigas          40 # YES
+#2 Crassostrea_virginica      68 # yes all but one
+#3 Mizuhopecten_yessoensis    34 # yes
+
+# were they already lost here? YES -- figured out because I subset for only those BIRs that were confirmed by CDD
+left_join(BIR_XP_gff_Interpro_Domains_only_cd00022,BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG) %>% distinct(gene,Species) %>% count(Species) 
+    #Joining, by = "protein_id"
+    ## A tibble: 3 x 2
+    #Species                     n
+    #<chr>                   <int>
+    #  1 Crassostrea_gigas          35
+    #2 Crassostrea_virginica      59
+    #3 Mizuhopecten_yessoensis    27
+# were thye lost here
+left_join(BIR_XP_gff_Interpro_Domains_only, BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG) %>% distinct(gene,Species) %>% count(Species) 
+# Joining, by = "protein_id"
+# # A tibble: 3 x 2
+# Species                     n
+# <chr>                   <int>
+#   1 Crassostrea_gigas          40
+# 2 Crassostrea_virginica      68
+# 3 Mizuhopecten_yessoensis    34
 
 # Number of proteins with a certain number of BIR domains
+## The use of this Interpro DF that was created for the purpose of plotting is okay, but remember because Mizuhopecten was collapsed for plotting, the code below is
+  # not valid for getting Mizuhopecten statistics 
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   # filter by BIR types that were plotted 
   filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
@@ -3197,6 +3236,18 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
   distinct(gene,Type, Species) %>%
   count(Type, Species)
 
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_type <- BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill %>%
+  # filter by BIR types that were plotted 
+  filter(Type == "\"InterPro:IPR022103\"" | Type == "Non_Zinc_binding" | Type == "T1" |
+           Type == "T2" | Type == "TX" | Type =="TY" | Type == "Unique") %>% filter(source == "CDD") %>%
+  filter( Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas") %>%
+  # filter out lines that have the exact same Target (meaning had two Interproscan BIR hits)
+  distinct(Target, .keep_all = TRUE) %>% 
+  distinct(protein_id, Type, .keep_all = TRUE) %>% 
+  left_join(., unique(All_molluscs_CDS_gff[,c("gene","protein_id")]), by = "protein_id") %>%
+  ungroup() %>%
+  distinct(gene,Type, Species)
+
 # How many genes have one two or three BIRs? Including this in my summary table 
 # join with gene info
 BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR %>% 
@@ -3213,12 +3264,27 @@ BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR_gene <-
   ungroup() %>%
   distinct(gene,total_CDD_BIR_per_protein, Species)
 
-# compare with BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG
-BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG[!(BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG$gene %in% BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR_gene$gene),] %>% ungroup() %>%
-  distinct(gene, Species)
+BIR_XP_gff_Interpro_Domains_gene_count <- BIR_XP_gff_Interpro_Domains %>%
+  # filter by BIR types that were plotted 
+  filter(Name =="cd00022")  %>%
+  left_join(., unique(BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG[,c("gene","protein_id","Species")]), by = "protein_id") %>% 
+  filter( Species == "Crassostrea_virginica" | Species == "Crassostrea_gigas" | Species == "Mizuhopecten_yessoensis") %>%
+  # filter out lines that have the exact same Target (meaning had two Interproscan BIR hits)
+  distinct(Target, .keep_all = TRUE) %>% 
+  group_by(protein_id) %>% mutate(total_CDD_BIR_per_protein = n()) %>% 
+  # Keep only one row for each protein
+  distinct(protein_id, .keep_all = TRUE) %>%
+  ungroup() %>%
+  distinct(gene,total_CDD_BIR_per_protein, Species)
 
-View(BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR_gene[!(BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR_gene$gene %in%
-                                                                                       BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR_gene$gene),])
+BIR_XP_gff_Interpro_Domains_gene_count %>% ungroup() %>% count(Species, total_CDD_BIR_per_protein)
+
+# compare to C. gig and C. vir BIR domain counts from two different starting dataframes using anti_join 
+  # anti_join() return all rows from x without a match in y.
+anti_join(BIR_XP_gff_Interpro_Domains_gene_count,BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR_gene) %>% View()
+anti_join(BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_number_BIR_gene,BIR_XP_gff_Interpro_Domains_gene_count) %>% View()
+
+# Now I can add the full M. yessoensis counts for the BIR numbers with the full gene list! 
 
 ### Make tree showing the number of BIR domains in each  
 IAP_GENE_raxml <- read.raxml(file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/RAxML/RAxML_bipartitionsBranchLabels.BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY_Gene_MSA_RAxML")
@@ -3229,75 +3295,99 @@ IAP_GENE_raxml_tibble_BIR <- as_tibble(IAP_GENE_raxml)
 colnames(IAP_GENE_raxml_tibble_BIR)[4] <- "gene"
 # add species data and change name to include the species data so I can add a highlight for BIR number and keep the text black
 #  CV_CG_MY_gene_species
-IAP_GENE_raxml_tibble_BIR_join <- left_join(IAP_GENE_raxml_tibble_BIR, BIR_domain_model_MY_CV_CG_type_updated_gene_BIR_number) %>% mutate(label = case_when(
+IAP_GENE_raxml_tibble_BIR_join <- left_join(IAP_GENE_raxml_tibble_BIR, BIR_XP_gff_Interpro_Domains_gene_count) %>% mutate(label = case_when(
   Species == "Crassostrea_gigas" ~ paste("C.gig",gene, sep = "-"),
-  Species == "Crassostrea_virginica" ~ paste("C.vir",gene, sep = "-")))
-IAP_GENE_raxml_tibble_BIR_join %>% filter(is.na(bootstrap) & is.na(Species) & !is.na(gene)) %>% View() # M. yessoensis genes have no designation
+  Species == "Crassostrea_virginica" ~ paste("C.vir",gene, sep = "-"))) 
+
+# join in to fill in the rest of the genes that were not analyzed for BIR
+IAP_GENE_raxml_tibble_BIR_join <- left_join(IAP_GENE_raxml_tibble_BIR_join, unique(BIR_dup_seq_rm_kept_haplotig_collapsed_MY_CV_CG[,c("gene","Species")]), by = "gene") %>%
+  select(-Species.x) %>% rename(Species = Species.y) %>%  mutate(label = case_when(
+    Species == "Crassostrea_gigas" ~ paste("C.gig",gene, sep = "-"),
+    Species == "Crassostrea_virginica" ~ paste("C.vir",gene, sep = "-"),
+    Species == "Mizuhopecten_yessoensis" ~ paste("M.yes",gene, sep = "-"))) %>% 
+    # fill in NA total_CDD_BIR_per_protein_label  
+  mutate(total_CDD_BIR_per_protein = case_when(
+    !is.na(total_CDD_BIR_per_protein) ~ as.character(total_CDD_BIR_per_protein),
+    is.na(total_CDD_BIR_per_protein) & !is.na(gene) ~ "non_CDD",
+    !is.na(gene) & !is.na(bootstrap) ~ NA_character_,
+    gene == "LOC111099688" ~ "2")) %>%
+  rename(species_label = label) %>% rename(label = gene) %>% 
+# Fix the three genes that are still blank, C. vir LOC111099688 recoded to  LOC111105597..the other genes are M.yessoensis 
+ mutate(species_label = case_when(
+  label == "LOC111099688" ~ "C_vir-LOC111099688",
+    label == "LOC110443976" ~ "M.yes-LOC110443976",
+    label == "LOC110440802" ~ "M.yes-LOC110440802",
+  TRUE ~ as.character(species_label))) %>%
+  mutate(Species = case_when(
+    label == "LOC111099688" ~ "Crassostrea_virginica",
+    label == "LOC110443976" ~ "Mizuhopecten_yessoensis",
+    label == "LOC110440802" ~ "Mizuhopecten_yessoensis",
+    TRUE ~ as.character(Species))) 
+
+# Join the IAPs that are Type X,Type Y, NZBIR
+BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_type_new <- BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_type %>%
+  filter(Type == "TX" | Type == "Non_Zinc_binding" | Type == "TY") %>% rename(label = gene)
+IAP_GENE_raxml_tibble_BIR_join <- left_join(IAP_GENE_raxml_tibble_BIR_join, BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_type_new)
 
 #Convert to treedata object to store tree plus outside data
 IAP_GENE_raxml_BIR_treedata <- as.treedata(IAP_GENE_raxml_tibble_BIR_join)
 
-# Drop tips to collapse Mizuhopecten tips (done by manually looking at tree and keeping the outgroup for each group)
-IAP_to_drop <- c("236","237","238","239","240","205","206","115","116","117","120","121","122","200","201",
-                 "196","185","186","187","194","190","192","183","179","189","161","162","141","142","146","143",
-                 "144","145","149","154","128","129","130","13","17","15","16","20","18","19","21","26","22","23","24",
-                 "25","50","52","53","54","59","60","61","62","63","70","71")
-
-# get labels for nodes to drop
-IAP_to_drop_label <- IAP_MY_CV_CG_raxml_tibble[IAP_MY_CV_CG_raxml_tibble$node %in% IAP_to_drop,]
-IAP_to_drop_label <- IAP_to_drop_label$label
-
-# labels for when to add shapes for dropped tips 
-IAP_to_label <- c("241","207","118","119","202","184","195","188","193","189","191","182","181","163","147","148","153","127","14","12","49","51","63","72")
-IAP_to_label_XP <- IAP_MY_CV_CG_raxml_tibble[IAP_MY_CV_CG_raxml_tibble$node %in% IAP_to_label,]
-IAP_to_label_XP <- IAP_to_label_XP$label
-
-#Collapse
-IAP_MY_CV_CG_raxml_treedata_collapsed <- drop.tip(IAP_MY_CV_CG_raxml_treedata , IAP_to_drop_label)
-View(as.tibble(IAP_MY_CV_CG_raxml_treedata_collapsed))
-IAP_MY_CV_CG_raxml_treedata_collapsed # tips were dropped
-
-# get new node numbers for where to add shapes 
-IAP_collapsed_tibble <- as.tibble(IAP_MY_CV_CG_raxml_treedata_collapsed)
-IAP_shape_label <- IAP_collapsed_tibble[IAP_collapsed_tibble$label %in% IAP_to_label_XP, ]
-IAP_shape_node <- IAP_shape_label$node
-length(IAP_shape_node)
-
-# check nrows
-IAP_collapsed_tibble %>% filter(!is.na(label)) %>% count() # 184 lines to plot 
-
-
-# check total gene number in tree
-IAP_GENE_raxml_tibble_join %>% filter(!is.na(Species)) %>% nrow() # 177
-
+# make dataframe with color added 
+# add color to tibble in order to plot geom_hilight below
+BIR_type_color_gene <- data.frame(color= c("#d14e3a",
+                                           "#65c95d",
+                                           "#cb958a",
+                                           "#c4d648",
+                                           "#9944cd"
+                                           ),
+                             total_CDD_BIR_per_protein = c("1","2","3","non_CDD", "4"))
+IAP_GENE_raxml_tibble_BIR_join_color <- left_join(IAP_GENE_raxml_tibble_BIR_join, BIR_type_color_gene)
 
 ## Plot IAP gene sequence tree as circular 
+# basic plot to get color legend
+IAP_GENE_BIR_number_circular_gene_legend <- ggtree(IAP_GENE_raxml_BIR_treedata, layout="circular", 
+                                                   aes(color=total_CDD_BIR_per_protein), 
+                                                   branch.length = "none") + 
+  scale_colour_manual(name = "Species", values=c("#d14e3a",
+                                                 "#65c95d",
+                                                 "#cb958a",
+                                                 "#c4d648",
+                                                 "#9944cd"), na.value="grey46", breaks=c("1", "2","3","non_CDD","4"),
+                      labels = c("1 BIR Domain", "2 BIR Domains","3 BIR Domains","Non-CDD BIR","4 BIR Domains")) 
+IAP_GENE_BIR_number_circular_gene_legend <- get_legend(IAP_GENE_BIR_number_circular_gene_legend)
+
+# add geom_highlight for BIR number
 IAP_GENE_BIR_number_circular_gene <- 
-  ggtree(IAP_GENE_raxml_BIR_treedata, layout="circular", branch.length = "none") + 
-  geom_tiplab2(aes(label=label,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
+  ggtree(IAP_GENE_raxml_BIR_treedata, layout="circular", 
+         #aes(color=total_CDD), 
+         branch.length = "none") + 
+  geom_tiplab2(aes(label=species_label,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
   #Edit theme
   theme(legend.position = "bottom", 
         legend.text = element_text(face = "italic", size=8, family="sans"),
         legend.title = element_text(size=12, family="sans")) +
   #xlim(-100,100)  +
   # add circle for 90-100 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=2.0) +
   # add triangle for 70-89 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=2.0) +
   # add upside down traingle for 50-69 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
-  # Add shape for tips removed (see IAP_shape_node above)
-  #geom_point2(aes(subset=(node==12)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  # add highligh
-  # fix legend appearance
-  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")) ) + # need to override aes to get rid of "a"
-  #scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
-  #                    labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis")) +
-  guides(col = guide_legend(ncol =1, title.position = "top", override.aes = aes(label = "")) ) # need to override aes to get rid of "a"
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=2.0) +
+                  # fix legend appearance
+  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")))  # need to override aes to get rid of "a"
+
+# Use loop to clade label highlight to each node 
+for(j in 1:dim(IAP_GENE_raxml_tibble_BIR_join_color)[1]){
+  #Then add each clade label
+  IAP_GENE_BIR_number_circular_gene <- IAP_GENE_BIR_number_circular_gene + geom_hilight(node=IAP_GENE_raxml_tibble_BIR_join_color$node[j], offset = .25, fill = IAP_GENE_raxml_tibble_BIR_join_color$color[j], extend = 12.0)
+}
+
+# Put together plot and other legend in cowplot
+IAP_GENE_BIR_number_circular_gene_plus_legend <- plot_grid(IAP_GENE_BIR_number_circular_gene, IAP_GENE_BIR_number_circular_gene_legend,  ncol=1, rel_heights  = c(0.62, 0.1)) 
 
 # Export plot to file 
-ggsave(filename = "IAP_CV_CG_MY_GENE_circular_tree.tiff", plot=IAP_GENE_raxml_treedata_circular_gene, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
+ggsave(filename = "IAP_GENE_BIR_number_circular_gene.tiff", plot=IAP_GENE_BIR_number_circular_gene_plus_legend, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/BIR_Type_MSA_figure/",
        width = 10 ,
        height = 10,
        units = "in",
