@@ -37,6 +37,7 @@ library(UpSetR)
 library(gt)
 library(GenomicFeatures)
 library(GenomicRanges)
+library(RCircos)
 setwd("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics")
 
 #### IMPORT GENOMES AND ANNOTATIONS #####
@@ -3737,7 +3738,6 @@ dat2fasta(BIR_example_list_sequences[,c(1,2)], "/Users/erinroberts/Documents/PhD
 
 #### PLOT IAP GENE TREE WITH INTRONLESS GENE AND GENE DENSITY INFO ####
 
-
 # export gene features for use in plotting and bedtools 
 C_vir_rtracklayer_gene_bed <- C_vir_rtracklayer %>% filter(type == "gene") %>% dplyr::select(seqid, start, end, gene) 
 
@@ -3755,10 +3755,14 @@ write.table(C_vir_rtracklayer_chromosome_bed, file="/Users/erinroberts/Documents
             quote = FALSE,col.names = FALSE, row.names=FALSE)
 
 ## Import gene density information that was calculated in bedops 
-C_vir_rtracklayer_gene_100kb_density <- read.table("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_vir_rtracklayer_gene_100kb_density.bed")
+C_vir_rtracklayer_gene_100kb_density <- read.table("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_vir_rtracklayer_gene_100kb_density.bed",
+                                                   col.names = c("seqid","start","end"))
+C_vir_rtracklayer_gene_1Mb_density <- read.table("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_vir_rtracklayer_gene_1Mb_density.bed",
+                                                   col.names = c("seqid","start","end"))
 
 # separate the counts into its own column for histogram plotting 
-
+C_vir_rtracklayer_gene_100kb_density_sep <- C_vir_rtracklayer_gene_100kb_density %>% separate(end , into = c("stop","count"))
+C_vir_rtracklayer_gene_1Mb_density_sep <- C_vir_rtracklayer_gene_1Mb_density %>% separate(end , into = c("stop","count"))
 
 # Identify intronless genes in  C. virginica
 C_vir_rtracklayer_intronless <- C_vir_rtracklayer %>% filter(type == "exon") %>% distinct(start, end, .keep_all = TRUE) %>% count(gene) %>% filter(n == 1)
@@ -3788,6 +3792,9 @@ left_join(C_vir_rtracklayer_intronless_IAP, BIR_XP_gff_Interpro_Domains_only_BIR
 # 7 LOC111132301 1 <NA>                  <NA>  # non-cdd
 #   8 LOC111132489 1 <NA>                  <NA> # non-cdd
 
+## get coordinates for intronless genes 
+C_vir_rtracklayer_intronless_IAP_coord <- C_vir_rtracklayer_gene_bed[C_vir_rtracklayer_gene_bed$gene %in% C_vir_rtracklayer_intronless_IAP$gene,]
+
 # identify in C. gig
 C_gig_rtracklayer_intronless <- C_gig_rtracklayer %>% filter(type == "exon") %>% distinct(start, end, .keep_all = TRUE) %>% count(gene) %>% filter(n == 1)
 C_gig_rtracklayer_intronless_IAP <- C_gig_rtracklayer_intronless[C_gig_rtracklayer_intronless$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,]
@@ -3798,7 +3805,101 @@ C_gig_rtracklayer_intronless_IAP <- C_gig_rtracklayer_intronless[C_gig_rtracklay
   #1012 LOC105345723 1
   #1187 LOC109617982 1
 
+# change chromosome names to be all character
+C_vir_chromsome_char <- data.frame(seqid = c(   "NC_035780.1","NC_035781.1","NC_035782.1","NC_035783.1","NC_035784.1","NC_035785.1","NC_035786.1","NC_035787.1","NC_035788.1","NC_035789.1","NC_007175.2"),
+                                   Chromosome = c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","MT"))
 
+## get coodinates for all Cvir IAPs
+  # already calculated this on line 1166
+BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label <- BIR_XP_gff_species_join_haplotig_collapsed_CV_gene %>% 
+  left_join(.,C_vir_chromsome_char) %>%
+  dplyr::select(Chromosome, start, end,gene) %>%
+  rename(ChromStart = start, ChromEnd = end, Gene = gene)
+
+# turn the gene and chr info into factors and start and end into numeric
+BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$Gene <- as.factor(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$Gene)
+BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$Chromosome <- as.factor(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$Chromosome)
+BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$ChromStart <- as.numeric(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$ChromStart)
+BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$ChromEnd <- as.numeric(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$ChromEnd)
+
+### Generate plot using RCircos 
+
+# change ideogram labels
+C_vir_rtracklayer_chromosome_bed_label <- C_vir_rtracklayer_chromosome_bed %>% 
+  left_join(.,C_vir_chromsome_char) %>%
+  dplyr::select(Chromosome, start, end) %>% 
+  rename(ChromStart = start, ChromStart = start, ChromEnd = end) %>%
+  # add band and stain columns 
+  mutate(Band = "all", Stain = "gvar")
+
+C_vir_rtracklayer_chromosome_bed_label$Chromosome <- as.factor(C_vir_rtracklayer_chromosome_bed_label$Chromosome)
+class(C_vir_rtracklayer_chromosome_bed_label$ChromStart)
+C_vir_rtracklayer_chromosome_bed_label$ChromStart <- as.numeric(C_vir_rtracklayer_chromosome_bed_label$ChromStart)
+C_vir_rtracklayer_chromosome_bed_label$ChromEnd <- as.numeric(C_vir_rtracklayer_chromosome_bed_label$ChromEnd)
+
+# Initialize RCircos
+RCircos.Set.Core.Components(cyto.info = C_vir_rtracklayer_chromosome_bed_label, 
+                            # add three tracks inside: gene density, IAP location, intronless IAPs
+                            tracks.inside = 3) ;
+# turn on graphics device
+out.file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/Cvir_rtracklayer_RCircos.pdf";
+pdf(file=out.file);
+RCircos.Set.Plot.Area();
+par(mai=c(0.25, 0.25, 0.25, 0.25));
+plot.new();
+plot.window(c(-2.5,2.5), c(-2.5, 2.5));
+
+# look at plot parameters 
+rcircos.params <- RCircos.Get.Plot.Parameters();
+rcircos.cyto <- RCircos.Get.Plot.Ideogram();
+rcircos.position <- RCircos.Get.Plot.Positions();
+RCircos.List.Plot.Parameters();
+
+# modifying plot parameters
+rcircos.params <- RCircos.Get.Plot.Parameters();
+rcircos.params$base.per.unit <- 3000;
+rcircos.params$text.size <- 0.3
+rcircos.params$char.width <- 100
+rcircos.params$track.background <- "white"
+rcircos.params$hist.color <- "blue"
+rcircos.params$grid.line.color <- "black"
+rcircos.params$chrom.width <- 0.05
+rcircos.params$highlight.width <- 0.5
+#rcircos.params$highlight.pos <- 1
+RCircos.Reset.Plot.Parameters(rcircos.params);
+RCircos.List.Plot.Parameters();
+
+# plot ideogram 
+RCircos.Chromosome.Ideogram.Plot();
+
+# Add hisotgram of gene density 
+C_vir_rtracklayer_gene_100kb_density_sep_label <- C_vir_rtracklayer_gene_100kb_density_sep %>%
+  left_join(.,C_vir_chromsome_char) %>%
+  dplyr::select(Chromosome, start, stop,count) %>%
+  rename(ChromStart = start, ChromEnd = stop, Data = count)
+C_vir_rtracklayer_gene_100kb_density_sep_label$Chromosome <- as.factor(C_vir_rtracklayer_gene_100kb_density_sep_label$Chromosome)
+C_vir_rtracklayer_gene_100kb_density_sep_label$ChromStart <- as.numeric(C_vir_rtracklayer_gene_100kb_density_sep_label$ChromStart)
+C_vir_rtracklayer_gene_100kb_density_sep_label$ChromEnd  <- as.numeric(C_vir_rtracklayer_gene_100kb_density_sep_label$ChromEnd )
+C_vir_rtracklayer_gene_100kb_density_sep_label$Data <- as.numeric(C_vir_rtracklayer_gene_100kb_density_sep_label$Data)
+
+C_vir_rtracklayer_gene_1Mb_density_sep_label <- C_vir_rtracklayer_gene_1Mb_density_sep %>%
+  left_join(.,C_vir_chromsome_char) %>%
+  dplyr::select(Chromosome, start, stop,count) %>%
+  rename(ChromStart = start, ChromEnd = stop, Data = count)
+C_vir_rtracklayer_gene_1Mb_density_sep_label$Chromosome <- as.factor(C_vir_rtracklayer_gene_1Mb_density_sep_label$Chromosome)
+C_vir_rtracklayer_gene_1Mb_density_sep_label$ChromStart <- as.numeric(C_vir_rtracklayer_gene_1Mb_density_sep_label$ChromStart)
+C_vir_rtracklayer_gene_1Mb_density_sep_label$ChromEnd  <- as.numeric(C_vir_rtracklayer_gene_1Mb_density_sep_label$ChromEnd )
+C_vir_rtracklayer_gene_1Mb_density_sep_label$Data <- as.numeric(C_vir_rtracklayer_gene_1Mb_density_sep_label$Data)
+
+RCircos.Histogram.Plot(C_vir_rtracklayer_gene_1Mb_density_sep_label, data.col = 4, track.num = 1, side = "in");
+
+# add IAP gene labels 
+gene.data <- BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label
+RCircos.Gene.Connector.Plot(gene.data, track.num = 2, side = "in", is.sorted = FALSE);
+RCircos.Gene.Name.Plot(gene.data,track.num = 3, side = "in", name.col = 4, is.sorted = FALSE);
+
+# remember  to turn off at the end
+dev.off()
 
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
 # for plotting here, proteins with identical sequence are collaped for the purpose of plotting 
