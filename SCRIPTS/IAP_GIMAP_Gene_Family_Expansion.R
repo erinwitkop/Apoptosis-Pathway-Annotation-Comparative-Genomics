@@ -35,6 +35,8 @@ library(ggtext)
 library(ggplotify)
 library(UpSetR)
 library(gt)
+library(GenomicFeatures)
+library(GenomicRanges)
 setwd("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics")
 
 #### IMPORT GENOMES AND ANNOTATIONS #####
@@ -3358,7 +3360,7 @@ IAP_GENE_BIR_number_circular_gene_legend <- get_legend(IAP_GENE_BIR_number_circu
 # add geom_highlight for BIR number
 IAP_GENE_BIR_number_circular_gene <- 
   ggtree(IAP_GENE_raxml_BIR_treedata, layout="circular", 
-         #aes(color=total_CDD), 
+         #aes(color=Type), 
          branch.length = "none") + 
   geom_tiplab2(aes(label=species_label,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
   #Edit theme
@@ -3730,7 +3732,73 @@ BIR_example_list <- rbind(BIR_domain_model_MY_CV_CG_type_updated_H_sapiens_MSA_s
 BIR_example_list_sequences <- BIR_domain_model_MY_CV_CG_type_distinct[BIR_domain_model_MY_CV_CG_type_distinct$seq.name %in% BIR_example_list$seq.name,]
 
 # export as fasta 
-dat2fasta(BIR_example_list_sequences[,c(1,2)], "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/Gene_Artifact_Investigation/BIR_example_list_sequences.fa")
+dat2fasta(BIR_example_list_sequences[,c(1,2)], "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_example_list_sequences.fa")
+
+
+#### PLOT IAP GENE TREE WITH INTRONLESS GENE AND GENE DENSITY INFO ####
+
+
+# export gene features for use in plotting and bedtools 
+C_vir_rtracklayer_gene_bed <- C_vir_rtracklayer %>% filter(type == "gene") %>% dplyr::select(seqid, start, end, gene) 
+
+# Write table for use in any external software 
+write.table(C_vir_rtracklayer_gene_bed, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_vir_rtracklayer_gene.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE)
+
+C_vir_rtracklayer %>% filter(type == "exon") %>% distinct(start, end, .keep_all = TRUE) %>% count(gene)
+
+# export chromosome lengths for use in plotting and bedtools 
+C_vir_rtracklayer_chromosome_bed <- C_vir_rtracklayer %>% filter(type == "region") %>% dplyr::select(seqid, start, end)
+
+# Write table for use in any external software 
+write.table(C_vir_rtracklayer_chromosome_bed, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_vir_rtracklayer_chromosome.bed",
+            quote = FALSE,col.names = FALSE, row.names=FALSE)
+
+## Import gene density information that was calculated in bedops 
+C_vir_rtracklayer_gene_100kb_density <- read.table("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter1_Apoptosis_Transcriptome_Analyses_2019/DATA ANALYSIS/apoptosis_data_pipeline/DESeq2/2020_Transcriptome_ANALYSIS/C_vir_rtracklayer_gene_100kb_density.bed")
+
+# separate the counts into its own column for histogram plotting 
+
+
+# Identify intronless genes in  C. virginica
+C_vir_rtracklayer_intronless <- C_vir_rtracklayer %>% filter(type == "exon") %>% distinct(start, end, .keep_all = TRUE) %>% count(gene) %>% filter(n == 1)
+
+C_vir_rtracklayer_intronless_IAP <- C_vir_rtracklayer_intronless[C_vir_rtracklayer_intronless$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,]
+
+# gene n
+# 245  LOC111105137 1
+# 463  LOC111109152 1
+# 853  LOC111116378 1
+# 898  LOC111116826 1
+# 906  LOC111117137 1
+# 941  LOC111117856 1
+# 1569 LOC111132301 1
+# 1591 LOC111132489 1
+
+# see how  these overlap with BIR types
+left_join(C_vir_rtracklayer_intronless_IAP, BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_type)
+
+# gene n Type               Species
+# 1 LOC111105137 1 <NA>                  <NA> # non-cdd
+# 2 LOC111109152 1   T2 Crassostrea_virginica
+# 3 LOC111116378 1   T2 Crassostrea_virginica
+# 4 LOC111116826 1   T2 Crassostrea_virginica
+# 5 LOC111117137 1   T2 Crassostrea_virginica
+# 6 LOC111117856 1   T2 Crassostrea_virginica
+# 7 LOC111132301 1 <NA>                  <NA>  # non-cdd
+#   8 LOC111132489 1 <NA>                  <NA> # non-cdd
+
+# identify in C. gig
+C_gig_rtracklayer_intronless <- C_gig_rtracklayer %>% filter(type == "exon") %>% distinct(start, end, .keep_all = TRUE) %>% count(gene) %>% filter(n == 1)
+C_gig_rtracklayer_intronless_IAP <- C_gig_rtracklayer_intronless[C_gig_rtracklayer_intronless$gene %in% BIR_XP_gff_species_join_haplotig_collapsed_CV_CG_MY$gene,]
+
+# only three in C. gigas 
+  #gene n
+  #771  LOC105338159 1
+  #1012 LOC105345723 1
+  #1187 LOC109617982 1
+
+
 
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
 # for plotting here, proteins with identical sequence are collaped for the purpose of plotting 
