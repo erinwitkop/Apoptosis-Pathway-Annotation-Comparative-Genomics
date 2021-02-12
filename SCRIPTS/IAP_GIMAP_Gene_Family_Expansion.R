@@ -3837,42 +3837,34 @@ class(C_vir_rtracklayer_chromosome_bed_label$ChromStart)
 C_vir_rtracklayer_chromosome_bed_label$ChromStart <- as.numeric(C_vir_rtracklayer_chromosome_bed_label$ChromStart)
 C_vir_rtracklayer_chromosome_bed_label$ChromEnd <- as.numeric(C_vir_rtracklayer_chromosome_bed_label$ChromEnd)
 
+# turn on graphics device
+out.file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/Cvir_rtracklayer_RCircos10.pdf";
+pdf(file=out.file, height = 7, width = 7);
+RCircos.Set.Plot.Area();
+
 # Initialize RCircos
 RCircos.Set.Core.Components(cyto.info = C_vir_rtracklayer_chromosome_bed_label, 
                             # add three tracks inside: gene density, IAP location, intronless IAPs
-                            tracks.inside = 3) ;
-# turn on graphics device
-out.file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/Cvir_rtracklayer_RCircos.pdf";
-pdf(file=out.file);
-RCircos.Set.Plot.Area();
-par(mai=c(0.25, 0.25, 0.25, 0.25));
-plot.new();
-plot.window(c(-2.5,2.5), c(-2.5, 2.5));
-
-# look at plot parameters 
-rcircos.params <- RCircos.Get.Plot.Parameters();
-rcircos.cyto <- RCircos.Get.Plot.Ideogram();
-rcircos.position <- RCircos.Get.Plot.Positions();
-RCircos.List.Plot.Parameters();
+                            tracks.inside = 3, tracks.outside = 0) ;
 
 # modifying plot parameters
 rcircos.params <- RCircos.Get.Plot.Parameters();
 rcircos.params$base.per.unit <- 3000;
-rcircos.params$text.size <- 0.3
-rcircos.params$char.width <- 100
+rcircos.params$text.size <- 3
+#rcircos.params$chr.name.pos <- 1
+rcircos.params$char.width <- 50
+rcircos.params$line.color <- "black"
 rcircos.params$track.background <- "white"
 rcircos.params$hist.color <- "blue"
 rcircos.params$grid.line.color <- "black"
 rcircos.params$chrom.width <- 0.05
-rcircos.params$highlight.width <- 0.5
-#rcircos.params$highlight.pos <- 1
+#rcircos.params$highlight.width <- 0.1
 RCircos.Reset.Plot.Parameters(rcircos.params);
-RCircos.List.Plot.Parameters();
 
 # plot ideogram 
 RCircos.Chromosome.Ideogram.Plot();
 
-# Add hisotgram of gene density 
+# Add histogram of gene density 
 C_vir_rtracklayer_gene_100kb_density_sep_label <- C_vir_rtracklayer_gene_100kb_density_sep %>%
   left_join(.,C_vir_chromsome_char) %>%
   dplyr::select(Chromosome, start, stop,count) %>%
@@ -3891,12 +3883,19 @@ C_vir_rtracklayer_gene_1Mb_density_sep_label$ChromStart <- as.numeric(C_vir_rtra
 C_vir_rtracklayer_gene_1Mb_density_sep_label$ChromEnd  <- as.numeric(C_vir_rtracklayer_gene_1Mb_density_sep_label$ChromEnd )
 C_vir_rtracklayer_gene_1Mb_density_sep_label$Data <- as.numeric(C_vir_rtracklayer_gene_1Mb_density_sep_label$Data)
 
-RCircos.Histogram.Plot(C_vir_rtracklayer_gene_1Mb_density_sep_label, data.col = 4, track.num = 1, side = "in");
-
 # add IAP gene labels 
 gene.data <- BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label
-RCircos.Gene.Connector.Plot(gene.data, track.num = 2, side = "in", is.sorted = FALSE);
-RCircos.Gene.Name.Plot(gene.data,track.num = 3, side = "in", name.col = 4, is.sorted = FALSE);
+RCircos.Gene.Connector.Plot(gene.data, track.num = 2, side = "in", is.sorted = FALSE, genomic.columns = 3);
+#RCircos.Gene.Name.Plot(gene.data,track.num = 2, side = "out", name.col = 4, is.sorted = FALSE);
+RCircos.Histogram.Plot(C_vir_rtracklayer_gene_1Mb_density_sep_label, data.col = 4, track.num = 1, side = "in");
+
+# add label for intronless genes
+C_vir_rtracklayer_intronless_IAP_coord_label <- C_vir_rtracklayer_intronless_IAP_coord %>% left_join(.,C_vir_chromsome_char) %>%
+  dplyr::select(Chromosome, start, end,gene) %>%
+  rename(ChromStart = start, ChromEnd = end) %>% 
+  # change text to be star for intronless genes
+  mutate(gene_label = "I")
+RCircos.Gene.Name.Plot(C_vir_rtracklayer_intronless_IAP_coord_label,track.num = 3, side = "in", name.col = 4, is.sorted = FALSE);
 
 # remember  to turn off at the end
 dev.off()
