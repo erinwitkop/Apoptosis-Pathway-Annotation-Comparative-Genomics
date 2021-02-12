@@ -6458,7 +6458,7 @@ d <- data.frame(label = Mollusc_Species_Tree$tip.label,
 # Plot species tree only
 Mollusc_Species_Tree <- ggtree(Mollusc_Species_Treedata, branch.length = "none") %<+% d +
   geom_tiplab(align=TRUE, aes(label=paste0('italic(', genus,')~italic(', species, ')')), parse=T) + # italicize species labels 
-   xlim(0,17) 
+   xlim(0,17) + theme(plot.margin = unit(c(0,0,0,0), "cm"))
 
 # Create simple heatmap to plot the gene number to add next to the tree 
 no_y_axis <- function () 
@@ -6481,21 +6481,38 @@ All_mollusc_IAP_gene_list_after_haplotig_collapsed_sinensis$Species <- factor(Al
 species_gene_heatmap <- All_mollusc_IAP_gene_list_after_haplotig_collapsed_sinensis %>% 
   # add dummy category so I can only plot one row
   mutate(category = "all") %>%
-ggplot(., aes(y=Species, x =category)) + geom_tile(aes(fill=n)) + no_y_axis() + no_x_axis() + 
+ggplot(., aes(y=Species, x =category)) + geom_tile(aes(fill=n, width = 0.2)) + no_y_axis() + no_x_axis() + 
   theme(panel.background = element_rect(fill = "transparent"),
-        legend.position = "bottom",
-        legend.box = "horizontal",
-        legend.text = element_text(size=14, family="sans"),
-        legend.title = element_text(size=16, family="sans"),
+        legend.position = "right",
+        legend.box = "vertical",
+        legend.text = element_text(size=10, family="sans"),
+        legend.title = element_text(size=12, family="sans"),
+        legend.margin=margin(0,0,0,0), 
+        legend.box.margin = margin(0,0,0,0),
+        axis.ticks.margin = unit(0,"null"),
+        axis.ticks.length = unit(0, "pt"), 
+        panel.spacing = unit(0,"null"),
     #    axis.text.y = element_text(size = 14, family = "sans", face = "italic")) +
-    axis.text.y = element_blank()) +
+    axis.text.y = element_blank(),
+    plot.margin = unit(c(-10,-10,-10,-10), "cm")) +
   # fill tiles with the number
-  geom_text(size = 8, aes(label = round(n, 1))) +
+  geom_text(size = 6, aes(label = round(n, 1))) +
   scale_fill_viridis_c(name = "IAP Gene Number", 
                        limits = c(0,90),
                        breaks = c(10,20,30,40,50,60,70,80,90), 
                        option="plasma",
-                       guide=guide_legend(), na.value = "transparent")
+                       guide=guide_legend(), na.value = "transparent") + 
+  guides(fill=guide_legend(ncol=1, title.position="right")) 
+
+# Plot the tree and the heatmap next to each other 
+Mollusc_Species_Tree_heatmap <- Mollusc_Species_Tree + species_gene_heatmap
+
+ggsave(filename = "Mollusc_Species_Tree_heatmap.tiff", plot= Mollusc_Species_Tree_heatmap, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
+       width = 8.7 ,
+       height = 7,
+       units = "in",
+       dpi=300)
 
 #### SCRAP CODE ####
 
