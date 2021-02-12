@@ -2087,6 +2087,65 @@ ggsave(filename = "IAP_gene_prot_combined_trees_10232020.tiff", plot=combined_tr
        units = "in",
        height = 15, width = 18,
        dpi=300)
+
+## Febraury 12th changing plot orientation and stacking the two trees 
+# remove tree plot margins 
+IAP_GENE_all_species_raxml_treedata_circular_gene_no_margin <- ggtree(IAP_GENE_all_species_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
+  geom_tiplab2(aes(label=label,angle=angle), size =2.2, offset=.5) + # geom_tiplab2 flips the labels correctly
+  #Edit theme
+  theme(legend.position = "bottom", 
+        legend.text = element_text(face = "italic", size=8, family="sans"),
+        legend.title = element_text(size=12, family="sans"),
+        plot.margin = margin(0,0,0,0)) +
+  #xlim(-100,100)  +
+  # add circle for 90-100 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  # add triangle for 70-89 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  # add upside down traingle for 50-69 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  # fix legend appearance
+  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")) ) + # need to override aes to get rid of "a"
+  scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32",  "#a68340",
+                                                 "#a3c763", "#c257b0", "#c083d0","#59a1cf","#c2134a","#ead76b"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis", 
+                                                                                                                                             "Elysia_chlorotica","Lottia_gigantea", "Octopus_bimaculoides", "Octopus_vulgaris", "Pomacea_canaliculata", "Biomphalaria_glabrata","Aplysia_californica"),
+                      labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis", 
+                                 "Elysia chlorotica","Lottia gigantea", "Octopus bimaculoides", "Octopus vulgaris", "Pomacea canaliculata", "Biomphalaria glabrata", "Aplysia californica")) 
+
+
+IAP_raxml_treedata_circular_product_no_margin <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
+  geom_tiplab2(aes(label=alias,angle=angle), size =1.8, offset=.5) + # geom_tiplab2 flips the labels correctly
+  #Edit theme
+  theme(legend.position = "bottom", 
+        legend.text = element_text(face = "italic", size=8, family="sans"),
+        legend.title = element_text(size=12, family="sans"),
+        plot.margin = margin(0,0,0,0)) +
+  #xlim(-100,100)  +
+  # add circle for 90-100 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  # add triangle for 70-89 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  # add upside down traingle for 50-69 instead of bootstrap values
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  # fix legend appearance
+  guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")) ) + # need to override aes to get rid of "a"
+  scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32",  "#a68340",
+                                                 "#a3c763", "#c257b0", "#c083d0","#59a1cf","#c2134a","#ead76b"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis", 
+                                                                                                                                             "Elysia_chlorotica","Lottia_gigantea", "Octopus_bimaculoides", "Octopus_vulgaris", "Pomacea_canaliculata", "Biomphalaria_glabrata","Aplysia_californica"),
+                      labels = c("Crassostrea gigas", "Crassostrea virginica","Mizuhopecten yessoensis", 
+                                 "Elysia chlorotica","Lottia gigantea", "Octopus bimaculoides", "Octopus vulgaris", "Pomacea canaliculata", "Biomphalaria glabrata", "Aplysia californica")) 
+
+combined_stacked_trees <- ggpubr::ggarrange(IAP_GENE_all_species_raxml_treedata_circular_gene_no_margin,IAP_raxml_treedata_circular_product_no_margin,
+                                    ncol = 1, labels = c("A","B"), font.label = list(size = 16, family = "sans"), common.legend = TRUE,
+                                    legend = "bottom")
+
+ggsave(filename = "IAP_gene_prot_combined_trees_2_12_21.tiff", combined_stacked_trees, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
+       units = "in",
+       height = 18, width = 10,
+       dpi=300)
+
+
 #### PLOT IAP MY, CV, CG PROTEIN TREE WITH DOMAIN INFO ####
 
 # Load and parse RAxML bipartitions bootstrapping file with treeio. File input is the bootstrapping analysis output
@@ -3850,7 +3909,7 @@ RCircos.Set.Core.Components(cyto.info = C_vir_rtracklayer_chromosome_bed_label,
 # modifying plot parameters
 rcircos.params <- RCircos.Get.Plot.Parameters();
 rcircos.params$base.per.unit <- 3000;
-rcircos.params$text.size <- 3
+rcircos.params$text.size <- 1
 #rcircos.params$chr.name.pos <- 1
 rcircos.params$char.width <- 50
 rcircos.params$line.color <- "black"
