@@ -2136,8 +2136,10 @@ IAP_raxml_treedata_circular_product_no_margin <- ggtree(IAP_raxml_treedata, layo
                                  "Elysia chlorotica","Lottia gigantea", "Octopus bimaculoides", "Octopus vulgaris", "Pomacea canaliculata", "Biomphalaria glabrata", "Aplysia californica")) 
 
 combined_stacked_trees <- ggpubr::ggarrange(IAP_GENE_all_species_raxml_treedata_circular_gene_no_margin,IAP_raxml_treedata_circular_product_no_margin,
-                                    ncol = 1, labels = c("A","B"), font.label = list(size = 16, family = "sans"), common.legend = TRUE,
+                                    ncol = 1, labels = c("A","B"), font.label = list(size = 20, family = "sans"), common.legend = TRUE,
                                     legend = "bottom")
+
+## add species tree so I can label the gene numbers 
 
 ggsave(filename = "IAP_gene_prot_combined_trees_2_12_21.tiff", combined_stacked_trees, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
@@ -6429,13 +6431,21 @@ C_gig_vst_common_df_all_mat_limma_GIMAP
 C_vir_vst_common_df_all_mat_limma_GIMAP
 
 
- 
 #### PLOT ORTHOFINDER SPECIES TREE  ####
-Mollusc_Species_Tree_text <-"((Octopus_bimaculoides:0.0710909,Octopus_sinensis:0.056727)N1:0.21781,((Mizuhopecten_yessoensis:0.315015,(Crassostrea_gigas:0.0955031,C_virginica:0.0982277)N5:0.236348)N3:0.0835452,(Lottia_gigantea:0.31253,(Pomacea_canaliculata:0.34807,(Elysia_chlorotica:0.303751,(Biomphalaria_glabrata:0.296022,Aplysia_californica:0.248891)N8:0.0608488)N7:0.129889)N6:0.0520687)N4:0.0492055)N2:0.21781)N0;"
+Mollusc_Species_Tree_text <-"((Octopus_bimaculoides:0.0710909,Octopus_sinensis:0.056727)N1:0.21781,((Mizuhopecten_yessoensis:0.315015,(Crassostrea_gigas:0.0955031,Crassostrea_virginica:0.0982277)N5:0.236348)N3:0.0835452,(Lottia_gigantea:0.31253,(Pomacea_canaliculata:0.34807,(Elysia_chlorotica:0.303751,(Biomphalaria_glabrata:0.296022,Aplysia_californica:0.248891)N8:0.0608488)N7:0.129889)N6:0.0520687)N4:0.0492055)N2:0.21781)N0;"
 Mollusc_Species_Tree <- read.newick(text=Mollusc_Species_Tree_text)
 Mollusc_Species_tibble <- as.tibble(Mollusc_Species_Tree)
 
-Mollusc_Species_Treedata <- as.treedata(Mollusc_Species_tibble)
+# add gene numbers to this table 
+All_mollusc_IAP_gene_list_after_haplotig_collapsed_sinensis <- All_mollusc_IAP_gene_list_after_haplotig_collapsed %>% 
+  mutate(Species = case_when(Species == "Octopus_vulgaris" ~ "Octopus_sinensis",
+         TRUE ~ Species))
+
+Mollusc_Species_tibble_join <- Mollusc_Species_tibble %>% rename(Species = label) %>% 
+  left_join(., All_mollusc_IAP_gene_list_after_haplotig_collapsed_sinensis) %>% rename(label = Species, Genes = n)
+Mollusc_Species_tibble_join$Genes <- as.numeric(Mollusc_Species_tibble_join$Genes)
+
+Mollusc_Species_Treedata <- as.treedata(Mollusc_Species_tibble_join)
 
 # write out species and genus
 genus <- c('Octopus', 'Octopus','Mizuhopecten','Crassostrea','Crassostrea','Lottia','Pomacea','Elysia','Biomphalaria','Aplysia')
@@ -6443,18 +6453,49 @@ species <- c('bimaculoides','sinensis','yessoensis','gigas','virginica','gigante
              'glabrata','californica')
 d <- data.frame(label = Mollusc_Species_Tree$tip.label,
                 genus = genus,
-                species = species
-                )
-
-# Change tip labels to be properly formatted
-lb = get.tree(Mollusc_Species_Tree)$tip.label
-d = data.frame(label=lb, label2 = paste(lb))
+                species = species)
 
 # Plot species tree only
 Mollusc_Species_Tree <- ggtree(Mollusc_Species_Treedata, branch.length = "none") %<+% d +
   geom_tiplab(align=TRUE, aes(label=paste0('italic(', genus,')~italic(', species, ')')), parse=T) + # italicize species labels 
-  ggtitle("Species Tree Orthogroup Analysis") +  xlim(0,17)
+   xlim(0,17) 
 
+# Create simple heatmap to plot the gene number to add next to the tree 
+no_y_axis <- function () 
+  theme(axis.line.y = element_blank(), 
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+
+no_x_axis <- function () 
+  theme(axis.line.x = element_blank(), 
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+# put in order of the species tree 
+All_mollusc_IAP_gene_list_after_haplotig_collapsed_sinensis$Species <- factor(All_mollusc_IAP_gene_list_after_haplotig_collapsed_sinensis$Species, 
+          levels = c("Octopus_bimaculoides","Octopus_sinensis","Mizuhopecten_yessoensis","Crassostrea_gigas","Crassostrea_virginica","Lottia_gigantea","Pomacea_canaliculata","Elysia_chlorotica","Biomphalaria_glabrata","Aplysia_californica"),
+          labels = c("Octopus bimaculoides","Octopus sinensis","Mizuhopecten yessoensis","Crassostrea gigas","Crassostrea virginica","Lottia gigantea","Pomacea canaliculata","Elysia chlorotica","Biomphalaria glabrata","Aplysia californica"))
+
+species_gene_heatmap <- All_mollusc_IAP_gene_list_after_haplotig_collapsed_sinensis %>% 
+  # add dummy category so I can only plot one row
+  mutate(category = "all") %>%
+ggplot(., aes(y=Species, x =category)) + geom_tile(aes(fill=n)) + no_y_axis() + no_x_axis() + 
+  theme(panel.background = element_rect(fill = "transparent"),
+        legend.position = "bottom",
+        legend.box = "horizontal",
+        legend.text = element_text(size=14, family="sans"),
+        legend.title = element_text(size=16, family="sans"),
+    #    axis.text.y = element_text(size = 14, family = "sans", face = "italic")) +
+    axis.text.y = element_blank()) +
+  # fill tiles with the number
+  geom_text(size = 8, aes(label = round(n, 1))) +
+  scale_fill_viridis_c(name = "IAP Gene Number", 
+                       limits = c(0,90),
+                       breaks = c(10,20,30,40,50,60,70,80,90), 
+                       option="plasma",
+                       guide=guide_legend(), na.value = "transparent")
 
 #### SCRAP CODE ####
 
