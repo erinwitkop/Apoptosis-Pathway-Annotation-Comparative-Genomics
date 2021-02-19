@@ -48,6 +48,11 @@ All_molluscs_CDS_gff <- readGFF(file="/Volumes/My Passport for Mac/OrthoFinder_G
 All_molluscs_CDS_gff <- as.data.frame(All_molluscs_CDS_gff)
 All_mollusc_gene_gff <- readGFF(file="/Volumes/My Passport for Mac/OrthoFinder_Genomes_Mar_2020_Paper1/GFF3/All_mollusc_gene.gff")
 All_mollusc_gene_gff <- as.data.frame(All_mollusc_gene_gff)
+All_mollusc_exon_gff <- readGFF(file="/Volumes/My Passport for Mac/OrthoFinder_Genomes_Mar_2020_Paper1/GFF3/All_mollusc_exon.gff")
+All_mollusc_exon_gff <- as.data.frame(All_mollusc_exon_gff)
+
+# remove from memory when not using
+rm(All_molluscs_CDS_gff,All_mollusc_gene_gff,All_mollusc_exon_gff)
 
 ### MANUAL SEARCH OF IAPS AND GIMAPS IN REFERENCE ANNOTATION ####
 Cvir_gff_IAP_family <- C_vir_rtracklayer[grepl("inhibitor of apoptosis", C_vir_rtracklayer$product, ignore.case=TRUE) | grepl("XIAP", C_vir_rtracklayer$product, ignore.case=TRUE) |
@@ -2136,7 +2141,7 @@ IAP_raxml_treedata_circular_product_no_margin <- ggtree(IAP_raxml_treedata, layo
                                  "Elysia chlorotica","Lottia gigantea", "Octopus bimaculoides", "Octopus vulgaris", "Pomacea canaliculata", "Biomphalaria glabrata", "Aplysia californica")) 
 
 combined_stacked_trees <- ggpubr::ggarrange(IAP_GENE_all_species_raxml_treedata_circular_gene_no_margin,IAP_raxml_treedata_circular_product_no_margin,
-                                    ncol = 1, labels = c("A","B"), font.label = list(size = 20, family = "sans"), common.legend = TRUE,
+                                    ncol = 1, labels = c("A","B"), font.label = list(size = 30, family = "sans"), common.legend = TRUE,
                                     legend = "bottom")
 
 ## add species tree so I can label the gene numbers 
@@ -3870,6 +3875,52 @@ C_gig_rtracklayer_intronless_IAP <- C_gig_rtracklayer_intronless[C_gig_rtracklay
 C_vir_chromsome_char <- data.frame(seqid = c(   "NC_035780.1","NC_035781.1","NC_035782.1","NC_035783.1","NC_035784.1","NC_035785.1","NC_035786.1","NC_035787.1","NC_035788.1","NC_035789.1","NC_007175.2"),
                                    Chromosome = c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","MT"))
 
+## identify in all mollusc Gff
+All_mollusc_exon_gff_intronless <- All_mollusc_exon_gff %>% distinct(start, end, .keep_all = TRUE) %>% count(gene) %>% filter(n == 1)
+All_mollusc_exon_gff_intronless_locus <- All_mollusc_exon_gff %>% distinct(start, end, .keep_all = TRUE) %>% count(locus_tag) %>% filter(n == 1)
+All_mollusc_exon_gff_intronless_IAP <- All_mollusc_exon_gff_intronless[All_mollusc_exon_gff_intronless$gene %in% All_gene_species$gene,]
+All_mollusc_exon_gff_intronless_IAP_locus <- All_mollusc_exon_gff_intronless_locus[All_mollusc_exon_gff_intronless_locus$locus_tag %in% All_gene_species$gene,]
+
+
+# match with species
+left_join(All_mollusc_exon_gff_intronless_IAP, All_gene_species[,c("gene","Species")])
+All_mollusc_exon_gff_intronless_IAP_locus %>% rename(gene = locus_tag) %>% left_join(., All_gene_species[,c("gene","Species")])
+
+#Joining, by = "gene"
+#gene n           Species
+#1       EGW08_017511 1 Elysia_chlorotica
+#2  LOTGIDRAFT_111196 1   Lottia_gigantea
+#3  LOTGIDRAFT_113794 1   Lottia_gigantea
+#4  LOTGIDRAFT_119876 1   Lottia_gigantea
+#5  LOTGIDRAFT_125617 1   Lottia_gigantea
+#6  LOTGIDRAFT_139361 1   Lottia_gigantea
+#7   LOTGIDRAFT_59237 1   Lottia_gigantea
+#8   LOTGIDRAFT_59297 1   Lottia_gigantea
+#9   LOTGIDRAFT_59316 1   Lottia_gigantea
+#10  LOTGIDRAFT_59317 1   Lottia_gigantea
+#11  LOTGIDRAFT_59566 1   Lottia_gigantea
+#12  LOTGIDRAFT_69569 1   Lottia_gigantea
+#13  LOTGIDRAFT_69570 1   Lottia_gigantea
+
+
+# Joining, by = "gene"
+# gene n                 Species
+# 1  LOC105338159 1       Crassostrea_gigas
+# 2  LOC105345723 1       Crassostrea_gigas
+# 3  LOC106075513 1   Biomphalaria_glabrata
+# 4  LOC106077001 1   Biomphalaria_glabrata
+# 5  LOC109617982 1       Crassostrea_gigas
+# 6  LOC110462844 1 Mizuhopecten_yessoensis
+# 7  LOC111105137 1   Crassostrea_virginica
+# 8  LOC111109152 1   Crassostrea_virginica
+# 9  LOC111116378 1   Crassostrea_virginica
+# 10 LOC111116826 1   Crassostrea_virginica
+# 11 LOC111117137 1   Crassostrea_virginica
+# 12 LOC111117856 1   Crassostrea_virginica
+# 13 LOC111132301 1   Crassostrea_virginica
+# 14 LOC111132489 1   Crassostrea_virginica
+# 15 LOC115223103 1        Octopus_vulgaris
+
 ## get coodinates for all Cvir IAPs
   # already calculated this on line 1166
 BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label <- BIR_XP_gff_species_join_haplotig_collapsed_CV_gene %>% 
@@ -3899,7 +3950,7 @@ C_vir_rtracklayer_chromosome_bed_label$ChromStart <- as.numeric(C_vir_rtracklaye
 C_vir_rtracklayer_chromosome_bed_label$ChromEnd <- as.numeric(C_vir_rtracklayer_chromosome_bed_label$ChromEnd)
 
 # turn on graphics device
-out.file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/Cvir_rtracklayer_RCircos10.pdf";
+out.file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/Cvir_rtracklayer_RCircos11.pdf";
 pdf(file=out.file, height = 7, width = 7);
 RCircos.Set.Plot.Area();
 
@@ -3911,7 +3962,7 @@ RCircos.Set.Core.Components(cyto.info = C_vir_rtracklayer_chromosome_bed_label,
 # modifying plot parameters
 rcircos.params <- RCircos.Get.Plot.Parameters();
 rcircos.params$base.per.unit <- 3000;
-rcircos.params$text.size <- 1
+rcircos.params$text.size <- 0.2
 #rcircos.params$chr.name.pos <- 1
 rcircos.params$char.width <- 50
 rcircos.params$line.color <- "black"
@@ -4857,6 +4908,25 @@ C_vir_C_gig_IAP_domain_structure_no_dup_rm_count_table <- C_vir_C_gig_IAP_domain
   
 # save as png
 gtsave(C_vir_C_gig_IAP_domain_structure_no_dup_rm_count_table, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/TABLES/C_vir_C_gig_IAP_domain_structure_no_dup_rm_count_table.png")
+
+# get same statistics but how many genes in each group 
+# perform separately so I can create a wide table for data visualization
+C_vir_IAP_domain_structure_no_dup_rm_count_GENE <- IAP_domain_structure_no_dup_rm %>%
+  filter(Species == "Crassostrea_virginica") %>% 
+  # add up number of unique proteins in each experiment
+  distinct(gene, .keep_all = TRUE) %>%
+  group_by(Domain_Name) %>%
+  dplyr::summarise(CV_total_per_domain = n()) %>%
+  mutate(CV_percent_of_total = CV_total_per_domain/sum(CV_total_per_domain)) %>% arrange(desc(CV_total_per_domain))
+
+C_gig_IAP_domain_structure_no_dup_rm_count_GENE <- IAP_domain_structure_no_dup_rm %>%
+  filter(Species == "Crassostrea_gigas") %>% 
+  # add up number of unique proteins in each experiment
+  distinct(gene , .keep_all = TRUE) %>%
+  group_by(Domain_Name) %>%
+  dplyr::summarise(CG_total_per_domain = n()) %>%
+  mutate(CG_percent_of_total = CG_total_per_domain/sum(CG_total_per_domain)) %>% arrange(desc(CG_total_per_domain))
+
 
 ### Export Data frame of DEG IAPs and domain groupsing to in WGCNA
 
@@ -6458,7 +6528,7 @@ d <- data.frame(label = Mollusc_Species_Tree$tip.label,
 # Plot species tree only
 Mollusc_Species_Tree <- ggtree(Mollusc_Species_Treedata, branch.length = "none") %<+% d +
   geom_tiplab(align=TRUE, aes(label=paste0('italic(', genus,')~italic(', species, ')')), parse=T) + # italicize species labels 
-   xlim(0,17) + theme(plot.margin = unit(c(0,0,0,0), "cm"))
+   xlim(0,17) + theme(plot.margin = unit(c(0,0,0,0), "cm"), text = element_text(size = 14))
 
 # Create simple heatmap to plot the gene number to add next to the tree 
 no_y_axis <- function () 
