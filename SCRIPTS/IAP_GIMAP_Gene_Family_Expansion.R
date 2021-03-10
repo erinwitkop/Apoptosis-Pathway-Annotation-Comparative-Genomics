@@ -1709,7 +1709,7 @@ IAP_GENE_Interpro_Domains_only_reorder_subset_distinct_title %>% filter(grepl("i
     #3 LOC111103270 InterPro:IPR010998            Integrase/recombinase, N-terminal
     #4 LOC111100017 InterPro:IPR001584                    Integrase, catalytic core
     #5 LOC111100017 InterPro:IPR041588                Integrase zinc-binding domain
-# 
+
 # RT, Integrase, and RnaseH needed for retrotransposon
 IAP_GENE_Interpro_Domains_only_reorder_subset_distinct_title %>% filter(grepl("integrase", ignore.case = TRUE, title) | grepl("RT", ignore.case = TRUE, title) | grepl("RNase", ignore.case = TRUE, title) |
                                                                           grepl("Ribonuclease", ignore.case = TRUE, title)) %>% 
@@ -1902,26 +1902,412 @@ IAP_GENE_Interproscan_domain_plot_domain_subset <- ggplot() +
   # change number of legend columns and put the legend title on top
   guides(fill=guide_legend(ncol=3, title.position="top")) 
 
-# add shading domain group boxes and text
-#IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text <- 
-#  IAP_Interproscan_domain_plot_BIR_type_domain_subset + 
-#  geom_rect(data=BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect, inherit.aes=FALSE,
-#            aes(ymin=min_start_per_group ,ymax=max_end_per_group,xmin=xmin,xmax=xmax,
-#                group=Color_group), 
-#            # fill works if you put outside of aes and inlude the colors in the data itseld
-#            fill = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_rect$Color_group,
-#            color = "gray86", # add border color
-#            size=0.2, # set border line thickness 
-#            alpha=0.1)  + # make translucent 
-#  # add text for domain name
-#  geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
-#            aes(x=text_name, y = y_midpoint, label = Domain_Name, family= "sans", fontface = Bold_group),
-#            size = 7)  
-## add text for Number, DECIDED TO REMOVE THE NUMBERS FROM HERE AND JUST KEEP WITH THE TREE PLOT
-##geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
-##          aes(x=text_number, y = y_midpoint, label = Number, family= "sans", fontface = Bold_group),
-##          size = 6)  
-#
+
+## Create gene domain tree with BIR domains removed 
+## March 1st, 2021, removing BIR domains from the domain annotation data frame tree in order to reduce tree clutter
+IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm <- IAP_GENE_Interpro_Domains_only_reorder_subset %>% 
+  filter(Dbxref != "InterPro:IPR001370") %>% filter(Dbxref != "InterPro:IPR022103") %>% filter(Dbxref !="SSF57924") %>% filter(Dbxref != "G3DSA:1.10.1170.10") %>%
+  filter(Dbxref !="G3DSA:1.10.533.10") %>% filter(Dbxref != "InterPro:IPR001841")  %>% filter(Dbxref != "InterPro:IPR013083") %>% filter(Dbxref != "G3DSA:4.10.60.10") %>%
+        filter(Dbxref != "PF13920") %>% filter(Dbxref !="cd16713") %>% filter(Dbxref != "SSF57850")
+
+#2 InterPro:IPR022103 "\"InterPro:IPR022103\"," Baculoviral IAP repeat-containing protein 6            "\"#5ba6a6\"," NA       
+#3 InterPro:IPR001370 "\"InterPro:IPR001370\"," BIR repeat                                             "\"#524ed4\"," NA       
+#4 SSF57924           "\"SSF57924\","           Inhibitor of apoptosis (IAP) repeat                    "\"#524ed4\"," NA       
+#5 G3DSA:1.10.1170.10 "\"G3DSA:1.10.1170.10\"," Inhibitor Of Apoptosis Protein (2mihbC-IAP-1); Chain A "\"#524ed4\"," NA   
+
+
+### Create main plot ###
+IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset <- ggplot() + 
+  # plot length of each protein as line
+  geom_segment(data = IAP_GENE_Interpro_Domains_all_full_prot_shortened,
+               aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
+  # add protein domain boxes with geom_rect 
+  geom_rect(data=IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm,inherit.aes = FALSE,
+            aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Dbxref)) +
+  #add labels
+  labs(y = NULL, x = "Nucleotide position") +
+  # add theme
+  theme_bw() + 
+  # plot theme
+  theme(axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black"),
+        legend.position = "bottom",
+        legend.box = "vertical",
+        legend.text = element_text(size=14, family="sans"),
+        legend.title = element_text(size=16, family="sans"),
+        axis.text.x=element_text(size=18, family="sans"),
+        axis.title.x.bottom = element_text(size=18, family="sans")) +
+  # Change y axis ticks
+  scale_x_continuous(breaks=c(0,500,1000,1500,1800), expand = c(0,0)) + 
+  # Change domain labels 
+  scale_fill_manual(values=c(                "#b2dbfe",
+                                             "#b6eee2",
+                                             "#b6eee2",
+                                             "#b6eee2",
+                                            # "brown", 
+                                             "#53e1a1",
+                                             "#d393d4",
+                                             "#b77853",
+                                             "#57e5d6",
+                                             "#e1c2aa",
+                                             "#d04d8f",
+                                             "#d04d8f",
+                                             "#d04d8f",
+                                             "#495f3a",
+                                             "#89599b",
+                                             "#c058c6",
+                                             "#c058c6",
+                                             "#c058c6",
+                                             "#c058c6",
+                                             "#79e379",
+                                             "#79e379",
+                                             "#79e379",
+                                             "#79e379",
+                                             "#79e379",
+                                             "#5db8de",
+                                             "#5db8de",
+                                             "#5db8de",
+                                             "#55b793",
+                                             "#55b793",
+                                             "#55b793",
+                                             #"#dadd48",
+                                            # "#dadd48",
+                                             "#ba4c46",
+                                             "#ba4c46",
+                                             "#85c967",
+                                             "#59388a",
+                                             "#59388a",
+                                             "#59388a",
+                                             "#6d82d9",
+                                             "#6d82d9",
+                                             "#6d82d9",
+                                             "#caad44",
+                                             #"#d95750",
+                                             #"#d95750",
+                                             #"#d95750",
+                                             #"#d95750",
+                                            "black"), 
+                    name="Functional Domains",
+                    breaks=c( "InterPro:IPR006703",
+                              "InterPro:IPR016187",
+                              "InterPro:IPR001304",
+                              "InterPro:IPR016186",
+                            #  "G3DSA:1.10.533.10",
+                              "InterPro:IPR011010",
+                              "InterPro:IPR008593",
+                              "cd00397",
+                              "InterPro:IPR043502",
+                              "InterPro:IPR036691",
+                              "InterPro:IPR000305",
+                              "InterPro:IPR035901",
+                              "InterPro:IPR011335",
+                              "InterPro:IPR011604",
+                              "InterPro:IPR009057",
+                              "InterPro:IPR013098",
+                              "InterPro:IPR007110",
+                              "InterPro:IPR036179",
+                              "InterPro:IPR013783",
+                              "InterPro:IPR041588",
+                              "InterPro:IPR013762",
+                              "InterPro:IPR001584",
+                              "InterPro:IPR002104",
+                              "InterPro:IPR010998",
+                              "InterPro:IPR043128",
+                              "InterPro:IPR000477",
+                              "InterPro:IPR026960",
+                              "InterPro:IPR002156",
+                              "InterPro:IPR036397",
+                              "InterPro:IPR012337",
+                              #"cd16713",
+                              #"SSF57850",
+                              "cd09275",
+                              "cd09274",
+                              "cd09276",
+                              "cd03714",
+                              "cd01647",
+                              "cd01650",
+                              "InterPro:IPR038717",
+                              "InterPro:IPR027805",
+                              "InterPro:IPR002492",
+                              "InterPro:IPR019080",
+                              #"InterPro:IPR001841",
+                              #"InterPro:IPR013083",
+                              #"G3DSA:4.10.60.10",
+                              #"PF13920",
+                            "gene_shortened"),
+                    labels=c("AIG1-type guanine nucleotide-binding (G) domain",
+                             "C-type lectin fold",
+                             "C-type lectin-like",
+                             "C-type lectin-like/link domain superfamily",
+                            # "Death Domain, Fas",
+                             "DNA breaking-rejoining enzyme, catalytic core",
+                             "DNA N-6-adenine-methyltransferase",
+                             "DNA_BRE_C ",
+                             "DNA/RNA polymerase superfamily",
+                             "Endonuclease/exonuclease/phosphatase superfamily",
+                             "GIY-YIG endonuclease",
+                             "GIY-YIG endonuclease superfamily",
+                             "Restriction endonuclease type II-like",
+                             "Exonuclease, phage-type/RecB, C-terminal",
+                             "Homeobox-like domain superfamily",
+                             "Immunoglobulin I-set",
+                             "Immunoglobulin-like domain",
+                             "Immunoglobulin-like domain superfamily",
+                             "Immunoglobulin-like fold",
+                             "Integrase zinc-binding domain",
+                             "Integrase-like, catalytic domain superfamily",
+                             "Integrase, catalytic core",
+                             "Integrase, catalytic domain",
+                             "Integrase/recombinase, N-terminal",
+                             "Reverse transcriptase/Diguanylate cyclase domain",
+                             "Reverse transcriptase domain",
+                             "Reverse transcriptase zinc-binding domain",
+                             "Ribonuclease H domain",
+                             "Ribonuclease H superfamily",
+                             "Ribonuclease H-like superfamily",
+                             #"RING-HC_BIRC2_3_7",
+                             #"RING/U-box",
+                             "RNase_HI_RT_DIRS1 ",
+                             "Ty3/Gypsy family of RNase HI in long-term repeat retroelements",
+                             "non-LTR RNase HI domain of reverse transcriptases",
+                             "RT_DIRS1 ",
+                             "RT_LTR: Reverse transcriptases (RTs) from retrotransposons and retroviruses ",
+                             "RT_nLTR_like ",
+                             "Tc1-like transposase, DDE domain",
+                             "Transposase, Helix-turn-helix domain",
+                             "Transposase, Tc1-like",
+                             "YqaJ viral recombinase",
+                             #"Zinc finger, RING-type",
+                             #"Zinc finger, RING/FYVE/PHD-type",
+                             #"Zinc finger, CCHC-type",
+                             #"Zinc finger, C3HC4 type (RING finger)",
+                             "Full Gene Length Shortened")) +
+  # change number of legend columns and put the legend title on top
+  guides(fill=guide_legend(ncol=3, title.position="top"))
+
+
+## Create separate plot only with the genes of interest, separated by species
+IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro <- IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm %>% filter(!is.na(node)) %>%
+  # order by species and gene
+  arrange(desc(Species,gene)) %>%
+  # remove existing height
+  dplyr::select(!c(height_start,height_end))
+  
+IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro_height <- IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro %>% distinct(gene) %>%
+  # add in the height start and end 
+mutate(height_start = rev(as.numeric(row.names(.)) - 0.25)) %>%
+  mutate(height_end = rev(as.numeric(row.names(.)) + .5))
+
+# join back in height 
+IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro <- left_join(IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro, IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro_height)
+IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro$gene <- factor(IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro$gene, levels =unique(IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro$gene))
+
+# make dataframe for the protein lines
+IAP_GENE_Interpro_Domains_all_full_prot_shortened_only_retro <- IAP_GENE_Interpro_Domains_all_full_prot_shortened[IAP_GENE_Interpro_Domains_all_full_prot_shortened$gene %in%IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro$gene,]
+IAP_GENE_Interpro_Domains_all_full_prot_shortened_only_retro <- IAP_GENE_Interpro_Domains_all_full_prot_shortened_only_retro %>% mutate(end = 1500) %>% 
+  arrange(desc(Species,gene)) %>% mutate(node = rev(as.numeric(row.names(.))))
+
+# find gene names to print
+IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro_ID <- IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro %>% distinct(gene, Species) %>% mutate(species_gene = paste(Species, gene, sep = " "))
+View(rev(IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro_ID$species_gene))
+
+IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro <- ggplot() + 
+  # plot length of each protein as line
+  geom_segment(data = IAP_GENE_Interpro_Domains_all_full_prot_shortened_only_retro,
+               aes(x=as.numeric(start), xend=as.numeric(end), y=node, yend=node), color = "grey") +
+  # add protein domain boxes with geom_rect 
+  geom_rect(data=IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro,inherit.aes = FALSE,
+            aes(xmin=start, xmax=end, ymin=height_start, ymax=height_end, fill= Dbxref)) +
+  #add labels
+  labs(y = NULL, x = "Nucleotide position") +
+  # add theme
+  theme_bw() + 
+  # plot theme
+  theme(
+    #axis.ticks.y = element_blank(), 
+        axis.text.y = ggtext::element_markdown(size=18, family="sans"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black"),
+        legend.position = "bottom",
+        legend.box = "vertical",
+        legend.text = element_text(size=18, family="sans"),
+        legend.title = element_text(size=18, family="sans"),
+        axis.text.x=element_text(size=18, family="sans"),
+        axis.title.x.bottom = element_text(size=18, family="sans")) +
+  # Change y axis ticks
+  scale_x_continuous(breaks=c(0,500,1000,1500)) + 
+  # change y axis labels
+ scale_y_discrete(name = NULL, limits = c("*C. gigas* LOC105339790",
+                                               "*C. virginica* LOC111100017",
+                                               "*C. virginica* LOC111100407",
+                                               "*C. virginica* LOC111100394",
+                                               "*C. virginica* LOC111112532",
+                                               "*C. virginica* LOC111103270",
+                                               "*C. virginica* LOC111103155",
+                                               "*M. yessoensis* LOC110457936",
+                                               "*M. yessoensis* LOC110458047",
+                                               "*M. yessoensis* LOC110462612",
+                                               "*M. yessoensis* LOC110465395",
+                                               "*M. yessoensis* LOC110456394",
+                                               "*M. yessoensis* LOC110456920",
+                                               "*M. yessoensis* LOC110457934",
+                                               "*M. yessoensis* LOC110456891",
+                                               "*M. yessoensis* LOC110456458",
+                                               "*M. yessoensis* LOC110451590",
+                                               "*M. yessoensis* LOC110452306",
+                                               "*M. yessoensis* LOC110460644"))  +
+  # Change domain labels 
+  scale_fill_manual(values=c(                "#b2dbfe",
+                                             "#b6eee2",
+                                             "#b6eee2",
+                                             "#b6eee2",
+                                             # "brown", 
+                                             "#53e1a1",
+                                             "#d393d4",
+                                             "#b77853",
+                                             "#57e5d6",
+                                             "#e1c2aa",
+                                             "#d04d8f",
+                                             "#d04d8f",
+                                             "#d04d8f",
+                                             "#495f3a",
+                                             "#89599b",
+                                             "#c058c6",
+                                             "#c058c6",
+                                             "#c058c6",
+                                             "#c058c6",
+                                             "#79e379",
+                                             "#79e379",
+                                             "#79e379",
+                                             "#79e379",
+                                             "#79e379",
+                                             "#5db8de",
+                                             "#5db8de",
+                                             "#5db8de",
+                                             "#55b793",
+                                             "#55b793",
+                                             "#55b793",
+                                             #"#dadd48",
+                                             # "#dadd48",
+                                             "#ba4c46",
+                                             "#ba4c46",
+                                             "#85c967",
+                                             "#59388a",
+                                             "#59388a",
+                                             "#59388a",
+                                             "#6d82d9",
+                                             "#6d82d9",
+                                             "#6d82d9",
+                                             "#caad44",
+                                             #"#d95750",
+                                             #"#d95750",
+                                             #"#d95750",
+                                             #"#d95750",
+                                             "black"), 
+                    name="Functional Domains",
+                    breaks=c( "InterPro:IPR006703",
+                              "InterPro:IPR016187",
+                              "InterPro:IPR001304",
+                              "InterPro:IPR016186",
+                              #  "G3DSA:1.10.533.10",
+                              "InterPro:IPR011010",
+                              "InterPro:IPR008593",
+                              "cd00397",
+                              "InterPro:IPR043502",
+                              "InterPro:IPR036691",
+                              "InterPro:IPR000305",
+                              "InterPro:IPR035901",
+                              "InterPro:IPR011335",
+                              "InterPro:IPR011604",
+                              "InterPro:IPR009057",
+                              "InterPro:IPR013098",
+                              "InterPro:IPR007110",
+                              "InterPro:IPR036179",
+                              "InterPro:IPR013783",
+                              "InterPro:IPR041588",
+                              "InterPro:IPR013762",
+                              "InterPro:IPR001584",
+                              "InterPro:IPR002104",
+                              "InterPro:IPR010998",
+                              "InterPro:IPR043128",
+                              "InterPro:IPR000477",
+                              "InterPro:IPR026960",
+                              "InterPro:IPR002156",
+                              "InterPro:IPR036397",
+                              "InterPro:IPR012337",
+                              #"cd16713",
+                              #"SSF57850",
+                              "cd09275",
+                              "cd09274",
+                              "cd09276",
+                              "cd03714",
+                              "cd01647",
+                              "cd01650",
+                              "InterPro:IPR038717",
+                              "InterPro:IPR027805",
+                              "InterPro:IPR002492",
+                              "InterPro:IPR019080",
+                              #"InterPro:IPR001841",
+                              #"InterPro:IPR013083",
+                              #"G3DSA:4.10.60.10",
+                              #"PF13920",
+                              "gene_shortened"),
+                    labels=c("AIG1-type guanine nucleotide-binding (G) domain",
+                             "C-type lectin fold",
+                             "C-type lectin-like",
+                             "C-type lectin-like/link domain superfamily",
+                             # "Death Domain, Fas",
+                             "DNA breaking-rejoining enzyme, catalytic core",
+                             "DNA N-6-adenine-methyltransferase",
+                             "DNA_BRE_C ",
+                             "DNA/RNA polymerase superfamily",
+                             "Endonuclease/exonuclease/phosphatase superfamily",
+                             "GIY-YIG endonuclease",
+                             "GIY-YIG endonuclease superfamily",
+                             "Restriction endonuclease type II-like",
+                             "Exonuclease, phage-type/RecB, C-terminal",
+                             "Homeobox-like domain superfamily",
+                             "Immunoglobulin I-set",
+                             "Immunoglobulin-like domain",
+                             "Immunoglobulin-like domain superfamily",
+                             "Immunoglobulin-like fold",
+                             "Integrase zinc-binding domain",
+                             "Integrase-like, catalytic domain superfamily",
+                             "Integrase, catalytic core",
+                             "Integrase, catalytic domain",
+                             "Integrase/recombinase, N-terminal",
+                             "Reverse transcriptase/Diguanylate cyclase domain",
+                             "Reverse transcriptase domain",
+                             "Reverse transcriptase zinc-binding domain",
+                             "Ribonuclease H domain",
+                             "Ribonuclease H superfamily",
+                             "Ribonuclease H-like superfamily",
+                             #"RING-HC_BIRC2_3_7",
+                             #"RING/U-box",
+                             "RNase_HI_RT_DIRS1 ",
+                             "Ty3/Gypsy family of RNase HI in\n long-term repeat retroelements",
+                             "non-LTR RNase HI domain of reverse transcriptases",
+                             "RT_DIRS1 ",
+                             "RT_LTR: Reverse transcriptases (RTs)\n from retrotransposons and retroviruses ",
+                             "RT_nLTR_like ",
+                             "Tc1-like transposase, DDE domain",
+                             "Transposase, Helix-turn-helix domain",
+                             "Transposase, Tc1-like",
+                             "YqaJ viral recombinase",
+                             #"Zinc finger, RING-type",
+                             #"Zinc finger, RING/FYVE/PHD-type",
+                             #"Zinc finger, CCHC-type",
+                             #"Zinc finger, C3HC4 type (RING finger)",
+                             "Full Gene Length Shortened")) +
+  # change number of legend columns and put the legend title on top
+  guides(fill=guide_legend(ncol=3, title.position="top"))
+
 ###  Export and arrange domain plot with tree
 IAP_GENE_raxml_treedata_vertical_legend <- cowplot::get_legend(IAP_GENE_raxml_treedata_vertical)
 IAP_GENE_raxml_treedata_vertical_no_legend <- IAP_GENE_raxml_treedata_vertical + 
@@ -1951,6 +2337,43 @@ ggsave(filename = "IAP_GENE_tr_dom_plus_legend_plot_10142020.tiff", plot=IAP_GEN
        height = 27,
        units = "in",
        dpi=300)
+
+## Mar 1st repeat export procedure for revised plot with BIR domains removed 
+###  Export and arrange domain plot with tree
+
+IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_plot_no_legend <- IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset + theme(legend.position='none')
+IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_plot_legend <- cowplot::get_legend(IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset)
+
+IAP_GENE_tr_dom_collapsed_BIR_rm <- plot_grid(NULL,IAP_GENE_MY_CV_CG_tree, IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_plot_no_legend, ncol=3, align='h',
+                                              rel_widths = c(0.05, 0.7,0.9)) +
+  # Add some space at top for labels
+  theme(plot.margin = unit(c(1,0.5,1,0.0), "cm")) 
+IAP_GENE_tr_dom_collapsed_BIR_rm_legend <- plot_grid(NULL, IAP_GENE_raxml_treedata_vertical_legend, IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_plot_legend,
+                                              nrow = 1, align="hv", rel_widths  =c(0.5, 0.7,1)) 
+
+## Create combined figure for publication
+IAP_GENE_tr_dom_plus_legend_BIR_rm <- plot_grid(IAP_GENE_tr_dom_collapsed_BIR_rm, IAP_GENE_tr_dom_collapsed_BIR_rm_legend,  ncol=1, rel_heights  = c(0.62, 0.1)) +
+  # add labels for plot components
+  draw_plot_label(c("A","B"), x= c(0.35, 0.48), y = c(1,1), size = 30, family = "sans") +
+  # add margin at bottom
+  theme(plot.margin = unit(c(1,3,1,0.0), "cm")) 
+
+## Export plot with tree and domains aligned : USE THIS FOR PUBLICATION
+ggsave(filename = "IAP_GENE_tr_dom_plus_legend_BIR_rm_03092021.tiff", plot=IAP_GENE_tr_dom_plus_legend_BIR_rm, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
+       width = 35.5,
+       height = 27,
+       units = "in",
+       dpi=300)
+
+### Export plot with just the genes that have retrotransposon machinery 
+ggsave(filename = "IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro_03092021.tiff", plot=IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro , device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
+       width = 23,
+       height = 15,
+       units = "in",
+       dpi=300)
+
 
 #### PLOT FULL IAP PROTEIN TREE ####
 # Helpful online tutorial regarding tool: https://www.molecularecologist.com/2017/02/phylogenetic-trees-in-r-using-ggtree/
