@@ -4357,6 +4357,17 @@ BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$Chromosome <- as.factor
 BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$ChromStart <- as.numeric(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$ChromStart)
 BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$ChromEnd <- as.numeric(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label$ChromEnd)
 
+# How many genes on chromosomes 6 and 7
+BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label_count <-  BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label
+BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label_count$Chromosome <- as.character(BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label_count$Chromosome)
+
+BIR_XP_gff_species_join_haplotig_collapsed_CV_gene_label_count %>% filter(Chromosome == "chr6" | Chromosome == "chr7") %>% dplyr::group_by(Chromosome) %>%
+ dplyr::count()
+    # Chromosome     n
+    # <chr>      <int>
+    #   1 chr6          27
+    # 2 chr7          27
+
 ### Generate plot using RCircos 
 
 # change ideogram labels
@@ -4434,6 +4445,75 @@ RCircos.Gene.Name.Plot(C_vir_rtracklayer_intronless_IAP_coord_label,track.num = 
 
 # remember  to turn off at the end
 dev.off()
+
+### Plot IAP gene positions using new C_gigas assembly that is at the chromosome level - March 12th, 2021
+
+# Load the new assembly  GCF_902806645.1_cgigas_uk_roslin_v1_genomic.gff as rtracklayer file, and make bed file
+C_gigas_chr_assembly <- rtracklayer::readGFF("/Users/erinroberts/Downloads/GCF_902806645.1_cgigas_uk_roslin_v1_genomic.gff")
+C_gigas_chr_assembly <- as.data.frame(C_gigas_chr_assembly)
+
+# export chromosome lengths for use in plotting and bedtools 
+C_gigas_chr_assembly_chromosome_bed <- C_gigas_chr_assembly %>% filter(type == "region" & genome == "chromosome") %>% dplyr::select(seqid, start, end)  
+
+## Generate plot using RCircos 
+
+# change ideogram labels
+C_gigas_chr_assembly_chromosome_bed_label <- C_gigas_chr_assembly_chromosome_bed %>% 
+  rename(Chromosome = seqid, ChromStart = start, ChromEnd = end) %>%
+  # add band and stain columns 
+  mutate(Band = "all", Stain = "gvar")
+
+C_gigas_chr_assembly_chromosome_bed_label$Chromosome <- as.factor(C_gigas_chr_assembly_chromosome_bed_label$Chromosome)
+class(C_gigas_chr_assembly_chromosome_bed_label$ChromStart)
+C_gigas_chr_assembly_chromosome_bed_label$ChromStart <- as.numeric(C_gigas_chr_assembly_chromosome_bed_label$ChromStart)
+C_gigas_chr_assembly_chromosome_bed_label$ChromEnd <-   as.numeric(C_gigas_chr_assembly_chromosome_bed_label$ChromEnd)
+
+## get coodinates for all Cvir IAPs
+# already calculated this on line 1166
+BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_label <- BIR_XP_gff_species_join_haplotig_collapsed_CG_gene %>% 
+  rename(Chromosome = seqid, ChromStart = start, ChromEnd = end, Gene = gene)
+
+# turn the gene and chr info into factors and start and end into numeric
+BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_label$Gene <- as.factor(BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_label$Gene)
+BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_label$Chromosome <- as.factor(BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_label$Chromosome)
+BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_label$ChromStart <- as.numeric(BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_label$ChromStart)
+BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_label$ChromEnd <- as.numeric(BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_label$ChromEnd)
+
+# turn on graphics device
+out.file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/Cgig_rtracklayer_RCircos.pdf";
+pdf(file=out.file, height = 7, width = 7);
+RCircos.Set.Plot.Area();
+
+# Initialize RCircos
+RCircos.Set.Core.Components(cyto.info = C_gigas_chr_assembly_chromosome_bed_label, 
+                            # add three tracks inside: gene density, IAP location, intronless IAPs
+                            tracks.inside = 1, tracks.outside = 0) ;
+
+# modifying plot parameters
+rcircos.params <- RCircos.Get.Plot.Parameters();
+rcircos.params$base.per.unit <- 3000;
+rcircos.params$text.size <- 0.2
+#rcircos.params$chr.name.pos <- 1
+rcircos.params$char.width <- 50
+rcircos.params$line.color <- "black"
+rcircos.params$track.background <- "white"
+rcircos.params$hist.color <- "blue"
+rcircos.params$grid.line.color <- "black"
+rcircos.params$chrom.width <- 0.05
+#rcircos.params$highlight.width <- 0.1
+RCircos.Reset.Plot.Parameters(rcircos.params);
+
+# plot ideogram 
+RCircos.Chromosome.Ideogram.Plot();
+
+# add IAP gene labels 
+gene.data <- BIR_XP_gff_species_join_haplotig_collapsed_CG_gene_label
+RCircos.Gene.Connector.Plot(gene.data, track.num = 2, side = "in", is.sorted = FALSE, genomic.columns = 3);
+#RCircos.Gene.Name.Plot(gene.data,track.num = 2, side = "out", name.col = 4, is.sorted = FALSE);
+
+dev.off()
+
+## Can't make the plot because these gene locations are not on the actual chromosomes..
 
 #### PLOT IAP TREE WITH DESEQ2 INFORMATION ####
 # for plotting here, proteins with identical sequence are collaped for the purpose of plotting 
@@ -4549,7 +4629,7 @@ colnames(IAP_domain_structure_node_order)[1] <- "protein_id"
 ## Plot C. virginica
 # set factor levels 
 C_vir_apop_LFC_IAP_full_XP$experiment <- factor(C_vir_apop_LFC_IAP_full_XP$experiment, levels=c("Hatchery_Probiotic_RI",  "Lab_Pro_RE22","ROD", "Dermo", "NA"), 
-                                                labels= c("Hatchery\nPro. RI",  "Lab Pro. S4, RI\n or RE22","ROD", "Dermo", "NA"))
+                                                labels= c("CVBAC-B",  "CVBAC-A","CVBAC-C", "CVPMA", "NA"))
 C_vir_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_vir_apop_LFC_IAP_full_XP$group_by_sim, levels=c("Hatchery_Probiotic_RI" ,"Lab_RI_6hr" , "Lab_RI_RI_24hr", "Lab_S4_6hr","Lab_S4_24hr", "Lab_RE22" ,
                           "ROD_susceptible_seed","ROD_resistant_seed", "Dermo_Susceptible_36hr", "Dermo_Susceptible_7d", "Dermo_Susceptible_28d","Dermo_Tolerant_36hr",   
                           "Dermo_Tolerant_7d","Dermo_Tolerant_28d" ),
@@ -4656,7 +4736,7 @@ rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)) # 184 levels correct
 ## Repeat procedure for C. gigas
 # Change factor level order of experiment for ggplot 
 C_gig_apop_LFC_IAP_full_XP$experiment <-  factor(C_gig_apop_LFC_IAP_full_XP$experiment, levels = c("Zhang", "Rubio","He","deLorgeril_sus", "deLorgeril_res","NA"), 
-       labels = c("Zhang<br>*Vibrio* spp." ,"Rubio<br>*Vibrio* spp." , "He OsHV-1" ,"de Lorgeril<br>Sus. OsHV-1", "de Lorgeril<br>Res. OsHV-1","de Lorgeril<br>Res. OsHV-1"))
+       labels = c("CVBAC-A" ,"CVBAC-B" , "CGOSHV1-B" ,"CGOSHV1-A Sus.", "CGOSHV1-A Res.","CGOSHV1-A Res."))
         # make sure to use Rmarkdown newline notation since using element_markdown for strip text formatting
 C_gig_apop_LFC_IAP_full_XP$group_by_sim <- factor(C_gig_apop_LFC_IAP_full_XP$group_by_sim, levels= c("Zhang_Valg"          ,"Zhang_Vtub"          ,"Zhang_LPS"          , "Rubio_J2_8"          ,"Rubio_J2_9"          ,"Rubio_LGP32"         ,"Rubio_LMG20012T"     ,"He_6hr"             ,
            "He_12hr"             ,"He_24hr"             ,"He_48hr"            , "He_120hr"            ,"deLorgeril_res_6hr"  ,"deLorgeril_res_12hr" ,"deLorgeril_res_24hr" ,"deLorgeril_res_48hr",
@@ -4849,7 +4929,7 @@ C_vir_vst_common_df_all_mat_limma_IAP_XP$Experiment <- recode_factor(C_vir_vst_c
                                                               "Dermo_Susceptible"="Dermo",
                                                               "Dermo_Tolerant"="Dermo")
 C_vir_vst_common_df_all_mat_limma_IAP_XP$Experiment <- factor(C_vir_vst_common_df_all_mat_limma_IAP_XP$Experiment, levels=c("Hatchery_Probiotic", "Pro_RE22","ROD","Dermo", "NA"),
-                                                              labels=c("Hatchery\nPro. RI",  "Lab Pro. S4, RI\n or RE22","ROD", "Dermo","NA"))
+                                                              labels=c("CVBAC-B",  "CVBAC-A","CVBAC-C", "CVPMA", "NA"))
 
 C_vir_vst_common_df_all_mat_limma_IAP_XP$Condition <- factor(C_vir_vst_common_df_all_mat_limma_IAP_XP$Condition, levels=c("Untreated_control","Bacillus_pumilus_RI0695", "Pro_RE22_Control_no_treatment", "Bacillus_pumilus_RI06_95_exposure_6h","Bacillus_pumilus_RI06_95_exposure_24h",
                                                                                                 "Phaeobacter_inhibens_S4_exposure_6h", "Phaeobacter_inhibens_S4_exposure_24h", "Vibrio_coralliilyticus_RE22_exposure_6h",
@@ -4935,7 +5015,7 @@ C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED_NArm <- ggp
 
 # Edit factor levels for C. gig
 C_gig_vst_common_df_all_mat_limma_IAP_XP$Experiment <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$Experiment, levels = c("Zhang", "Rubio","He","deLorgeril_Susceptible", "deLorgeril_Resistant"), 
-                                                              labels = c("Zhang<br>*Vibrio* spp." ,"Rubio<br>*Vibrio* spp." , "He OsHV-1" ,"de Lorgeril<br>Sus. OsHV-1", "de Lorgeril<br>Res. OsHV-1"))
+                                                              labels = c("CVBAC-A" ,"CVBAC-B" , "CGOSHV1-B" ,"CGOSHV1-A Sus.", "CGOSHV1-A Res."))
 
 C_gig_vst_common_df_all_mat_limma_IAP_XP$Condition <- factor(C_gig_vst_common_df_all_mat_limma_IAP_XP$Condition, levels = c( "Zhang_Control","V_aes_V_alg1_V_alg2","V_tub_V_ang","LPS_M_lut","Rubio_Control","Vcrass_J2_8","Vcrass_J2_9","Vtasma_LGP32",
                                                                               "Vtasma_LMG20012T","Time0_control","6h_control","6h_OsHV1","12h_control","12h_OsHV1","24h_control","24h_OsHV1","48h_control",
@@ -5054,6 +5134,13 @@ ggsave(filename = "IAP_Const_C_vir_C_gig_09172020.tiff", plot=vst_combined, devi
        units = "in",
        dpi=300, limitsize = FALSE)
 
+ggsave(filename = "IAP_Const_C_vir_C_gig_03102021.tiff", plot=vst_combined, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_Const",
+       width = 40,
+       height = 25,
+       units = "in",
+       dpi=300, limitsize = FALSE)
+
 ## Plot LFC expression side by side
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_LFC_axis <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_no_legend + aplot::ylim2(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED)
 C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend <- C_vir_apop_LFC_IAP_tile_plot_COLLAPSED + theme(legend.position = "none")
@@ -5080,6 +5167,13 @@ LFC_combined <- plot_grid(LFC_plots, LFC_legend, ncol=1, rel_heights  = c(0.8, 0
 #       dpi=300)
 
 ggsave(filename = "IAP_LFC_C_vir_C_gig_09172020.tiff", plot=LFC_combined, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_LFC",
+       width = 40,
+       height = 30,
+       units = "in",
+       dpi=300)
+
+ggsave(filename = "IAP_LFC_C_vir_C_gig_03102021.tiff", plot=LFC_combined, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_LFC",
        width = 40,
        height = 30,
@@ -5206,6 +5300,13 @@ ggsave(filename = "IAP_Const_C_vir_C_gig_dashed_gene_01122021.tiff", plot=vst_ge
        units = "in",
        dpi=300, limitsize = FALSE)
 
+ggsave(filename = "IAP_Const_C_vir_C_gig_dashed_gene_03102021.tiff", plot=vst_gene_name_combined, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_Const",
+       width = 40,
+       height = 25,
+       units = "in",
+       dpi=300, limitsize = FALSE)
+
 ## Plot LFC expression side by side
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_gene_name_LFC_axis <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_gene_name_no_legend + aplot::ylim2(C_vir_apop_LFC_IAP_tile_plot_COLLAPSED)
 
@@ -5228,6 +5329,45 @@ ggsave(filename = "IAP_LFC_C_vir_C_gig_gene_name_01122021.tiff", plot=LFC_gene_n
        height = 30,
        units = "in",
        dpi=300)
+
+ggsave(filename = "IAP_LFC_C_vir_C_gig_gene_name_03102021.tiff", plot=LFC_gene_name_combined, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_LFC",
+       width = 40,
+       height = 30,
+       units = "in",
+       dpi=300)
+#### EXPORT PROTEIN DOMAIN TREE PLOT WITH COLLAPSED GENE NAMES ####
+
+# Use data frame with collapsed --- for transcripts from the same gene 
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME
+
+###  Export and arrange domain plot with tree
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_legend <- cowplot::get_legend(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME)
+IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_no_legend <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME + 
+  theme(legend.position='none')
+
+IAP_MY_CV_CG_treecollapsed_GENE_NAME <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_no_legend + aplot::ylim2(IAP_Interproscan_domain_plot_no_legend)
+
+IAP_tr_dom_collapsed_GENE_NAME <- plot_grid(NULL,IAP_MY_CV_CG_treecollapsed_GENE_NAME, IAP_Interproscan_domain_plot_no_legend, ncol=3, align='h', rel_widths = c(0.2, 0.7,0.8)) +
+  # Add some space at top for labels
+  theme(plot.margin = unit(c(1,0.0,0.0,0.0), "cm")) 
+IAP_tr_dom_collapsed__GENE_NAME_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_legend, IAP_Interproscan_domain_plot_legend,
+                                         nrow = 1, align="hv", rel_widths  =c(0.7, 0.7,1)) 
+
+## Create combined figure for publication
+IAP_tr_dom_plus_legend_collapsed_GENE_NAME <- plot_grid(IAP_tr_dom_collapsed_GENE_NAME, IAP_tr_dom_collapsed__GENE_NAME_legend,  ncol=1, rel_heights  = c(0.8, 0.1)) +
+  # add labels for plot components
+  draw_plot_label(c("A","B","C"), x= c(0.38, 0.53, 0.9), y = c(1,1,1), size = 30, family = "sans")
+
+## Export plot with tree and domains aligned 
+
+ggsave(filename = "IAP_tr_dom_plus_legend_collapsed_GENE_NAME_03102021.tiff", plot=IAP_tr_dom_plus_legend_collapsed_GENE_NAME, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
+       width = 34,
+       height = 27,
+       units = "in",
+       dpi=300)
+
 
 #### CREATE TABLE WITH IAP DOMAIN STRUCTURE FOR ALL IAP PROTEINS ####
 
@@ -5371,6 +5511,15 @@ C_vir_C_gig_apop_LFC_IAP_OG_domain_structure <- rbind(C_vir_apop_LFC_IAP_OG_doma
 
 # save for used in other script
 save(C_vir_C_gig_apop_LFC_IAP_OG_domain_structure, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/C_vir_C_gig_apop_LFC_IAP_OG_domain_structure")
+
+# Were alternativly spliced forms used across different experiments
+C_vir_C_gig_apop_LFC_IAP_OG_domain_structure_alternative <- C_vir_C_gig_apop_LFC_IAP_OG_domain_structure %>% distinct(Species, gene,transcript_id, experiment) %>% ungroup() %>%
+  group_by(gene) %>% mutate(gene_count = n()) %>% filter( gene_count >1) %>% distinct(gene, transcript_id, .keep_all = TRUE) 
+
+C_vir_C_gig_apop_LFC_IAP_OG_domain_structure_alternative <- C_vir_C_gig_apop_LFC_IAP_OG_domain_structure_alternative %>%
+  ungroup() %>% group_by(gene) %>% 
+  mutate(transcript_type = n()) %>% filter(transcript_type >1)
+
 
 # How many transcripts not used at all from any experiment
 length(unique(C_vir_apop_LFC_IAP_OG_domain_structure$protein_id)) # 37 total used 
