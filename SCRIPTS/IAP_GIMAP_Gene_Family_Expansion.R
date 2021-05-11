@@ -358,6 +358,9 @@ AIG1_XP_ALL_gff_GIMAP_species
 View(unique(BIR_XP_gff_species$product)) # has one phosphatase and actin regulator 4-B-like but does have the IAP repeats 
 View(unique(AIG1_XP_ALL_gff_GIMAP_species$product))
 
+# export this list 
+save(BIR_XP_gff_species, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/BIR_XP_gff_species.Rdata")
+
 ##################### ORTHOGROUP ANALYSIS ###############################
 
 ### Load May15th Orthogroup Analysis of 10 Mollusc species from Orthogroup.tsv file ###
@@ -2095,7 +2098,10 @@ IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro <- IAP_GENE_Inte
   # order by species and gene
   arrange(desc(Species,gene)) %>%
   # remove existing height
-  dplyr::select(!c(height_start,height_end))
+  dplyr::select(!c(height_start,height_end)) %>%
+  # 5/10/21 - remove genes LOC111100407 and LOC111103155 which only have Ig and C-type lectin domains respectively
+  filter(gene != "LOC111100407") %>% filter(gene != "LOC111103155" )
+
   
 IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro_height <- IAP_GENE_Interpro_Domains_only_reorder_subset_BIR_rm_only_retro %>% distinct(gene) %>%
   # add in the height start and end 
@@ -2145,11 +2151,11 @@ IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro <- ggplot() +
   # change y axis labels
  scale_y_discrete(name = NULL, limits = c("*C. gigas* LOC105339790",
                                                "*C. virginica* LOC111100017",
-                                               "*C. virginica* LOC111100407",
+                                               #"*C. virginica* LOC111100407",
                                                "*C. virginica* LOC111100394",
                                                "*C. virginica* LOC111112532",
                                                "*C. virginica* LOC111103270",
-                                               "*C. virginica* LOC111103155",
+                                               #"*C. virginica* LOC111103155",
                                                "*M. yessoensis* LOC110457936",
                                                "*M. yessoensis* LOC110458047",
                                                "*M. yessoensis* LOC110462612",
@@ -2163,58 +2169,69 @@ IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro <- ggplot() +
                                                "*M. yessoensis* LOC110452306",
                                                "*M. yessoensis* LOC110460644"))  +
   # Change domain labels 
-  scale_fill_manual(values=c(                "#b2dbfe",
-                                             "#b6eee2",
-                                             "#b6eee2",
-                                             "#b6eee2",
-                                             # "brown", 
-                                             "#53e1a1",
-                                             "#d393d4",
-                                             "#b77853",
-                                             "#57e5d6",
-                                             "#e1c2aa",
-                                             "#d04d8f",
-                                             "#d04d8f",
-                                             "#d04d8f",
-                                             "#495f3a",
-                                             "#89599b",
-                                             "#c058c6",
-                                             "#c058c6",
-                                             "#c058c6",
-                                             "#c058c6",
-                                             "#79e379",
-                                             "#79e379",
-                                             "#79e379",
-                                             "#79e379",
-                                             "#79e379",
-                                             "#5db8de",
-                                             "#5db8de",
-                                             "#5db8de",
-                                             "#55b793",
-                                             "#55b793",
-                                             "#55b793",
-                                             #"#dadd48",
-                                             # "#dadd48",
-                                             "#ba4c46",
-                                             "#ba4c46",
-                                             "#85c967",
-                                             "#59388a",
-                                             "#59388a",
-                                             "#59388a",
-                                             "#6d82d9",
-                                             "#6d82d9",
-                                             "#6d82d9",
-                                             "#caad44",
-                                             #"#d95750",
-                                             #"#d95750",
-                                             #"#d95750",
-                                             #"#d95750",
-                                             "black"), 
+  scale_fill_manual(values=c("#a2843c",
+                             
+                             #"#5ec778",
+                             #"#5ec778",
+                             #"#5ec778",
+                             
+                             "#e18562",
+                             
+                             "#5ec778",
+                             
+                             "#d7ba7d",
+                             
+                             "#cfa73d",
+                             
+                             "#677fd8",
+                             
+                             "#5a388b",
+                             "#5a388b",
+                             "#5a388b",
+                             
+                             "#873015",
+                             
+                             "#cdd452",
+                             
+                             #"#d471b2",
+                             #"#d471b2",
+                             #"#d471b2",
+                             #"#d471b2",
+                             
+                             "#7d9fbf",
+                             "#7d9fbf",
+                             "#7d9fbf",
+                             "#7d9fbf",
+                             "#7d9fbf",
+                             
+                             "#872762",
+                             "#872762",
+                             "#872762",
+                             
+                             "#e25180",
+                             "#e25180",
+                             "#e25180",
+                             
+                             "#b9475f",
+                             "#b9475f",
+                             "#b9475f",
+                             
+                             "#bf73cb",
+                             
+                             "#bf73cb",
+                             "#bf73cb",
+                             
+                             "#5f8e3e",
+                             "#5f8e3e",
+                             "#5f8e3e",
+                             
+                             "#98b342",
+    "black"),
                     name="Functional Domains",
                     breaks=c( "InterPro:IPR006703",
-                              "InterPro:IPR016187",
-                              "InterPro:IPR001304",
-                              "InterPro:IPR016186",
+                              #"InterPro:IPR016187",
+                              #"InterPro:IPR001304",
+                              #"InterPro:IPR016186",
                               #  "G3DSA:1.10.533.10",
                               "InterPro:IPR011010",
                               "InterPro:IPR008593",
@@ -2226,10 +2243,10 @@ IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro <- ggplot() +
                               "InterPro:IPR011335",
                               "InterPro:IPR011604",
                               "InterPro:IPR009057",
-                              "InterPro:IPR013098",
-                              "InterPro:IPR007110",
-                              "InterPro:IPR036179",
-                              "InterPro:IPR013783",
+                              #"InterPro:IPR013098",
+                              #"InterPro:IPR007110",
+                              #"InterPro:IPR036179",
+                              #"InterPro:IPR013783",
                               "InterPro:IPR041588",
                               "InterPro:IPR013762",
                               "InterPro:IPR001584",
@@ -2259,9 +2276,9 @@ IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro <- ggplot() +
                               #"PF13920",
                               "gene_shortened"),
                     labels=c("AIG1-type guanine nucleotide-binding (G) domain",
-                             "C-type lectin fold",
-                             "C-type lectin-like",
-                             "C-type lectin-like/link domain superfamily",
+                             #"C-type lectin fold",
+                             #"C-type lectin-like",
+                             #"C-type lectin-like/link domain superfamily",
                              # "Death Domain, Fas",
                              "DNA breaking-rejoining enzyme, catalytic core",
                              "DNA N-6-adenine-methyltransferase",
@@ -2273,10 +2290,10 @@ IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro <- ggplot() +
                              "Restriction endonuclease type II-like",
                              "Exonuclease, phage-type/RecB, C-terminal",
                              "Homeobox-like domain superfamily",
-                             "Immunoglobulin I-set",
-                             "Immunoglobulin-like domain",
-                             "Immunoglobulin-like domain superfamily",
-                             "Immunoglobulin-like fold",
+                             #"Immunoglobulin I-set",
+                             #"Immunoglobulin-like domain",
+                             #"Immunoglobulin-like domain superfamily",
+                             #"Immunoglobulin-like fold",
                              "Integrase zinc-binding domain",
                              "Integrase-like, catalytic domain superfamily",
                              "Integrase, catalytic core",
@@ -2367,7 +2384,7 @@ ggsave(filename = "IAP_GENE_tr_dom_plus_legend_BIR_rm_03092021.tiff", plot=IAP_G
        dpi=300)
 
 ### Export plot with just the genes that have retrotransposon machinery 
-ggsave(filename = "IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro_03092021.tiff", plot=IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro , device="tiff",
+ggsave(filename = "IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro_05102021.tiff", plot=IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro , device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
        width = 23,
        height = 15,
@@ -2406,6 +2423,8 @@ View(IAP_raxml_tibble %>% filter(!grepl("uncharacterized",product)) %>% distinct
 # Join with alias info
 IAP_alias <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_shortened_product.csv")
 IAP_raxml_tibble <- left_join(IAP_raxml_tibble, IAP_alias)
+# export IAP_raxml_tibble
+save(IAP_raxml_tibble, file = "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_raxml_tibble.Rdata")
 
 # Fill in blanks with uncharacterized locus name
 IAP_raxml_tibble$alias[is.na(IAP_raxml_tibble$alias)] <- IAP_raxml_tibble$product[is.na(IAP_raxml_tibble$alias)]
