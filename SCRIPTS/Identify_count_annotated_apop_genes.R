@@ -1050,7 +1050,7 @@ nrow(combined_gene_name_yes_no_table_unique) #275
 
 # Load gene pathway key with protein aliases curated in excel
 # August 19th, 2020: fixed this table and added more specific pathway designations and the newly identified IAPs
-gene_name_pathway_key_merged <- read.csv("/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/Gene_name_pathway_key.csv", head=TRUE)
+gene_name_pathway_key_merged <- read.csv(gene_name_pathway_key_merged, "/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/C_vir_C_gig_Apoptosis_Pathway_Annotation_Data/Gene_name_pathway_key.csv", head=TRUE)
 
 # Genes in C vir and not in C gig (all the C_gig_gene_LOC NA's)
 c_vir_not_c_gig <- combined_gene_name_yes_no_table_unique %>% filter(is.na(C_gig_gene_LOC))
