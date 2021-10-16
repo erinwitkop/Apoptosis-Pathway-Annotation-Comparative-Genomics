@@ -2439,12 +2439,13 @@ IAP_raxml_treedata <- as.treedata(IAP_raxml_tibble)
 save(IAP_raxml_treedata, file="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/Apoptosis_Pathway_Annotation_Comparative_Genomics/Comparative_Analysis_Apoptosis_Gene_Families_Data/IAP_raxml_treedata.Rdata")
 
 ## Plot circular protein tree to use for paper ##
+## 10-16-2021 Increasing font size for plotting protein name in geom_tiplab2 in response to reviewer comments
 IAP_raxml_treedata_circular_product <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
-  geom_tiplab2(aes(label=alias,angle=angle), size =1.8, offset=.5) + # geom_tiplab2 flips the labels correctly
+  geom_tiplab2(aes(label=alias,angle=angle), size =2.8, offset=.5) + # geom_tiplab2 flips the labels correctly
   #Edit theme
 theme(legend.position = "bottom", 
-      legend.text = element_text(face = "italic", size=8, family="sans"),
-      legend.title = element_text(size=12, family="sans")) +
+      legend.text = element_text(face = "italic", size=12, family="sans"),
+      legend.title = element_text(size=14, family="sans")) +
   #xlim(-100,100)  +
   # add circle for 90-100 instead of bootstrap values
   geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
@@ -2461,10 +2462,18 @@ theme(legend.position = "bottom",
                                  "Elysia chlorotica","Lottia gigantea", "Octopus bimaculoides", "Octopus vulgaris", "Pomacea canaliculata", "Biomphalaria glabrata", "Aplysia californica")) 
  
 # Export plot to file to put together with gene tree for paper
-ggsave(filename = "IAP_full_protein_circular_tree.tiff", plot=IAP_raxml_treedata_circular_product, device="tiff",
+#ggsave(filename = "IAP_full_protein_circular_tree.tiff", plot=IAP_raxml_treedata_circular_product, device="tiff",
+#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_protein_tree/",
+#       width = 10 ,
+#       height = 10,
+#       units = "in",
+#       dpi=300)
+
+# increased font size and overall size on 10-16-2021 to go into Figure 1
+ggsave(filename = "IAP_full_protein_circular_tree_increased_10_16_21.tiff", plot=IAP_raxml_treedata_circular_product, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_protein_tree/",
-       width = 10 ,
-       height = 10,
+       width = 15.5 ,
+       height = 15.5,
        units = "in",
        dpi=300)
 
@@ -7119,7 +7128,7 @@ d <- data.frame(label = Mollusc_Species_Tree$tip.label,
 # Plot species tree only
 Mollusc_Species_Tree <- ggtree(Mollusc_Species_Treedata, branch.length = "none") %<+% d +
   geom_tiplab(align=TRUE, aes(label=paste0('italic(', genus,')~italic(', species, ')')), parse=T) + # italicize species labels 
-   xlim(0,17) + theme(plot.margin = unit(c(0,0,0,0), "cm"), text = element_text(size = 14))
+   xlim(0,17) + theme(plot.margin = unit(c(0,0,0,0), "cm"), text = element_text(size = 20))
 
 # Create simple heatmap to plot the gene number to add next to the tree 
 no_y_axis <- function () 
@@ -7139,6 +7148,7 @@ All_mollusc_IAP_gene_list_after_haplotig_collapsed_sinensis$Species <- factor(Al
           levels = c("Octopus_bimaculoides","Octopus_sinensis","Mizuhopecten_yessoensis","Crassostrea_gigas","Crassostrea_virginica","Lottia_gigantea","Pomacea_canaliculata","Elysia_chlorotica","Biomphalaria_glabrata","Aplysia_californica"),
           labels = c("Octopus bimaculoides","Octopus sinensis","Mizuhopecten yessoensis","Crassostrea gigas","Crassostrea virginica","Lottia gigantea","Pomacea canaliculata","Elysia chlorotica","Biomphalaria glabrata","Aplysia californica"))
 
+# 10-16-21 Increasing font size and overall size of the tree to edit figure 1
 species_gene_heatmap <- All_mollusc_IAP_gene_list_after_haplotig_collapsed_sinensis %>% 
   # add dummy category so I can only plot one row
   mutate(category = "all") %>%
@@ -7146,8 +7156,8 @@ ggplot(., aes(y=Species, x =category)) + geom_tile(aes(fill=n, width = 0.2)) + n
   theme(panel.background = element_rect(fill = "transparent"),
         legend.position = "right",
         legend.box = "vertical",
-        legend.text = element_text(size=10, family="sans"),
-        legend.title = element_text(size=12, family="sans"),
+        legend.text = element_text(size=20, family="sans"),
+        legend.title = element_text(size=20, family="sans"),
         legend.margin=margin(0,0,0,0), 
         legend.box.margin = margin(0,0,0,0),
         axis.ticks.margin = unit(0,"null"),
@@ -7168,9 +7178,17 @@ ggplot(., aes(y=Species, x =category)) + geom_tile(aes(fill=n, width = 0.2)) + n
 # Plot the tree and the heatmap next to each other 
 Mollusc_Species_Tree_heatmap <- Mollusc_Species_Tree + species_gene_heatmap
 
-ggsave(filename = "Mollusc_Species_Tree_heatmap.tiff", plot= Mollusc_Species_Tree_heatmap, device="tiff",
+#ggsave(filename = "Mollusc_Species_Tree_heatmap.tiff", plot= Mollusc_Species_Tree_heatmap, device="tiff",
+#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
+#       width = 8.7 ,
+#       height = 7,
+#       units = "in",
+#       dpi=300)
+
+# increased font size tree 10-16-2021
+ggsave(filename = "Mollusc_Species_Tree_heatmap_10_16_21.tiff", plot= Mollusc_Species_Tree_heatmap, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
-       width = 8.7 ,
+       width = 10 ,
        height = 7,
        units = "in",
        dpi=300)
