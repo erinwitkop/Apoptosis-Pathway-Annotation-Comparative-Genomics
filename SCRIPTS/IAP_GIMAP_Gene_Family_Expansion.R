@@ -2149,25 +2149,25 @@ IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro <- ggplot() +
   # Change y axis ticks
   scale_x_continuous(breaks=c(0,500,1000,1500)) + 
   # change y axis labels
- scale_y_discrete(name = NULL, limits = c("*C. gigas* LOC105339790",
-                                               "*C. virginica* LOC111100017",
-                                               #"*C. virginica* LOC111100407",
-                                               "*C. virginica* LOC111100394",
-                                               "*C. virginica* LOC111112532",
-                                               "*C. virginica* LOC111103270",
-                                               #"*C. virginica* LOC111103155",
-                                               "*M. yessoensis* LOC110457936",
-                                               "*M. yessoensis* LOC110458047",
-                                               "*M. yessoensis* LOC110462612",
-                                               "*M. yessoensis* LOC110465395",
-                                               "*M. yessoensis* LOC110456394",
-                                               "*M. yessoensis* LOC110456920",
-                                               "*M. yessoensis* LOC110457934",
-                                               "*M. yessoensis* LOC110456891",
-                                               "*M. yessoensis* LOC110456458",
-                                               "*M. yessoensis* LOC110451590",
-                                               "*M. yessoensis* LOC110452306",
-                                               "*M. yessoensis* LOC110460644"))  +
+ scale_y_discrete(name = NULL, limits = c("*Cg* LOC105339790",
+                                               "*Cv* LOC111100017",
+                                               #"*Cv* LOC111100407",
+                                               "*Cv* LOC111100394",
+                                               "*Cv* LOC111112532",
+                                               "*Cv* LOC111103270",
+                                               #"*Cv* LOC111103155",
+                                               "*My* LOC110457936",
+                                               "*My* LOC110458047",
+                                               "*My* LOC110462612",
+                                               "*My* LOC110465395",
+                                               "*My* LOC110456394",
+                                               "*My* LOC110456920",
+                                               "*My* LOC110457934",
+                                               "*My* LOC110456891",
+                                               "*My* LOC110456458",
+                                               "*My* LOC110451590",
+                                               "*My* LOC110452306",
+                                               "*My* LOC110460644"))  +
   # Change domain labels 
   scale_fill_manual(values=c("#a2843c",
                              
@@ -2391,6 +2391,15 @@ ggsave(filename = "IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_r
        units = "in",
        dpi=300)
 
+### Export plot with just the genes that have retrotransposon machinery - with shortened names
+ggsave(filename = "IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro_11062021.tiff", plot=IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro , device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
+       width = 23,
+       height = 15,
+       units = "in",
+       dpi=300)
+
+
 
 #### PLOT FULL IAP PROTEIN TREE ####
 # Helpful online tutorial regarding tool: https://www.molecularecologist.com/2017/02/phylogenetic-trees-in-r-using-ggtree/
@@ -2444,8 +2453,8 @@ IAP_raxml_treedata_circular_product <- ggtree(IAP_raxml_treedata, layout="circul
   geom_tiplab2(aes(label=alias,angle=angle), size =2.8, offset=.5) + # geom_tiplab2 flips the labels correctly
   #Edit theme
 theme(legend.position = "bottom", 
-      legend.text = element_text(face = "italic", size=12, family="sans"),
-      legend.title = element_text(size=14, family="sans")) +
+      legend.text = element_text(face = "italic", size=20, family="sans"),
+      legend.title = element_text(size=22, family="sans")) +
   #xlim(-100,100)  +
   # add circle for 90-100 instead of bootstrap values
   geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
@@ -7127,8 +7136,8 @@ d <- data.frame(label = Mollusc_Species_Tree$tip.label,
 
 # Plot species tree only
 Mollusc_Species_Tree <- ggtree(Mollusc_Species_Treedata, branch.length = "none") %<+% d +
-  geom_tiplab(align=TRUE, aes(label=paste0('italic(', genus,')~italic(', species, ')')), parse=T) + # italicize species labels 
-   xlim(0,17) + theme(plot.margin = unit(c(0,0,0,0), "cm"), text = element_text(size = 20))
+  geom_tiplab(align=TRUE, aes(label=paste0('italic(', genus,')~italic(', species, ')'), size = 3.0), parse=T) + # italicize species labels 
+   xlim(0,17) + theme(plot.margin = unit(c(0,0,0,0), "cm"))
 
 # Create simple heatmap to plot the gene number to add next to the tree 
 no_y_axis <- function () 
@@ -7156,8 +7165,8 @@ ggplot(., aes(y=Species, x =category)) + geom_tile(aes(fill=n, width = 0.2)) + n
   theme(panel.background = element_rect(fill = "transparent"),
         legend.position = "right",
         legend.box = "vertical",
-        legend.text = element_text(size=20, family="sans"),
-        legend.title = element_text(size=20, family="sans"),
+        legend.text = element_text(size=12, family="sans"),
+        legend.title = element_text(size=12, family="sans"),
         legend.margin=margin(0,0,0,0), 
         legend.box.margin = margin(0,0,0,0),
         axis.ticks.margin = unit(0,"null"),
@@ -7188,7 +7197,7 @@ Mollusc_Species_Tree_heatmap <- Mollusc_Species_Tree + species_gene_heatmap
 # increased font size tree 10-16-2021
 ggsave(filename = "Mollusc_Species_Tree_heatmap_10_16_21.tiff", plot= Mollusc_Species_Tree_heatmap, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
-       width = 10 ,
+       width = 12 ,
        height = 7,
        units = "in",
        dpi=300)
