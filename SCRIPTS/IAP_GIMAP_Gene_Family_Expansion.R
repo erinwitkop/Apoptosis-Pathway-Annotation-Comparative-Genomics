@@ -5418,16 +5418,16 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_no_legend <- IAP_MY_CV_
 
 IAP_MY_CV_CG_treecollapsed_GENE_NAME <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_no_legend + aplot::ylim2(IAP_Interproscan_domain_plot_no_legend)
 
-IAP_tr_dom_collapsed_GENE_NAME <- plot_grid(NULL, IAP_MY_CV_CG_treecollapsed_GENE_NAME, IAP_Interproscan_domain_plot_no_legend, ncol=3, align='h', rel_widths = c(0.1,1.0,0.8)) +
+IAP_tr_dom_collapsed_GENE_NAME <- plot_grid(NULL, IAP_MY_CV_CG_treecollapsed_GENE_NAME, IAP_Interproscan_domain_plot_no_legend, ncol=3, align='h', rel_widths = c(0.1,1.0,1.0)) +
   # Add some space at top for labels
   theme(plot.margin = unit(c(2.0,0.0,0.0,0.0), "cm")) 
 IAP_tr_dom_collapsed__GENE_NAME_legend <- plot_grid(NULL,IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_legend, IAP_Interproscan_domain_plot_legend,
-                                         nrow = 1, align="hv", rel_widths  =c(0.5,0.7,1)) 
+                                         nrow = 1, align="hv", rel_widths  =c(0.5,0.4,1)) 
 
 ## Create combined figure for publication
 IAP_tr_dom_plus_legend_collapsed_GENE_NAME <- plot_grid(IAP_tr_dom_collapsed_GENE_NAME, IAP_tr_dom_collapsed__GENE_NAME_legend,  ncol=1, rel_heights  = c(0.8, 0.08)) +
   # add labels for plot components
-  draw_plot_label(c("A","B","C"), x= c(0.35, 0.57, 0.9), y = c(1,1,1), size = 35, family = "sans")
+  draw_plot_label(c("A","B","C"), x= c(0.30, 0.52, 0.9), y = c(1,1,1), size = 35, family = "sans")
 
 ## Export plot with tree and domains aligned 
   #ggsave(filename = "IAP_tr_dom_plus_legend_collapsed_GENE_NAME_03102021.tiff", plot=IAP_tr_dom_plus_legend_collapsed_GENE_NAME, device="tiff",
@@ -5440,7 +5440,7 @@ IAP_tr_dom_plus_legend_collapsed_GENE_NAME <- plot_grid(IAP_tr_dom_collapsed_GEN
 ## Export plot with tree and domains aligned with increased text size
 ggsave(filename = "IAP_tr_dom_plus_legend_collapsed_GENE_NAME_12242021.tiff", plot=IAP_tr_dom_plus_legend_collapsed_GENE_NAME, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
-       width = 43,
+       width = 46,
        height = 35,
        units = "in",
        dpi=300)
