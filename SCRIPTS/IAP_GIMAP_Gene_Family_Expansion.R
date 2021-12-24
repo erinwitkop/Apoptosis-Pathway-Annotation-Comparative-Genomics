@@ -4709,19 +4709,19 @@ C_vir_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_vir_apop_LFC_IAP_full_XP[!(is
   theme_minimal() + 
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title = element_text(size=20, family="sans"),
-        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.5),
-        axis.text.x.bottom = element_text(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
+        axis.title = element_text(size=26, family="sans"),
+        plot.title = ggtext::element_markdown(size=40, family="sans", hjust= 0.5),
+        axis.text.x.bottom = element_text(size=26, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
         legend.position = "bottom",
-        legend.title = element_text(size=16, family="sans"), 
-        legend.text = element_text(size=14, family="sans"),
+        legend.title = element_text(size=30, family="sans"), 
+        legend.text = element_text(size=30, family="sans"),
         panel.background = element_rect(fill = "transparent"),
         #panel.grid.major.x = element_blank(),
         #panel.grid.major.y = element_line(size=0.2, color="gray"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.text.x = element_text(
-          size = 16, face = "bold", family="sans"),
+          size = 26, face = "bold", family="sans"),
         strip.background = element_rect(colour = "white", fill="white")) +
   guides(fill=guide_legend(ncol=3, title.position="top")) +
   # remove NA row from the list (get list from rev(unique(C_vir_apop_LFC_IAP_full_XP$protein_id)))
@@ -4821,19 +4821,19 @@ C_gig_apop_LFC_IAP_tile_plot_COLLAPSED <- ggplot(C_gig_apop_LFC_IAP_full_XP[!(is
   theme_minimal() + 
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title = element_text(size=20, family="sans"),
-        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.5),
-        axis.text.x.bottom = ggtext::element_markdown(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
+        axis.title = element_text(size=26, family="sans"),
+        plot.title = ggtext::element_markdown(size=40, family="sans", hjust= 0.5),
+        axis.text.x.bottom = ggtext::element_markdown(size=26, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
         legend.position = "bottom",
-        legend.title = element_text(size=16, family="sans"), 
-        legend.text = element_text(size=14, family="sans"),
+        legend.title = element_text(size=30, family="sans"), 
+        legend.text = element_text(size=30, family="sans"),
         panel.background = element_rect(fill = "transparent"),
         #panel.grid.major.x = element_blank(),
         #panel.grid.major.y = element_line(size=0.2, color="gray"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.text.x = ggtext::element_markdown(
-          size = 16, face = "bold", family="sans"),
+          size = 26, face = "bold", family="sans"),
         strip.background = element_rect(colour = "white", fill="white")) +
   guides(fill=guide_legend(ncol=3, title.position="top")) +
   # remove NA row from the list 
@@ -5012,19 +5012,19 @@ C_vir_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C
   theme_minimal() + 
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title = element_text(size=20, family="sans"),
-        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.5),
-        axis.text.x.bottom = element_text(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
+        axis.title = element_text(size=26, family="sans"),
+        plot.title = ggtext::element_markdown(size=40, family="sans", hjust= 0.5),
+        axis.text.x.bottom = element_text(size=26, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
         legend.position = "bottom",
-        legend.title = element_text(size=16, family="sans"), 
-        legend.text = element_text(size=14, family="sans"),
+        legend.title = element_text(size=30, family="sans"), 
+        legend.text = element_text(size=30, family="sans"),
         panel.background = element_rect(fill = "transparent"),
         #panel.grid.major.x = element_blank(),
         #panel.grid.major.y = element_line(size=0.2, color="gray"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.text.x = element_text(
-          size = 16, face = "bold", family="sans"),
+          size = 26, face = "bold", family="sans"),
         strip.background = element_rect(colour = "white", fill="white")) +
   guides(fill=guide_legend(ncol=3, title.position="top")) 
 
@@ -5100,19 +5100,19 @@ C_gig_vst_common_df_all_mat_limma_IAP_gather_avg_tile_plot_COLLAPSED <- ggplot(C
   theme_minimal() + 
   theme(axis.ticks.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title = element_text(size=20, family="sans"),
-        plot.title = ggtext::element_markdown(size=20, family="sans", hjust= 0.5),
-        axis.text.x.bottom = ggtext::element_markdown(size=16, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
+        axis.title = element_text(size=26, family="sans"),
+        plot.title = ggtext::element_markdown(size=40, family="sans", hjust= 0.5),
+        axis.text.x.bottom = ggtext::element_markdown(size=26, family="sans", face = "bold", angle = 90, vjust=0.5, hjust =1),
         legend.position = "bottom",
-        legend.title = element_text(size=16, family="sans"), 
-        legend.text = element_text(size=14, family="sans"),
+        legend.title = element_text(size=30, family="sans"), 
+        legend.text = element_text(size=30, family="sans"),
         panel.background = element_rect(fill = "transparent"),
         #panel.grid.major.x = element_blank(),
         #panel.grid.major.y = element_line(size=0.2, color="gray"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.text.x = ggtext::element_markdown(
-          size = 16, face = "bold", family="sans"),
+          size = 26, face = "bold", family="sans"),
         strip.background = element_rect(colour = "white", fill="white")) +
   guides(fill=guide_legend(ncol=3, title.position="top")) 
 # add geom_rect boxes
@@ -5337,26 +5337,34 @@ vst_gene_name_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_vertical_col
 
 vst_gene_name_plots <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_gene_name_no_legend, Cvir_const_IAP_gt,
                        Cgig_const_IAP_gt ,
-                       ncol =3, align="h", axis="tb")
+                       ncol =3, align="h", axis="tb", rel_widths = c(1,0.9))
 
 vst_gene_name_combined <- plot_grid(vst_gene_name_plots, vst_gene_name_legend, ncol=1, rel_heights  = c(0.8, 0.1)) + 
   # Add some space at top for labels
   theme(plot.margin = unit(c(1.2,0.0,0.0,0.0), "cm")) +
-  draw_plot_label(c("A","B","C"), x= c(0.21, 0.33, 0.66), y = c(1,1,1), size = 30, family = "sans", vjust = 0.2) +
-  draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 20, fontfamily = "sans", angle= 0) 
+  draw_plot_label(c("A","B","C"), x= c(0.21, 0.33, 0.66), y = c(1,1,1), size = 40, family = "sans", vjust = 0.2) +
+  draw_label("Treatment", x=0.65, y=  0.09, vjust=-0.5, size = 40, fontfamily = "sans", angle= 0) 
 
 # Export Const. expression plot
-ggsave(filename = "IAP_Const_C_vir_C_gig_dashed_gene_01122021.tiff", plot=vst_gene_name_combined, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_Const",
-       width = 40,
-       height = 25,
-       units = "in",
-       dpi=300, limitsize = FALSE)
+  #ggsave(filename = "IAP_Const_C_vir_C_gig_dashed_gene_01122021.tiff", plot=vst_gene_name_combined, device="tiff",
+  #       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_Const",
+  #       width = 40,
+  #       height = 25,
+  #       units = "in",
+  #       dpi=300, limitsize = FALSE)
+  #
+  #ggsave(filename = "IAP_Const_C_vir_C_gig_dashed_gene_03102021.tiff", plot=vst_gene_name_combined, device="tiff",
+  #       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_Const",
+  #       width = 40,
+  #       height = 25,
+  #       units = "in",
+  #       dpi=300, limitsize = FALSE)
 
-ggsave(filename = "IAP_Const_C_vir_C_gig_dashed_gene_03102021.tiff", plot=vst_gene_name_combined, device="tiff",
+# export const with increased text size 12-24-21
+ggsave(filename = "IAP_Const_C_vir_C_gig_dashed_gene_12242021.tiff", plot=vst_gene_name_combined, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_Const",
-       width = 40,
-       height = 25,
+       width = 60,
+       height = 35,
        units = "in",
        dpi=300, limitsize = FALSE)
 
@@ -5367,26 +5375,35 @@ LFC_gene_name_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_vertical_col
                         nrow = 1, ncol= 4, align="hv", rel_widths  =c(0.5,0.57,1,1))
 
 LFC_gene_name_plots <- plot_grid(IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_gene_name_LFC_axis, C_vir_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend, C_gig_apop_LFC_IAP_tile_plot_COLLAPSED_no_legend, 
-                       ncol=3, align="h", axis="tb")
+                       ncol=3, align="h", axis="tb", rel_widths = c(1,0.95, 0.9))
 
 LFC_gene_name_combined <- plot_grid(LFC_gene_name_plots, LFC_gene_name_legend, ncol=1, rel_heights  = c(0.8, 0.1)) + 
   # Add some space at top for labels
   theme(plot.margin = unit(c(1.2,0.0,0.0,0.0), "cm")) +
-  draw_plot_label(c("A","B","C"), x= c(0.21, 0.33, 0.66), y = c(1,1,1), size = 30, family = "sans", vjust = 0.2) +
-  draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 20, fontfamily = "sans", angle= 0)
+  draw_plot_label(c("A","B","C"), x= c(0.21, 0.33, 0.66), y = c(1,1,1), size = 40, family = "sans", vjust = 0.2) +
+  draw_label("Treatment", x=0.67, y=  0.09, vjust=-0.5, size = 40, fontfamily = "sans", angle= 0)
 
 # Export LFC plot
-ggsave(filename = "IAP_LFC_C_vir_C_gig_gene_name_01122021.tiff", plot=LFC_gene_name_combined, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_LFC",
-       width = 40,
-       height = 30,
-       units = "in",
-       dpi=300)
+  #ggsave(filename = "IAP_LFC_C_vir_C_gig_gene_name_01122021.tiff", plot=LFC_gene_name_combined, device="tiff",
+  #       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_LFC",
+  #       width = 40,
+  #       height = 30,
+  #       units = "in",
+  #       dpi=300)
+  #
+  #ggsave(filename = "IAP_LFC_C_vir_C_gig_gene_name_03102021.tiff", plot=LFC_gene_name_combined, device="tiff",
+  #       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_LFC",
+  #       width = 40,
+  #       height = 30,
+  #       units = "in",
+  #       dpi=300)
 
-ggsave(filename = "IAP_LFC_C_vir_C_gig_gene_name_03102021.tiff", plot=LFC_gene_name_combined, device="tiff",
+# Increased text size on 12-24-21
+
+ggsave(filename = "IAP_LFC_C_vir_C_gig_gene_name_12242021.tiff", plot=LFC_gene_name_combined, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_LFC",
-       width = 40,
-       height = 30,
+       width = 60, limitsize = FALSE,
+       height = 35,
        units = "in",
        dpi=300)
 #### EXPORT PROTEIN DOMAIN TREE PLOT WITH COLLAPSED GENE NAMES ####
