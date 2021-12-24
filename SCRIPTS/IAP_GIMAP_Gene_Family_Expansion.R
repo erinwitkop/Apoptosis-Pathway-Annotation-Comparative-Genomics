@@ -3615,7 +3615,7 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset_shaded_text <-
   # add text for domain name
  geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
            aes(x=text_name, y = y_midpoint, label = Domain_Name, family= "sans", fontface = Bold_group),
-           size = 7)  
+           size = 10)  
   # add text for Number, DECIDED TO REMOVE THE NUMBERS FROM HERE AND JUST KEEP WITH THE TREE PLOT
   #geom_text(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text, inherit.aes = FALSE,
   #          aes(x=text_number, y = y_midpoint, label = Number, family= "sans", fontface = Bold_group),
@@ -5265,34 +5265,34 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME <-
   ggtree(IAP_MY_CV_CG_raxml_treedata_collapsed_gene_name, aes(color=Species, fill=Species),  branch.length = "none") + 
   geom_tiplab(aes(label=gene_collapse), fontface="bold", size =6.0, offset=0) + # geom_tiplab2 flips the labels correctly
   # add circle for 90-100 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=2.0) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=3.0) +
   # add triangle for 70-89 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=2.0) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=3.0) +
   # add upside down traingle for 50-69 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=2.0) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=3.0) +
   # Add shape for tips removed (see IAP_shape_node above)
-  geom_point2(aes(subset=(node==12)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==13)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==36)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==37)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==48)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==91)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==92)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==97)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==108)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==109)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==113)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==120)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==137)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==138)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==139)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==140)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==141)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==142)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==143)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==147)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==150)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==179)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==12)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==13)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==36)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==37)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==48)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==91)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==92)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==97)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==108)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==109)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==113)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==120)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==137)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==138)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==139)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==140)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==141)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==142)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==143)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==147)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==150)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==179)), shape=22, size=3.0, color = '#c55d32', fill='#c55d32') +
   ## Add clade labels for the 21 domain groups  domain groups using the internal node number
   geom_cladelabel(261, label="1",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') + # get node order from below 
   geom_cladelabel(254, label="2",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
@@ -5401,30 +5401,30 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_no_legend <- IAP_MY_CV_
 
 IAP_MY_CV_CG_treecollapsed_GENE_NAME <- IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_no_legend + aplot::ylim2(IAP_Interproscan_domain_plot_no_legend)
 
-IAP_tr_dom_collapsed_GENE_NAME <- plot_grid(NULL,IAP_MY_CV_CG_treecollapsed_GENE_NAME, IAP_Interproscan_domain_plot_no_legend, ncol=3, align='h', rel_widths = c(0.2, 0.7,0.8)) +
+IAP_tr_dom_collapsed_GENE_NAME <- plot_grid(NULL, IAP_MY_CV_CG_treecollapsed_GENE_NAME, IAP_Interproscan_domain_plot_no_legend, ncol=3, align='h', rel_widths = c(0.1,1.0,0.8)) +
   # Add some space at top for labels
-  theme(plot.margin = unit(c(1,0.0,0.0,0.0), "cm")) 
-IAP_tr_dom_collapsed__GENE_NAME_legend <- plot_grid(NULL, IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_legend, IAP_Interproscan_domain_plot_legend,
-                                         nrow = 1, align="hv", rel_widths  =c(0.7, 0.7,1)) 
+  theme(plot.margin = unit(c(2.0,0.0,0.0,0.0), "cm")) 
+IAP_tr_dom_collapsed__GENE_NAME_legend <- plot_grid(NULL,IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME_legend, IAP_Interproscan_domain_plot_legend,
+                                         nrow = 1, align="hv", rel_widths  =c(0.5,0.7,1)) 
 
 ## Create combined figure for publication
-IAP_tr_dom_plus_legend_collapsed_GENE_NAME <- plot_grid(IAP_tr_dom_collapsed_GENE_NAME, IAP_tr_dom_collapsed__GENE_NAME_legend,  ncol=1, rel_heights  = c(0.8, 0.1)) +
+IAP_tr_dom_plus_legend_collapsed_GENE_NAME <- plot_grid(IAP_tr_dom_collapsed_GENE_NAME, IAP_tr_dom_collapsed__GENE_NAME_legend,  ncol=1, rel_heights  = c(0.8, 0.08)) +
   # add labels for plot components
-  draw_plot_label(c("A","B","C"), x= c(0.38, 0.53, 0.9), y = c(1,1,1), size = 30, family = "sans")
+  draw_plot_label(c("A","B","C"), x= c(0.35, 0.57, 0.9), y = c(1,1,1), size = 35, family = "sans")
 
 ## Export plot with tree and domains aligned 
-ggsave(filename = "IAP_tr_dom_plus_legend_collapsed_GENE_NAME_03102021.tiff", plot=IAP_tr_dom_plus_legend_collapsed_GENE_NAME, device="tiff",
-       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
-       width = 34,
-       height = 27,
-       units = "in",
-       dpi=300)
+  #ggsave(filename = "IAP_tr_dom_plus_legend_collapsed_GENE_NAME_03102021.tiff", plot=IAP_tr_dom_plus_legend_collapsed_GENE_NAME, device="tiff",
+  #       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
+  #       width = 34,
+  #       height = 27,
+  #       units = "in",
+  #       dpi=300)
 
 ## Export plot with tree and domains aligned with increased text size
 ggsave(filename = "IAP_tr_dom_plus_legend_collapsed_GENE_NAME_12242021.tiff", plot=IAP_tr_dom_plus_legend_collapsed_GENE_NAME, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
-       width = 45,
-       height = 40,
+       width = 43,
+       height = 35,
        units = "in",
        dpi=300)
 
