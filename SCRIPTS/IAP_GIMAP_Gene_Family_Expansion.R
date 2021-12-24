@@ -2135,17 +2135,17 @@ IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro <- ggplot() +
   # plot theme
   theme(
     #axis.ticks.y = element_blank(), 
-        axis.text.y = ggtext::element_markdown(size=18, family="sans"),
+        axis.text.y = ggtext::element_markdown(size=26, family="sans"),
         panel.grid.minor = element_blank(),
         panel.grid.major.y = element_blank(),
         panel.border = element_blank(),
         axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black"),
         legend.position = "bottom",
         legend.box = "vertical",
-        legend.text = element_text(size=18, family="sans"),
-        legend.title = element_text(size=18, family="sans"),
-        axis.text.x=element_text(size=18, family="sans"),
-        axis.title.x.bottom = element_text(size=18, family="sans")) +
+        legend.text = element_text(size=24, family="sans"),
+        legend.title = element_text(size=26, family="sans"),
+        axis.text.x=element_text(size=26, family="sans"),
+        axis.title.x.bottom = element_text(size=26, family="sans")) +
   # Change y axis ticks
   scale_x_continuous(breaks=c(0,500,1000,1500)) + 
   # change y axis labels
@@ -2399,6 +2399,13 @@ ggsave(filename = "IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_r
        units = "in",
        dpi=300)
 
+### Export plot with just the genes that have retrotransposon machinery - with shortened names and increased size
+ggsave(filename = "IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro_12242021.tiff", plot=IAP_GENE_Interproscan_domain_plot_domain_BIR_rm_subset_only_retro , device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
+       width = 28,
+       height = 15,
+       units = "in",
+       dpi=300)
 
 
 #### PLOT FULL IAP PROTEIN TREE ####
@@ -2450,18 +2457,18 @@ save(IAP_raxml_treedata, file="/Users/erinroberts/Documents/PhD_Research/Chapter
 ## Plot circular protein tree to use for paper ##
 ## 10-16-2021 Increasing font size for plotting protein name in geom_tiplab2 in response to reviewer comments
 IAP_raxml_treedata_circular_product <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
-  geom_tiplab2(aes(label=alias,angle=angle), size =2.8, offset=.5) + # geom_tiplab2 flips the labels correctly
+  geom_tiplab2(aes(label=alias,angle=angle), size =6.0, offset=.3) + # geom_tiplab2 flips the labels correctly
   #Edit theme
 theme(legend.position = "bottom", 
-      legend.text = element_text(face = "italic", size=20, family="sans"),
-      legend.title = element_text(size=22, family="sans")) +
-  #xlim(-100,100)  +
+      legend.text = element_text(face = "italic", size=28, family="sans"),
+      legend.title = element_text(size=30, family="sans")) +
+  xlim(-100,NA)  +
   # add circle for 90-100 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=0.8) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=3.0) +
   # add triangle for 70-89 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=0.8) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 70 & as.numeric(bootstrap) < 90),color = "black", fill="black", shape=24, size=3.0) +
   # add upside down traingle for 50-69 instead of bootstrap values
-  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=0.8) +
+  geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=3.0) +
   # fix legend appearance
   guides(col = guide_legend(ncol =3, title.position = "top", override.aes = aes(label = "")) ) + # need to override aes to get rid of "a"
   scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32",  "#a68340",
@@ -2479,12 +2486,21 @@ theme(legend.position = "bottom",
 #       dpi=300)
 
 # increased font size and overall size on 10-16-2021 to go into Figure 1
-ggsave(filename = "IAP_full_protein_circular_tree_increased_10_16_21.tiff", plot=IAP_raxml_treedata_circular_product, device="tiff",
+#ggsave(filename = "IAP_full_protein_circular_tree_increased_10_16_21.tiff", plot=IAP_raxml_treedata_circular_product, device="tiff",
+#       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_protein_tree/",
+#       width = 15.5 ,
+#       height = 15.5,
+#       units = "in",
+#       dpi=300)
+
+# increased font size more and overall size on 12/24/21 for Figure 1
+ggsave(filename = "IAP_full_protein_circular_tree_increased_12_24_21.tiff", plot=IAP_raxml_treedata_circular_product, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_protein_tree/",
-       width = 15.5 ,
-       height = 15.5,
+       width = 30 ,
+       height = 30,
        units = "in",
        dpi=300)
+
 
 ## Plot circular tree with gene labels ##
 IAP_raxml_treedata_circular_gene <- ggtree(IAP_raxml_treedata, layout="circular", aes(color=Species), branch.length = "none") + 
@@ -3486,7 +3502,7 @@ BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened_domain_text <- BIR_XP_gff_In
          text_name = 1970,
          text_number = 2400) 
 
-## Create main plot
+## Create main plot - increased text size on 12-24-21
 IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() + 
   # plot length of each protein as line
   geom_segment(data =BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened,
@@ -3496,7 +3512,7 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
   geom_point(data = BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened[BIR_XP_gff_Interpro_Domains_fullprot_BIR6_shortened$protein_id %in% BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill_no_Type$protein_id,],
              aes(x=as.numeric(end), y = as.numeric(node)),
              color="black",
-             size=6,
+             size=15,
              shape= "*") +
   # add protein domain boxes with geom_rect 
   geom_rect(data=BIR_XP_gff_Interpro_Domains_only_BIR_type_BIR6_shortened_fill,inherit.aes = FALSE,
@@ -3511,13 +3527,13 @@ IAP_Interproscan_domain_plot_BIR_type_domain_subset <- ggplot() +
         panel.grid.minor = element_blank(),
         panel.grid.major.y = element_blank(),
         panel.border = element_blank(),
-        axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black"),
+        axis.line.x = element_line(size = 1.0, linetype = "solid", colour = "black"),
         legend.position = "bottom",
         legend.box = "vertical",
-        legend.text = element_text(size=14, family="sans"),
-        legend.title = element_text(size=16, family="sans"),
-        axis.text.x=element_text(size=18, family="sans"),
-        axis.title.x.bottom = element_text(size=18, family="sans")) +
+        legend.text = element_text(size=24, family="sans"),
+        legend.title = element_text(size=26, family="sans"),
+        axis.text.x=element_text(size=24, family="sans"),
+        axis.title.x.bottom = element_text(size=24, family="sans")) +
   # Change y axis ticks
   scale_x_continuous(breaks=c(0,500,1000,1500,1800), expand = c(0,0)) + 
   # Change domain labels 
@@ -5244,10 +5260,10 @@ IAP_MY_CV_CG_raxml_treedata_collapsed_gene_name <- as_tibble(IAP_MY_CV_CG_raxml_
   # convert back to tree object
   IAP_MY_CV_CG_raxml_treedata_collapsed_gene_name <- as.treedata(  IAP_MY_CV_CG_raxml_treedata_collapsed_gene_name)
   
-# Plot collapsed tree
+# Plot collapsed tree - increased text size on 12-24-21
 IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME <- 
   ggtree(IAP_MY_CV_CG_raxml_treedata_collapsed_gene_name, aes(color=Species, fill=Species),  branch.length = "none") + 
-  geom_tiplab(aes(label=gene_collapse), fontface="bold", size =3.5, offset=0) + # geom_tiplab2 flips the labels correctly
+  geom_tiplab(aes(label=gene_collapse), fontface="bold", size =6.0, offset=0) + # geom_tiplab2 flips the labels correctly
   # add circle for 90-100 instead of bootstrap values
   geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 90), color = "black", fill="black", shape=21, size=2.0) +
   # add triangle for 70-89 instead of bootstrap values
@@ -5255,54 +5271,54 @@ IAP_MY_CV_CG_raxml_treedata_vertical_collapsed_GENE_NAME <-
   # add upside down traingle for 50-69 instead of bootstrap values
   geom_nodepoint(aes(subset = as.numeric(bootstrap) >= 50  &  as.numeric(bootstrap) < 70 ), color = "black",fill="black", shape=25, size=2.0) +
   # Add shape for tips removed (see IAP_shape_node above)
-  geom_point2(aes(subset=(node==12)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==13)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==36)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==37)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==48)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==91)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==92)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==97)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==108)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==109)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==113)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==120)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==137)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==138)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==139)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==140)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==141)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==142)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==143)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==147)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==150)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
-  geom_point2(aes(subset=(node==179)), shape=22, size=2.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==12)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==13)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==36)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==37)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==48)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==91)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==92)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==97)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==108)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==109)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==113)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==120)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==137)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==138)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==139)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==140)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==141)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==142)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==143)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==147)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==150)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
+  geom_point2(aes(subset=(node==179)), shape=22, size=4.0, color = '#c55d32', fill='#c55d32') +
   ## Add clade labels for the 21 domain groups  domain groups using the internal node number
-  geom_cladelabel(261, label="1",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') + # get node order from below 
-  geom_cladelabel(254, label="2",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(233, label="3",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(228, label="4",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(217, label="5",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(211, label="6",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(207, label="7",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(198, label="8",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(201, label="9",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(311, label="10", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(308, label="11", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(291, label="12", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(304, label="13", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(329, label="14", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(340, label="15", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(343, label="16", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(347, label="17", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(353, label="18", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(359, label="19", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(188, label="20", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black') +
-  geom_cladelabel(366, label="21", offset = 9.5, offset.text=0.5, family="sans", fontsize = 7, barsize=2, color='black', extend = 0.5) +
+  geom_cladelabel(261, label="1",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') + # get node order from below 
+  geom_cladelabel(254, label="2",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(233, label="3",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(228, label="4",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(217, label="5",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(211, label="6",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(207, label="7",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(198, label="8",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(201, label="9",  offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(311, label="10", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(308, label="11", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(291, label="12", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(304, label="13", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(329, label="14", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(340, label="15", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(343, label="16", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(347, label="17", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(353, label="18", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(359, label="19", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(188, label="20", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black') +
+  geom_cladelabel(366, label="21", offset = 9.5, offset.text=0.5, family="sans", fontsize = 10, barsize=2, color='black', extend = 0.5) +
   #Edit theme
   theme(legend.position = "bottom", 
-        legend.text = element_text(face = "italic", size=14, family="sans"),
-        legend.title = element_text(size=16, family="sans")) +
+        legend.text = element_text(face = "italic", size=24, family="sans"),
+        legend.title = element_text(size=26, family="sans")) +
   #geom_text2(aes(label=bootstrap, subset = as.numeric(bootstrap) > 50), hjust = 1, vjust = -0.2, size = 2.0, fontface="bold") + # allows for subset
   xlim(-70,31.8) + #change scaling so branch lengths are smaller and all alias labels are showing
   scale_colour_manual(name = "Species", values=c("#0a8707","#6a70d8", "#c55d32"), na.value="grey46", breaks=c("Crassostrea_gigas", "Crassostrea_virginica","Mizuhopecten_yessoensis"),
@@ -5397,7 +5413,6 @@ IAP_tr_dom_plus_legend_collapsed_GENE_NAME <- plot_grid(IAP_tr_dom_collapsed_GEN
   draw_plot_label(c("A","B","C"), x= c(0.38, 0.53, 0.9), y = c(1,1,1), size = 30, family = "sans")
 
 ## Export plot with tree and domains aligned 
-
 ggsave(filename = "IAP_tr_dom_plus_legend_collapsed_GENE_NAME_03102021.tiff", plot=IAP_tr_dom_plus_legend_collapsed_GENE_NAME, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
        width = 34,
@@ -5405,6 +5420,13 @@ ggsave(filename = "IAP_tr_dom_plus_legend_collapsed_GENE_NAME_03102021.tiff", pl
        units = "in",
        dpi=300)
 
+## Export plot with tree and domains aligned with increased text size
+ggsave(filename = "IAP_tr_dom_plus_legend_collapsed_GENE_NAME_12242021.tiff", plot=IAP_tr_dom_plus_legend_collapsed_GENE_NAME, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_tree_domain",
+       width = 45,
+       height = 40,
+       units = "in",
+       dpi=300)
 
 #### CREATE TABLE WITH IAP DOMAIN STRUCTURE FOR ALL IAP PROTEINS ####
 
@@ -7136,7 +7158,7 @@ d <- data.frame(label = Mollusc_Species_Tree$tip.label,
 
 # Plot species tree only
 Mollusc_Species_Tree <- ggtree(Mollusc_Species_Treedata, branch.length = "none") %<+% d +
-  geom_tiplab(align=TRUE, aes(label=paste0('italic(', genus,')~italic(', species, ')'), size = 3.0), parse=T) + # italicize species labels 
+  geom_tiplab(align=TRUE, aes(label=paste0('italic(', genus,')~italic(', species, ')'), size = 5.0), parse=T) + # italicize species labels 
    xlim(0,17) + theme(plot.margin = unit(c(0,0,0,0), "cm"))
 
 # Create simple heatmap to plot the gene number to add next to the tree 
@@ -7165,8 +7187,8 @@ ggplot(., aes(y=Species, x =category)) + geom_tile(aes(fill=n, width = 0.2)) + n
   theme(panel.background = element_rect(fill = "transparent"),
         legend.position = "right",
         legend.box = "vertical",
-        legend.text = element_text(size=12, family="sans"),
-        legend.title = element_text(size=12, family="sans"),
+        legend.text = element_text(size=20, family="sans"),
+        legend.title = element_text(size=20, family="sans"),
         legend.margin=margin(0,0,0,0), 
         legend.box.margin = margin(0,0,0,0),
         axis.ticks.margin = unit(0,"null"),
@@ -7196,6 +7218,14 @@ Mollusc_Species_Tree_heatmap <- Mollusc_Species_Tree + species_gene_heatmap
 
 # increased font size tree 10-16-2021
 ggsave(filename = "Mollusc_Species_Tree_heatmap_10_16_21.tiff", plot= Mollusc_Species_Tree_heatmap, device="tiff",
+       path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
+       width = 12 ,
+       height = 7,
+       units = "in",
+       dpi=300)
+
+# increased font size tree 12-24-2021
+ggsave(filename = "Mollusc_Species_Tree_heatmap_12_24_21.tiff", plot= Mollusc_Species_Tree_heatmap, device="tiff",
        path="/Users/erinroberts/Documents/PhD_Research/Chapter_1_Apoptosis Paper/Chapter_1_Apoptosis_Annotation_Data_Analyses_2019/DATA/ANNOTATION_DATA_FIGURES/IAP_gene_tree/",
        width = 12 ,
        height = 7,
